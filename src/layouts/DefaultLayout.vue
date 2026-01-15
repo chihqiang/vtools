@@ -25,15 +25,16 @@
       <slot />
     </main>
 
-    <footer class="bg-gray-800 text-white">
-      <div class="container mx-auto px-4 py-6">
+    <footer class="bg-white border-t border-gray-200">
+      <div class="px-6 py-6 max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center">
-          <p class="text-sm text-gray-400">© 2024 VTools. All rights reserved.</p>
-          <div class="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">关于我们</a>
-            <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">隐私政策</a>
-            <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">使用条款</a>
-            <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">联系我们</a>
+          <p class="text-sm text-gray-500">
+            © 2026 <a href="https://github.com/chihqiang/vtools" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 transition-colors">VTools</a> - Open Source Toolkit
+          </p>
+          <div class="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-6 mt-4 md:mt-0">
+            <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-blue-600 transition-colors">Apache License</a>
+            <span class="text-sm text-gray-500">|</span>
+            <p class="text-sm text-gray-500">Made with ❤️</p>
           </div>
         </div>
       </div>
