@@ -210,7 +210,7 @@ const downloadCsv = () => {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = 'json_to_table.csv'
+    link.download = 'vtools-json-to-table.csv'
 
     // 确保链接在文档中
     link.style.display = 'none'
