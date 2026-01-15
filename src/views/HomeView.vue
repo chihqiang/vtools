@@ -1,8 +1,5 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">在线工具列表</h2>
-    <p class="text-gray-600 mb-6">选择一个工具开始使用</p>
-
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <RouterLink v-for="tool in tools" :key="tool.name" :to="tool.path" :class="[
         'group relative overflow-hidden rounded-xl p-6 bg-white border-2 border-gray-200 text-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1',
