@@ -1,0 +1,189 @@
+<template>
+  <div class="bg-white rounded-lg shadow-md p-6 h-full">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">JSON 格式化工具</h2>
+    <p class="text-gray-600 mb-6">JSON 格式化工具，支持 JSON 格式化、压缩、高亮显示等功能。</p>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-gray-700">输入</h3>
+          <div class="flex space-x-2">
+            <button
+              @click="formatJson"
+              class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+            >
+              格式化
+            </button>
+            <button
+              @click="minifyJson"
+              class="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
+            >
+              压缩
+            </button>
+            <button
+              @click="clearInput"
+              class="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
+            >
+              清空
+            </button>
+          </div>
+        </div>
+        <textarea
+          v-model="inputJson"
+          @input="handleInput"
+          placeholder="请输入 JSON 字符串..."
+          class="flex-1 w-full p-4 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          spellcheck="false"
+        ></textarea>
+        <div v-if="errorMessage" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          {{ errorMessage }}
+        </div>
+      </div>
+      
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-gray-700">输出</h3>
+          <div class="flex space-x-2">
+            <button
+              @click="copyOutput"
+              class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+            >
+              复制
+            </button>
+            <button
+              @click="downloadJson"
+              class="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
+            >
+              下载
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 border rounded-lg overflow-auto bg-gray-50">
+          <div v-if="parsedJson !== null" class="p-4">
+            <json-viewer :value="parsedJson" :expand-depth="5" copyable sort></json-viewer>
+          </div>
+          <div v-else class="flex items-center justify-center h-full text-gray-400">
+            <span>等待输入有效的 JSON...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+// @ts-expect-error vue-json-viewer 缺少类型声明
+import JsonViewer from 'vue-json-viewer'
+import 'vue-json-viewer/style.css'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
+
+const inputJson = ref('')
+const parsedJson = ref<unknown>(null)
+const errorMessage = ref('')
+
+const handleInput = () => {
+  try {
+    if (!inputJson.value.trim()) {
+      parsedJson.value = null
+      errorMessage.value = ''
+      return
+    }
+    
+    const parsed = JSON.parse(inputJson.value)
+    parsedJson.value = parsed
+    errorMessage.value = ''
+  } catch (error) {
+    parsedJson.value = null
+    errorMessage.value = `JSON 解析错误: ${error instanceof Error ? error.message : '未知错误'}`
+  }
+}
+
+const formatJson = () => {
+  try {
+    if (!inputJson.value.trim()) {
+      toast.error('请输入 JSON 字符串')
+      return
+    }
+    
+    const parsed = JSON.parse(inputJson.value)
+    inputJson.value = JSON.stringify(parsed, null, 2)
+    parsedJson.value = parsed
+    errorMessage.value = ''
+    toast.success('格式化成功')
+  } catch (error) {
+    errorMessage.value = `JSON 解析错误: ${error instanceof Error ? error.message : '未知错误'}`
+    toast.error('格式化失败')
+  }
+}
+
+const minifyJson = () => {
+  try {
+    if (!inputJson.value.trim()) {
+      toast.error('请输入 JSON 字符串')
+      return
+    }
+    
+    const parsed = JSON.parse(inputJson.value)
+    inputJson.value = JSON.stringify(parsed)
+    parsedJson.value = parsed
+    errorMessage.value = ''
+    toast.success('压缩成功')
+  } catch (error) {
+    errorMessage.value = `JSON 解析错误: ${error instanceof Error ? error.message : '未知错误'}`
+    toast.error('压缩失败')
+  }
+}
+
+const clearInput = () => {
+  inputJson.value = ''
+  parsedJson.value = null
+  errorMessage.value = ''
+  toast.success('已清空')
+}
+
+const copyOutput = () => {
+  if (parsedJson.value === null) {
+    toast.error('没有可复制的内容')
+    return
+  }
+  
+  try {
+    navigator.clipboard.writeText(JSON.stringify(parsedJson.value, null, 2))
+    toast.success('已复制到剪贴板')
+  } catch {
+    toast.error('复制失败')
+  }
+}
+
+const downloadJson = () => {
+  if (parsedJson.value === null) {
+    toast.error('没有可下载的内容')
+    return
+  }
+  
+  try {
+    const jsonString = JSON.stringify(parsedJson.value, null, 2)
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'formatted.json'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('下载成功')
+  } catch {
+    toast.error('下载失败')
+  }
+}
+</script>
+
+<style scoped>
+textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+</style>

@@ -7,21 +7,6 @@
             在线工具
           </RouterLink>
         </div>
-        <div class="flex items-center space-x-2">
-          <button
-            v-for="lang in languages"
-            :key="lang.code"
-            @click="changeLanguage(lang.code)"
-            :class="[
-              'px-3 py-1 rounded text-sm transition-colors',
-              currentLang === lang.code
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            ]"
-          >
-            {{ lang.name }}
-          </button>
-        </div>
       </div>
     </header>
 
@@ -45,17 +30,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const currentLang = ref('zh')
-const languages = [
-  { code: 'zh', name: '中文' },
-  { code: 'en', name: 'English' }
-]
-
-const changeLanguage = (lang: string) => {
-  currentLang.value = lang
-}
 </script>
 <style scoped>
 </style>
