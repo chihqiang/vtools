@@ -4,7 +4,7 @@
       在线工具列表
     </h2>
     <p class="text-gray-600 mb-6">选择一个工具开始使用</p>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <RouterLink
         to="/timestamp"
@@ -28,7 +28,7 @@
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
       </RouterLink>
-      
+
       <RouterLink
         to="/json"
         class="group relative overflow-hidden rounded-xl p-6 bg-white border-2 border-gray-200 text-gray-800 shadow-lg hover:shadow-2xl hover:border-green-500 transition-all duration-300 hover:-translate-y-1"
@@ -51,7 +51,30 @@
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-1 bg-green-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
       </RouterLink>
-      
+
+      <RouterLink
+        to="/json-to-table"
+        class="group relative overflow-hidden rounded-xl p-6 bg-white border-2 border-gray-200 text-gray-800 shadow-lg hover:shadow-2xl hover:border-purple-500 transition-all duration-300 hover:-translate-y-1"
+      >
+        <div class="relative z-10">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+              </svg>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+              <svg class="w-4 h-4 text-purple-600 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="font-bold text-xl mb-2">JSON 转表格</h3>
+          <p class="text-gray-600 text-sm">将 JSON 数据转换为表格格式，并支持下载 CSV 文件</p>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+      </RouterLink>
+
       <div class="group relative overflow-hidden rounded-xl p-6 bg-white border-2 border-gray-200 text-gray-800 shadow-lg opacity-60">
         <div class="relative z-10">
           <div class="flex items-center justify-between mb-4">
