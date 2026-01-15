@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-// @ts-expect-error vue-json-viewer 缺少类型声明
+// vue-json-viewer 缺少类型声明
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
