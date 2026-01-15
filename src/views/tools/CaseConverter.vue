@@ -1,8 +1,5 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">英文字母大小写转换工具</h2>
-    <p class="text-gray-600 mb-6">快速转换英文文本的大小写格式，支持多种转换方式。</p>
-
     <div class="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- 单个文本区域 - 占用3列 -->
       <div class="lg:col-span-3">

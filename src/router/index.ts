@@ -4,6 +4,7 @@ import TimestampTool from '@/views/tools/TimestampTool.vue'
 import JsonFormatter from '@/views/tools/JsonFormatter.vue'
 import JsonToTable from '@/views/tools/JsonToTable.vue'
 import CaseConverter from '@/views/tools/CaseConverter.vue'
+import EncryptionTool from '@/views/tools/EncryptionTool.vue'
 
 // 定义路由元数据类型
 type RouteMeta = {
@@ -68,6 +69,18 @@ const router = createRouter({
         description: '英文字母大小写转换工具，支持多种转换方式',
         icon: 'M13 10V3L4 14h7v7l9-11h-7z',
         color: 'orange'
+      } as RouteMeta
+    },
+    {
+      path: '/encryption',
+      name: 'encryption',
+      component: EncryptionTool,
+      meta: {
+        showOnHome: true,
+        title: '加密解密工具',
+        description: '支持Base64、URL编码解码和MD5加密',
+        icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+        color: 'red'
       } as RouteMeta
     },
   ],

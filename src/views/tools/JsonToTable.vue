@@ -1,8 +1,5 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full flex flex-col">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">JSON 转表格工具</h2>
-    <p class="text-gray-600 mb-6">将 JSON 数据转换为表格格式，并支持下载为 CSV 文件。</p>
-
     <!-- 核心内容区域 - 使用固定最大高度确保可预测的布局 -->
     <div class="mb-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

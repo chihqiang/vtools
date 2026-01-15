@@ -1,8 +1,5 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">时间戳工具</h2>
-    <p class="text-gray-600 mb-6">时间戳转换工具，支持当前时间戳、时间戳转日期、日期转时间戳等功能。</p>
-    
     <div class="space-y-6">
       <div class="border rounded-lg p-4 bg-gray-50">
         <div class="flex items-center justify-between">
@@ -48,7 +45,7 @@
           </button>
         </div>
       </div>
-      
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="border rounded-lg p-4 bg-gray-50">
           <h3 class="font-semibold text-gray-700 mb-3">时间戳转日期时间</h3>
@@ -109,7 +106,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="border rounded-lg p-4 bg-gray-50">
           <h3 class="font-semibold text-gray-700 mb-3">日期时间转时间戳</h3>
           <div class="space-y-3">
@@ -233,10 +230,10 @@ const isRunning = ref(true)
 const updateCurrentTimestamp = () => {
   const now = dayjs()
   const timestamp = now.valueOf()
-  
+
   currentTimestamp.value = {
-    value: currentTimestamp.value.unit === 'seconds' 
-      ? Math.floor(timestamp / 1000).toString() 
+    value: currentTimestamp.value.unit === 'seconds'
+      ? Math.floor(timestamp / 1000).toString()
       : timestamp.toString(),
     unit: currentTimestamp.value.unit,
     datetime: now.format('YYYY-MM-DD HH:mm:ss')
@@ -261,27 +258,27 @@ const convertTimestampToDate = () => {
   if (!input) {
     return
   }
-  
+
   const timestamp = parseInt(input)
   if (isNaN(timestamp)) {
     toast.error('无效的时间戳')
     return
   }
-  
+
   const adjustedTimestamp = timestampUnit.value === 'seconds' ? timestamp * 1000 : timestamp
-  
+
   let result: dayjs.Dayjs
   if (timestampTimezone.value === 'local') {
     result = dayjs(adjustedTimestamp)
   } else {
     result = dayjs.utc(adjustedTimestamp).tz(timestampTimezone.value)
   }
-  
+
   if (!result.isValid()) {
     toast.error('无效的时间戳')
     return
   }
-  
+
   timestampResult.value = result.format('YYYY-MM-DD HH:mm:ss')
 }
 
@@ -291,27 +288,27 @@ const convertDateToTimestamp = () => {
     toast.error('请输入日期时间')
     return
   }
-  
+
   let result: dayjs.Dayjs
   if (dateTimezone.value === 'local') {
     result = dayjs(input)
   } else {
     result = dayjs.tz(input, dateTimezone.value)
   }
-  
+
   if (!result.isValid()) {
     toast.error('无效的日期格式，请使用格式：YYYY-MM-DD HH:mm:ss')
     return
   }
-  
+
   updateDateResult(result)
 }
 
 const updateDateResult = (date: dayjs.Dayjs) => {
   const timestamp = date.valueOf()
   dateResult.value = {
-    value: dateResult.value.unit === 'seconds' 
-      ? Math.floor(timestamp / 1000).toString() 
+    value: dateResult.value.unit === 'seconds'
+      ? Math.floor(timestamp / 1000).toString()
       : timestamp.toString(),
     unit: dateResult.value.unit,
     originalTimestamp: timestamp
@@ -321,16 +318,16 @@ const updateDateResult = (date: dayjs.Dayjs) => {
 const updateDateResultUnit = () => {
   const currentValue = dateResult.value.value
   if (!currentValue) return
-  
+
   const newUnit = dateResult.value.unit
   let result: string
-  
+
   if (newUnit === 'seconds') {
     result = Math.floor(dateResult.value.originalTimestamp / 1000).toString()
   } else {
     result = dateResult.value.originalTimestamp.toString()
   }
-  
+
   dateResult.value = {
     value: result,
     unit: newUnit,
@@ -350,13 +347,13 @@ const copyToClipboard = async (text: string) => {
 onMounted(() => {
   updateCurrentTimestamp()
   timer = window.setInterval(updateCurrentTimestamp, 1000)
-  
+
   const now = dayjs()
   const timestamp = now.valueOf()
-  
+
   timestampInput.value = Math.floor(timestamp / 1000).toString()
   dateInput.value.datetime = now.format('YYYY-MM-DD HH:mm:ss')
-  
+
   convertTimestampToDate()
   convertDateToTimestamp()
 })

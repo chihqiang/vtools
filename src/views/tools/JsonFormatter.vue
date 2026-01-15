@@ -1,8 +1,5 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">JSON 格式化工具</h2>
-    <p class="text-gray-600 mb-6">JSON 格式化工具，支持 JSON 格式化、压缩、高亮显示等功能。</p>
-
     <div class="mb-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
@@ -85,7 +82,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-// vue-json-viewer 缺少类型声明
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
