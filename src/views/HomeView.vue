@@ -106,7 +106,7 @@ const tools = computed(() =>
       path: route.path,
       title: route.meta?.title || '',
       description: route.meta?.description || '',
-      icon: route.meta?.icon || 'M12 6v6m0 0v6m0-6h6m-6 0H6',
+      icon: (route.meta?.icon as string) || 'M12 6v6m0 0v6m0-6h6m-6 0H6',
       color: route.meta?.color || 'gray',
     })),
 )
