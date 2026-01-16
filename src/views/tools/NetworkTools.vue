@@ -321,151 +321,13 @@ const refreshNetworkInfo = async () => {
 
   try {
     const items: Array<{ label: string; value: string }> = []
-    
     items.push({
       label: '获取时间',
       value: new Date().toLocaleString()
     })
-    
-    items.push({
-      label: '浏览器',
-      value: navigator.userAgent.split(' ')[0] || '未知'
-    })
-
-    items.push({
-      label: '浏览器版本',
-      value: navigator.userAgent.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/)?.[1] || 
-             navigator.userAgent.match(/Firefox\/(\d+\.\d+)/)?.[1] ||
-             navigator.userAgent.match(/Safari\/(\d+\.\d+)/)?.[1] ||
-             '未知'
-    })
-
-    items.push({
-      label: '操作系统',
-      value: navigator.userAgent.includes('Windows') ? 'Windows' :
-             navigator.userAgent.includes('Mac') ? 'macOS' :
-             navigator.userAgent.includes('Linux') ? 'Linux' :
-             navigator.userAgent.includes('Android') ? 'Android' :
-             navigator.userAgent.includes('iOS') ? 'iOS' : '未知'
-    })
-    
-    items.push({
-      label: '平台',
-      value: navigator.platform || '未知'
-    })
-    
-    items.push({
-      label: '语言',
-      value: navigator.language || '未知'
-    })
-
-    items.push({
-      label: '语言列表',
-      value: navigator.languages?.join(', ') || '未知'
-    })
-    
     items.push({
       label: '在线状态',
       value: navigator.onLine ? '在线' : '离线'
-    })
-
-    items.push({
-      label: '屏幕分辨率',
-      value: `${window.screen.width} x ${window.screen.height}`
-    })
-
-    items.push({
-      label: '窗口尺寸',
-      value: `${window.innerWidth} x ${window.innerHeight}`
-    })
-
-    items.push({
-      label: '像素比',
-      value: `${window.devicePixelRatio}`
-    })
-
-    items.push({
-      label: '颜色深度',
-      value: `${window.screen.colorDepth} bit`
-    })
-
-    items.push({
-      label: '硬件并发',
-      value: `${navigator.hardwareConcurrency || '未知'} 核`
-    })
-
-    items.push({
-      label: '内存大小',
-      value: (navigator as ExtendedNavigator).deviceMemory ? `${(navigator as ExtendedNavigator).deviceMemory} GB` : '未知'
-    })
-
-    items.push({
-      label: 'Cookie',
-      value: navigator.cookieEnabled ? '启用' : '禁用'
-    })
-
-    items.push({
-      label: 'Do Not Track',
-      value: navigator.doNotTrack === '1' ? '启用' : '未启用'
-    })
-
-    items.push({
-      label: '触摸支持',
-      value: 'ontouchstart' in window ? '支持' : '不支持'
-    })
-
-    items.push({
-      label: 'LocalStorage',
-      value: typeof localStorage !== 'undefined' ? '可用' : '不可用'
-    })
-
-    items.push({
-      label: 'SessionStorage',
-      value: typeof sessionStorage !== 'undefined' ? '可用' : '不可用'
-    })
-
-    items.push({
-      label: 'IndexedDB',
-      value: typeof indexedDB !== 'undefined' ? '可用' : '不可用'
-    })
-
-    items.push({
-      label: 'WebGL',
-      value: (() => {
-        try {
-          const canvas = document.createElement('canvas')
-          return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) ? '支持' : '不支持'
-        } catch {
-          return '不支持'
-        }
-      })()
-    })
-
-    items.push({
-      label: 'WebGL 2.0',
-      value: (() => {
-        try {
-          const canvas = document.createElement('canvas')
-          return !!canvas.getContext('webgl2') ? '支持' : '不支持'
-        } catch {
-          return '不支持'
-        }
-      })()
-    })
-
-    items.push({
-      label: 'WebRTC',
-      value: typeof RTCPeerConnection !== 'undefined' ? '支持' : '不支持'
-    })
-
-    items.push({
-      label: 'WebSocket',
-      value: typeof WebSocket !== 'undefined' ? '支持' : '不支持'
-    })
-
-    items.push({
-      label: '地理位置',
-      value: 'geolocation' in navigator ? '支持' : '不支持'
     })
 
     const connection = (navigator as ExtendedNavigator).connection
@@ -529,10 +391,12 @@ const refreshNetworkInfo = async () => {
         value: '获取失败'
       })
     }
+
     networkInfoItems.value = items
+    toast.success('网络信息已更新')
   } catch (error) {
     networkInfo.value = `获取失败: ${error instanceof Error ? error.message : '未知错误'}`
-    toast.error('获取基本信息失败')
+    toast.error('获取网络信息失败')
   } finally {
     infoLoading.value = false
   }
