@@ -8,6 +8,7 @@ import EncryptionTool from '@/views/tools/EncryptionTool.vue'
 import StringDiff from '@/views/tools/StringDiff.vue'
 import NetworkTools from '@/views/tools/NetworkTools.vue'
 import BrowserInfo from '@/views/tools/BrowserInfo.vue'
+import RandomStringGenerator from '@/views/tools/RandomStringGenerator.vue'
 
 // 定义路由元数据类型
 type RouteMeta = {
@@ -124,6 +125,18 @@ const router = createRouter({
         description: '检测浏览器详细信息，包括系统、硬件、网络等',
         icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
         color: 'gray'
+      } as RouteMeta
+    },
+    {
+      path: '/random-string',
+      name: 'random-string',
+      component: RandomStringGenerator,
+      meta: {
+        showOnHome: true,
+        title: '随机字符串生成器',
+        description: '生成安全的随机字符串，支持自定义长度和字符类型',
+        icon: 'M15 7a2 2 0 012 2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2M9 7a2 2 0 012 2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2',
+        color: 'blue'
       } as RouteMeta
     },
   ],
