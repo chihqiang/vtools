@@ -4,7 +4,7 @@
     <div>
       <div class="flex items-center justify-between mb-3">
         <h3 class="font-semibold text-gray-700">文本内容</h3>
-        <div class="flex space-x-2">
+        <div class="flex flex-wrap gap-2">
           <button
             @click="pasteText"
             class="px-3 py-2 bg-blue-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
@@ -18,6 +18,12 @@
             复制
           </button>
           <button
+            @click="removeSpaces"
+            class="px-3 py-2 bg-amber-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            清除空格
+          </button>
+          <button
             @click="clearInput"
             class="px-3 py-2 bg-gray-600 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
           >
@@ -29,7 +35,7 @@
       <div class="border border-gray-300 rounded-lg overflow-hidden">
         <textarea
           v-model="inputText"
-          placeholder="请输入英文文本，然后选择转换方式..."
+          placeholder="请输入文本，然后选择转换方式..."
           class="w-full min-h-[400px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         ></textarea>
       </div>
@@ -97,12 +103,40 @@
         </div>
       </div>
     </div>
+
+    <!-- 拼音转换区 -->
+    <div class="mt-6">
+      <h3 class="font-semibold text-gray-700 mb-3">拼音转换</h3>
+      <div class="border border-gray-300 rounded-lg p-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <button
+            @click="toPinyin"
+            class="px-3 py-2 bg-cyan-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            拼音
+          </button>
+          <button
+            @click="toPinyinWithTone"
+            class="px-3 py-2 bg-emerald-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            带声调拼音
+          </button>
+          <button
+            @click="toPinyinInitials"
+            class="px-3 py-2 bg-lime-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            拼音首字母
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
+import pinyin from 'pinyin'
 
 const toast = useToast()
 const inputText = ref('')
@@ -235,7 +269,63 @@ const kebabCase = () => {
   toast.success('kebab-case 转换成功')
 }
 
+/* ---------- 拼音转换 ---------- */
+
+const toPinyin = () => {
+  if (!ensureInput()) return
+  try {
+    const result = pinyin(inputText.value, {
+      style: pinyin.STYLE_NORMAL,
+      heteronym: false,
+      segment: true,
+    })
+    inputText.value = result.map((item: string[]) => item[0]).join(' ')
+    toast.success('已转换为拼音')
+  } catch (error) {
+    console.error('拼音转换失败:', error)
+    toast.error('拼音转换失败')
+  }
+}
+
+const toPinyinWithTone = () => {
+  if (!ensureInput()) return
+  try {
+    const result = pinyin(inputText.value, {
+      style: pinyin.STYLE_TONE,
+      heteronym: false,
+      segment: true,
+    })
+    inputText.value = result.map((item: string[]) => item[0]).join(' ')
+    toast.success('已转换为带声调拼音')
+  } catch (error) {
+    console.error('拼音转换失败:', error)
+    toast.error('拼音转换失败')
+  }
+}
+
+const toPinyinInitials = () => {
+  if (!ensureInput()) return
+  try {
+    const result = pinyin(inputText.value, {
+      style: pinyin.STYLE_FIRST_LETTER,
+      heteronym: false,
+      segment: true,
+    })
+    inputText.value = result.map((item: string[]) => item[0]).join(' ')
+    toast.success('已转换为拼音首字母')
+  } catch (error) {
+    console.error('拼音转换失败:', error)
+    toast.error('拼音转换失败')
+  }
+}
+
 /* ---------- 剪贴板 ---------- */
+
+const removeSpaces = () => {
+  if (!ensureInput()) return
+  inputText.value = inputText.value.replace(/\s+/g, '')
+  toast.success('已清除所有空格')
+}
 
 const clearInput = () => {
   inputText.value = ''
