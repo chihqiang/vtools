@@ -40,22 +40,30 @@
         ></textarea>
       </div>
 
-      <div class="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
-        <div class="flex items-center gap-2">
-          <span class="font-medium">字符数:</span>
-          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ charCount }}</span>
+      <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div
+          class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200"
+        >
+          <div class="text-xs text-blue-600 font-medium mb-1">字符数</div>
+          <div class="text-2xl font-bold text-blue-700 font-mono">{{ charCount }}</div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="font-medium">字节数:</span>
-          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ byteCount }}</span>
+        <div
+          class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200"
+        >
+          <div class="text-xs text-green-600 font-medium mb-1">字节数</div>
+          <div class="text-2xl font-bold text-green-700 font-mono">{{ byteCount }}</div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="font-medium">行数:</span>
-          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ lineCount }}</span>
+        <div
+          class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200"
+        >
+          <div class="text-xs text-purple-600 font-medium mb-1">行数</div>
+          <div class="text-2xl font-bold text-purple-700 font-mono">{{ lineCount }}</div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="font-medium">单词数:</span>
-          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ wordCount }}</span>
+        <div
+          class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200"
+        >
+          <div class="text-xs text-orange-600 font-medium mb-1">单词数</div>
+          <div class="text-2xl font-bold text-orange-700 font-mono">{{ wordCount }}</div>
         </div>
       </div>
     </div>

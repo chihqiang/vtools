@@ -1,2 +1,3 @@
-pnpm run format
+#!/bin/bash
+
 pnpm run lint

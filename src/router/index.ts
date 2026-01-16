@@ -3,7 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import TimestampTool from '@/views/tools/TimestampTool.vue'
 import JsonFormatter from '@/views/tools/JsonFormatter.vue'
 import JsonToTable from '@/views/tools/JsonToTable.vue'
-import CaseConverter from '@/views/tools/CaseConverter.vue'
+import CaseConverter from '@/views/tools/StringConverter.vue'
 import EncryptionTool from '@/views/tools/EncryptionTool.vue'
 import StringDiff from '@/views/tools/StringDiff.vue'
 import NetworkTools from '@/views/tools/NetworkTools.vue'
@@ -68,27 +68,27 @@ const router = createRouter({
       } as RouteMeta,
     },
     {
-      path: '/case-converter',
-      name: 'case-converter',
+      path: '/string-converter',
+      name: 'string-converter',
       component: CaseConverter,
       meta: {
         showOnHome: true,
-        title: '大小写转换',
-        description: '英文字母大小写转换工具，支持多种转换方式',
+        title: '字符串转换',
+        description: '字符串转换工具，支持多种转换方式',
         icon: 'M13 10V3L4 14h7v7l9-11h-7z',
         color: 'orange',
       } as RouteMeta,
     },
     {
-      path: '/encryption',
-      name: 'encryption',
-      component: EncryptionTool,
+      path: '/random-string',
+      name: 'random-string',
+      component: RandomStringGenerator,
       meta: {
         showOnHome: true,
-        title: '加密解密工具',
-        description: '支持Base64、URL编码解码和MD5加密',
-        icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
-        color: 'red',
+        title: '随机字符串生成器',
+        description: '生成安全的随机字符串，支持自定义长度和字符类型',
+        icon: 'M15 7a2 2 0 012 2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2M9 7a2 2 0 012 2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2',
+        color: 'blue',
       } as RouteMeta,
     },
     {
@@ -101,6 +101,18 @@ const router = createRouter({
         description: '比较两个字符串的差异，高亮显示不同的部分',
         icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2-2v-2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 012 2h2a2 2 0 012 2v2a2 2 0 012-2h-2a2 2 0 00-2-2V7a2 2 0 00-2 2zm0 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H9a1 1 0 01-1-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2a1 1 0 001 1z',
         color: 'cyan',
+      } as RouteMeta,
+    },
+    {
+      path: '/encryption',
+      name: 'encryption',
+      component: EncryptionTool,
+      meta: {
+        showOnHome: true,
+        title: '加密解密工具',
+        description: '支持Base64、URL编码解码和MD5加密',
+        icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+        color: 'red',
       } as RouteMeta,
     },
     {
@@ -125,18 +137,6 @@ const router = createRouter({
         description: '检测浏览器详细信息，包括系统、硬件、网络等',
         icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
         color: 'gray',
-      } as RouteMeta,
-    },
-    {
-      path: '/random-string',
-      name: 'random-string',
-      component: RandomStringGenerator,
-      meta: {
-        showOnHome: true,
-        title: '随机字符串生成器',
-        description: '生成安全的随机字符串，支持自定义长度和字符类型',
-        icon: 'M15 7a2 2 0 012 2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2M9 7a2 2 0 012 2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2m2 0a2 2 0 01-2-2',
-        color: 'blue',
       } as RouteMeta,
     },
   ],
