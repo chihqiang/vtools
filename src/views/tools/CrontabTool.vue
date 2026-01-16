@@ -93,14 +93,24 @@
           <table class="w-full">
             <thead class="bg-gray-50 sticky top-0">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序号</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                <th
+                  class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  序号
+                </th>
+                <th
+                  class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  时间
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
               <tr v-for="(time, index) in nextRunTimes" :key="index">
                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ index + 1 }}</td>
-                <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-gray-900">{{ time }}</td>
+                <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-gray-900">
+                  {{ time }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -139,7 +149,7 @@ const commonCronExpressions = ref([
   { expression: '0 9-17 * * *', description: '工作日9点到17点每小时执行' },
   { expression: '0 0 * * 1-5', description: '工作日每天执行' },
   { expression: '0 0 * * 6,0', description: '周末每天执行' },
-  { expression: '0 0 15 * *', description: '每月15日执行' }
+  { expression: '0 0 15 * *', description: '每月15日执行' },
 ])
 
 // 使用示例表达式
@@ -203,7 +213,7 @@ const parseCron = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false
+      hour12: false,
     }).format(nextDate)
     parseError.value = ''
     toast.success('解析成功')
@@ -228,7 +238,7 @@ const generateNextRunTimes = () => {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
       }).format(new Date(date.toDate()))
     })
 

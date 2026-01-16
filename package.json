@@ -15,7 +15,7 @@
     "lint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "prepare": "husky",
-    "check": "format lint type-check build"
+    "check": "run-p format lint type-check build"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",

@@ -32,10 +32,7 @@
         </div>
 
         <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
-          <div
-            class="overflow-y-auto"
-            :style="{ height: containerHeight }"
-          >
+          <div class="overflow-y-auto" :style="{ height: containerHeight }">
             <textarea
               v-model="leftContent"
               @input="debouncedConvert"
@@ -78,19 +75,12 @@
         </div>
 
         <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
-          <div
-            class="overflow-y-auto bg-gray-50"
-            :style="{ height: containerHeight }"
-          >
-            <pre
-              v-if="rightContent"
-              class="p-4 font-mono text-sm whitespace-pre-wrap"
-            >{{ rightContent }}</pre>
+          <div class="overflow-y-auto bg-gray-50" :style="{ height: containerHeight }">
+            <pre v-if="rightContent" class="p-4 font-mono text-sm whitespace-pre-wrap">{{
+              rightContent
+            }}</pre>
 
-            <div
-              v-else
-              class="flex items-center justify-center h-full text-gray-400"
-            >
+            <div v-else class="flex items-center justify-center h-full text-gray-400">
               等待转换结果
             </div>
           </div>
@@ -102,7 +92,13 @@
     <div class="mt-6 flex flex-wrap gap-4">
       <div v-if="rightType === 'json'" class="flex items-center gap-2">
         <label class="text-sm text-gray-600">JSON 缩进</label>
-        <input type="number" v-model="jsonIndent" min="0" max="8" class="w-16 px-2 py-1 border rounded-md text-sm" />
+        <input
+          type="number"
+          v-model="jsonIndent"
+          min="0"
+          max="8"
+          class="w-16 px-2 py-1 border rounded-md text-sm"
+        />
         <label class="flex items-center gap-1 text-sm text-gray-600">
           <input type="checkbox" v-model="jsonSortKeys" />
           排序键
@@ -111,7 +107,13 @@
 
       <div v-if="rightType === 'yaml'" class="flex items-center gap-2">
         <label class="text-sm text-gray-600">YAML 缩进</label>
-        <input type="number" v-model="yamlIndent" min="1" max="8" class="w-16 px-2 py-1 border rounded-md text-sm" />
+        <input
+          type="number"
+          v-model="yamlIndent"
+          min="1"
+          max="8"
+          class="w-16 px-2 py-1 border rounded-md text-sm"
+        />
       </div>
     </div>
   </div>
@@ -186,15 +188,17 @@ const detectInput = (content: string) => {
 const sortObject = (v: JsonValue | undefined): JsonValue => {
   if (v === undefined) return null
   if (Array.isArray(v)) {
-    return v.map(item => {
+    return v.map((item) => {
       return sortObject(item)
     })
   }
   if (v && typeof v === 'object') {
-    return Object.keys(v).sort().reduce((acc: JsonObject, k) => {
-      acc[k] = sortObject(v[k])
-      return acc
-    }, {})
+    return Object.keys(v)
+      .sort()
+      .reduce((acc: JsonObject, k) => {
+        acc[k] = sortObject(v[k])
+        return acc
+      }, {})
   }
   return v
 }
