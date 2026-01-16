@@ -1,32 +1,46 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6">
+  <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- JSON 输入区 -->
       <div>
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-gray-700">输入 JSON</h3>
-          <div class="flex space-x-2">
-            <button
-              @click="clearInput"
-              class="px-3 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition-all duration-150 shadow-sm hover:shadow"
-            >
-              清空
-            </button>
-          </div>
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            输入 JSON
+          </h3>
+
+          <button
+            @click="clearInput"
+            class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm
+                   hover:bg-gray-300 transition"
+          >
+            清空
+          </button>
         </div>
-        <div class="border border-gray-300 rounded-lg bg-white overflow-hidden">
+
+        <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
           <div class="overflow-y-auto" :style="{ maxHeight: containerHeight }">
             <textarea
               v-model="inputJson"
               @input="handleInput"
-              placeholder="请输入 JSON 字符串..."
-              class="w-full p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-150"
+              placeholder="请输入 JSON 数组"
+              class="w-full p-4 font-mono text-sm
+                     bg-gray-50
+                     focus:bg-white
+                     focus:outline-none
+                     focus:ring-1 focus:ring-blue-500
+                     resize-none transition"
               :style="{ minHeight: containerHeight }"
               spellcheck="false"
             ></textarea>
           </div>
         </div>
-        <div v-if="errorMessage" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+
+        <div
+          v-if="errorMessage"
+          class="mt-2 text-sm text-red-500 flex items-center gap-2"
+        >
+          <span>⚠</span>
           {{ errorMessage }}
         </div>
       </div>
@@ -34,38 +48,81 @@
       <!-- 表格输出区 -->
       <div>
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-gray-700">表格</h3>
-          <div class="flex space-x-2">
-            <button
-              @click="downloadCsv"
-              :disabled="!tableData.length"
-              class="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-all duration-150 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-sm"
-            >
-              下载 CSV ({{ tableData.length }} 条)
-            </button>
-          </div>
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            表格结果
+          </h3>
+
+          <button
+            @click="downloadCsv"
+            :disabled="!tableData.length"
+            class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm
+                   hover:bg-emerald-700 transition shadow-sm
+                   disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            下载 CSV（{{ tableData.length }}）
+          </button>
         </div>
-        <div class="border border-gray-300 rounded-lg bg-white overflow-hidden">
+
+        <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
           <div class="overflow-y-auto" :style="{ maxHeight: containerHeight }">
-            <table v-if="tableData.length" class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-100">
+            <table
+              v-if="tableData.length"
+              class="min-w-full text-sm border-collapse"
+            >
+              <thead class="sticky top-0 z-10 bg-gray-100 border-b border-gray-300">
                 <tr>
-                  <th v-for="(header, index) in tableHeaders" :key="index" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 sticky top-0 z-10">
+                  <th
+                    v-for="(header, index) in tableHeaders"
+                    :key="index"
+                    class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap"
+                  >
                     {{ header }}
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(row, rowIndex) in tableData" :key="rowIndex" class="hover:bg-gray-50 transition-colors duration-150">
-                  <td v-for="(header, colIndex) in tableHeaders" :key="colIndex" class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-b border-gray-100">
+
+              <tbody>
+                <tr
+                  v-for="(row, rowIndex) in tableData"
+                  :key="rowIndex"
+                  class="hover:bg-gray-50 transition"
+                >
+                  <td
+                    v-for="(header, colIndex) in tableHeaders"
+                    :key="colIndex"
+                    class="px-4 py-2 text-gray-800 border-b border-gray-100
+                           max-w-xs truncate"
+                    :title="formatCell(row[header])"
+                  >
                     {{ formatCell(row[header]) }}
                   </td>
                 </tr>
               </tbody>
             </table>
-            <div v-else class="flex items-center justify-center text-gray-400" :style="{ minHeight: containerHeight }">
-              <span v-if="isParsing">解析中...</span>
-              <span v-else>等待输入有效的 JSON 数组...</span>
+
+            <!-- 空状态 -->
+            <div
+              v-else
+              class="flex flex-col items-center justify-center text-gray-400 gap-2"
+              :style="{ minHeight: containerHeight }"
+            >
+              <svg
+                class="w-10 h-10 opacity-40"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 7h18M3 12h18M3 17h18"
+                />
+              </svg>
+              <span class="text-sm">
+                {{ isParsing ? '解析中…' : '等待输入有效的 JSON 数组' }}
+              </span>
             </div>
           </div>
         </div>
@@ -90,30 +147,19 @@ const containerHeight = ref('500px')
 
 const calculateHeight = () => {
   const windowHeight = window.innerHeight
-  const headerHeight = 80
-  const padding = 48
-  const titleHeight = 40
-  const buttonHeight = 40
-  const errorHeight = errorMessage.value ? 60 : 0
-  const availableHeight = windowHeight - headerHeight - padding - titleHeight - buttonHeight - errorHeight
-  containerHeight.value = `${Math.max(400, availableHeight)}px`
+  const baseOffset = 260
+  containerHeight.value = `${Math.max(420, windowHeight - baseOffset)}px`
 }
 
-const handleResize = () => {
-  calculateHeight()
-}
-
-watch(errorMessage, () => {
-  calculateHeight()
-})
+watch(errorMessage, calculateHeight)
 
 onMounted(() => {
   calculateHeight()
-  window.addEventListener('resize', handleResize)
+  window.addEventListener('resize', calculateHeight)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
+  window.removeEventListener('resize', calculateHeight)
 })
 
 const handleInput = () => {
@@ -126,49 +172,45 @@ const handleInput = () => {
       return
     }
 
+    isParsing.value = true
     const parsed = JSON.parse(inputJson.value)
 
     if (!Array.isArray(parsed)) {
-      errorMessage.value = 'JSON 必须是一个数组'
-      parsedJson.value = []
-      tableHeaders.value = []
-      tableData.value = []
-      return
+      throw new Error('JSON 必须是一个数组')
     }
 
     parsedJson.value = parsed
 
-    if (parsed.length === 0) {
+    if (!parsed.length) {
       tableHeaders.value = []
       tableData.value = []
       errorMessage.value = ''
       return
     }
 
-    // 获取所有唯一的键作为表头
     const headers = new Set<string>()
     parsed.forEach(item => {
-      if (typeof item === 'object' && item !== null) {
-        Object.keys(item).forEach(key => headers.add(key))
+      if (item && typeof item === 'object') {
+        Object.keys(item).forEach(k => headers.add(k))
       }
     })
+
     tableHeaders.value = Array.from(headers)
 
-    // 转换数据格式
     tableData.value = parsed.map(item => {
       const row: Record<string, unknown> = {}
-      tableHeaders.value.forEach(header => {
-        row[header] = item[header] !== undefined ? item[header] : ''
-      })
+      tableHeaders.value.forEach(h => (row[h] = item[h] ?? ''))
       return row
     })
 
     errorMessage.value = ''
-  } catch (error) {
+  } catch (e) {
     parsedJson.value = []
     tableHeaders.value = []
     tableData.value = []
-    errorMessage.value = `JSON 解析错误: ${error instanceof Error ? error.message : '未知错误'}`
+    errorMessage.value = `解析失败：${e instanceof Error ? e.message : '未知错误'}`
+  } finally {
+    isParsing.value = false
   }
 }
 
@@ -182,91 +224,48 @@ const clearInput = () => {
 }
 
 const formatCell = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return ''
-  }
-  if (typeof value === 'object') {
-    return JSON.stringify(value)
-  }
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'object') return JSON.stringify(value)
   return String(value)
 }
 
 const downloadCsv = () => {
-  if (!tableData.value || !tableData.value.length) {
-    toast.error('没有可下载的内容')
-    return
-  }
+  if (!tableData.value.length) return
 
-  try {
-    // 生成 CSV 内容
-    let csvContent = ''
+  let csv = '\uFEFF'
+  csv += tableHeaders.value.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\n'
 
-    // 添加 UTF-8 BOM，确保Excel正确识别中文
-    csvContent += '\uFEFF'
-
-    // 添加表头
-    const headers = tableHeaders.value.map(header => {
-      return `"${header.replace(/"/g, '""')}"`
-    })
-    csvContent += headers.join(',') + '\n'
-
-    // 添加数据行
-    tableData.value.forEach(row => {
-      const rowValues = tableHeaders.value.map(header => {
-        const value = row[header]
-        let formattedValue = formatCell(value)
-
-        // 处理包含逗号、双引号或换行符的内容
-        if (typeof formattedValue === 'string' && (formattedValue.includes(',') || formattedValue.includes('"') || formattedValue.includes('\n'))) {
-          formattedValue = `"${formattedValue.replace(/"/g, '""')}"`
-        }
-        return formattedValue
+  tableData.value.forEach(row => {
+    csv += tableHeaders.value
+      .map(h => {
+        const v = formatCell(row[h])
+        return v.includes(',') || v.includes('"') || v.includes('\n')
+          ? `"${v.replace(/"/g, '""')}"`
+          : v
       })
-      csvContent += rowValues.join(',') + '\n'
-    })
+      .join(',') + '\n'
+  })
 
-    // 创建 Blob 对象
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'vtools-json-to-table.csv'
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'json-to-table.csv'
+  a.click()
+  URL.revokeObjectURL(url)
 
-    // 确保链接在文档中
-    link.style.display = 'none'
-    document.body.appendChild(link)
-
-    // 触发点击事件
-    link.click()
-
-    // 清理
-    setTimeout(() => {
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-    }, 100)
-
-    toast.success('CSV 文件下载成功')
-  } catch (error) {
-    console.error('CSV 下载错误:', error)
-    toast.error('CSV 文件下载失败')
-  }
+  toast.success('CSV 下载成功')
 }
 </script>
 
 <style scoped>
 textarea {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-}
-
-table {
-  border-collapse: collapse;
-}
-
-th {
-  border-bottom: 2px solid #e2e8f0;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  line-height: 1.6;
+  tab-size: 2;
 }
 
 td {
-  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
 }
 </style>
