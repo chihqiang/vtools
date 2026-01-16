@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import TimestampTool from '@/views/tools/TimestampTool.vue'
 import JsonFormatter from '@/views/tools/JsonFormatter.vue'
@@ -20,7 +20,7 @@ type RouteMeta = {
 }
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
