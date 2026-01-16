@@ -5,6 +5,7 @@ import JsonFormatter from '@/views/tools/JsonFormatter.vue'
 import JsonToTable from '@/views/tools/JsonToTable.vue'
 import CaseConverter from '@/views/tools/CaseConverter.vue'
 import EncryptionTool from '@/views/tools/EncryptionTool.vue'
+import StringDiff from '@/views/tools/StringDiff.vue'
 
 // 定义路由元数据类型
 type RouteMeta = {
@@ -81,6 +82,18 @@ const router = createRouter({
         description: '支持Base64、URL编码解码和MD5加密',
         icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
         color: 'red'
+      } as RouteMeta
+    },
+    {
+      path: '/string-diff',
+      name: 'string-diff',
+      component: StringDiff,
+      meta: {
+        showOnHome: true,
+        title: '字符串对比',
+        description: '比较两个字符串的差异，高亮显示不同的部分',
+        icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2-2v-2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 012 2h2a2 2 0 012 2v2a2 2 0 012-2h-2a2 2 0 00-2-2V7a2 2 0 00-2 2zm0 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H9a1 1 0 01-1-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2a1 1 0 001 1z',
+        color: 'cyan'
       } as RouteMeta
     },
   ],

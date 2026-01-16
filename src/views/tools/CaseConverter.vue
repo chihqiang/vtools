@@ -1,101 +1,101 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full">
-    <div class="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- 单个文本区域 - 占用3列 -->
-      <div class="lg:col-span-3">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-gray-700">文本内容</h3>
-          <div class="flex space-x-2">
-            <button
-              @click="pasteText"
-              class="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-all duration-150 shadow-sm hover:shadow"
-            >
-              粘贴
-            </button>
-            <button
-              @click="copyText"
-              class="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-all duration-150 shadow-sm hover:shadow"
-            >
-              复制
-            </button>
-            <button
-              @click="clearInput"
-              class="px-3 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition-all duration-150 shadow-sm hover:shadow"
-            >
-              清空
-            </button>
-          </div>
-        </div>
-        <!-- 固定高度的文本框 -->
-        <div class="border border-gray-300 rounded-lg bg-white overflow-hidden">
-          <!-- 滚动容器 -->
-          <div class="max-h-[400px] overflow-y-auto">
-            <textarea
-              v-model="inputText"
-              placeholder="请输入英文文本，然后选择转换方式..."
-              class="w-full p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-150 min-h-[400px]"
-            ></textarea>
-          </div>
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-gray-700">文本内容</h3>
+        <div class="flex space-x-2">
+          <button
+            @click="pasteText"
+            class="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            粘贴
+          </button>
+          <button
+            @click="copyText"
+            class="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            复制
+          </button>
+          <button
+            @click="clearInput"
+            class="px-3 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            清空
+          </button>
         </div>
       </div>
+      <div class="border border-gray-300 rounded-lg bg-white overflow-hidden">
+        <div class="max-h-[400px] overflow-y-auto">
+          <textarea
+            v-model="inputText"
+            placeholder="请输入英文文本，然后选择转换方式..."
+            class="w-full p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-150 min-h-[400px]"
+          ></textarea>
+        </div>
+      </div>
+    </div>
 
-      <!-- 转换按钮区域 - 占用1列 -->
-      <div class="flex flex-col gap-3">
-        <h3 class="font-semibold text-gray-700 mb-1">转换方式</h3>
-        <button
-          @click="convertToUpperCase"
-          class="px-4 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          全部大写 (UPPERCASE)
-        </button>
-        <button
-          @click="convertToLowerCase"
-          class="px-4 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          全部小写 (lowercase)
-        </button>
-        <button
-          @click="convertToFirstUpperCase"
-          class="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          首字母大写 (First Uppercase)
-        </button>
-        <button
-          @click="convertToFirstLowerCase"
-          class="px-4 py-2 bg-purple-500 text-white rounded text-sm hover:bg-purple-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          首字母小写 (first Uppercase)
-        </button>
-        <button
-          @click="convertToSentenceCase"
-          class="px-4 py-2 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          句子首字母大写 (Sentence case)
-        </button>
-        <button
-          @click="convertToTitleCase"
-          class="px-4 py-2 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          标题大小写 (Title Case)
-        </button>
-        <button
-          @click="convertToCamelCase"
-          class="px-4 py-2 bg-pink-500 text-white rounded text-sm hover:bg-pink-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          驼峰命名 (camelCase)
-        </button>
-        <button
-          @click="convertToSnakeCase"
-          class="px-4 py-2 bg-teal-500 text-white rounded text-sm hover:bg-teal-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          下划线命名 (snake_case)
-        </button>
-        <button
-          @click="convertToKebabCase"
-          class="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-all duration-150 shadow-sm hover:shadow"
-        >
-          短横线命名 (kebab-case)
-        </button>
+    <div class="mt-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-gray-700">转换方式</h3>
+      </div>
+      <div class="border border-gray-300 rounded-lg bg-white p-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button
+            @click="convertToUpperCase"
+            class="px-3 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            全部大写 (UPPERCASE)
+          </button>
+          <button
+            @click="convertToLowerCase"
+            class="px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            全部小写 (lowercase)
+          </button>
+          <button
+            @click="convertToFirstUpperCase"
+            class="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            首字母大写 (First Uppercase)
+          </button>
+          <button
+            @click="convertToFirstLowerCase"
+            class="px-3 py-2 bg-purple-500 text-white rounded text-sm hover:bg-purple-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            首字母小写 (first Uppercase)
+          </button>
+          <button
+            @click="convertToSentenceCase"
+            class="px-3 py-2 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            句子首字母大写 (Sentence case)
+          </button>
+          <button
+            @click="convertToTitleCase"
+            class="px-3 py-2 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            标题大小写 (Title Case)
+          </button>
+          <button
+            @click="convertToCamelCase"
+            class="px-3 py-2 bg-pink-500 text-white rounded text-sm hover:bg-pink-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            驼峰命名 (camelCase)
+          </button>
+          <button
+            @click="convertToSnakeCase"
+            class="px-3 py-2 bg-teal-500 text-white rounded text-sm hover:bg-teal-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            下划线命名 (snake_case)
+          </button>
+          <button
+            @click="convertToKebabCase"
+            class="px-3 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-all duration-150 shadow-sm hover:shadow"
+          >
+            短横线命名 (kebab-case)
+          </button>
+        </div>
       </div>
     </div>
   </div>
