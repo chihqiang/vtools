@@ -8,7 +8,7 @@ import EncryptionTool from '@/views/tools/EncryptionTool.vue'
 import StringDiff from '@/views/tools/StringDiff.vue'
 import NetworkTools from '@/views/tools/NetworkTools.vue'
 import BrowserInfo from '@/views/tools/BrowserInfo.vue'
-import RandomStringGenerator from '@/views/tools/RandomStringGenerator.vue'
+import StringRandom from '@/views/tools/StringRandom.vue'
 
 // 定义路由元数据类型
 type RouteMeta = {
@@ -80,9 +80,9 @@ const router = createRouter({
       } as RouteMeta,
     },
     {
-      path: '/random-string',
-      name: 'random-string',
-      component: RandomStringGenerator,
+      path: '/string-random',
+      name: 'string-random',
+      component: StringRandom,
       meta: {
         showOnHome: true,
         title: '随机字符串生成器',
