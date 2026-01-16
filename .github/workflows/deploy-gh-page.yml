@@ -1,0 +1,33 @@
+name: deploy-gh-page
+
+on:
+ workflow_dispatch:
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+        
+    - name: Install pnpm
+      run: npm install -g pnpm
+      
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Build project
+      run: pnpm build
+      
+    - name: Publish to gh-pages branch
+      uses: chihqiang/gh-pages-action@main
+      with:
+        publish_dir: dist
+        target_branch: gh-pages
+        cname: tools.zhiqiang.wang
+        token: ${{ secrets.GH_TOKEN }}
