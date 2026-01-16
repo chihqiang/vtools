@@ -39,6 +39,25 @@
           class="w-full min-h-[400px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         ></textarea>
       </div>
+
+      <div class="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+        <div class="flex items-center gap-2">
+          <span class="font-medium">字符数:</span>
+          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ charCount }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-medium">字节数:</span>
+          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ byteCount }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-medium">行数:</span>
+          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ lineCount }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-medium">单词数:</span>
+          <span class="bg-gray-100 px-2 py-1 rounded font-mono">{{ wordCount }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- 转换区 -->
@@ -134,12 +153,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
 import pinyin from 'pinyin'
 
 const toast = useToast()
 const inputText = ref('')
+
+const charCount = computed(() => inputText.value.length)
+
+const byteCount = computed(() => {
+  return new Blob([inputText.value]).size
+})
+
+const lineCount = computed(() => {
+  if (!inputText.value) return 0
+  return inputText.value.split('\n').length
+})
+
+const wordCount = computed(() => {
+  if (!inputText.value.trim()) return 0
+  return inputText.value.trim().split(/\s+/).length
+})
 
 /* ---------- 工具 ---------- */
 
