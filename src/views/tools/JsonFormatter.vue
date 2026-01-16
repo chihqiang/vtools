@@ -162,7 +162,6 @@ const minifyJson = () => {
     inputJson.value = JSON.stringify(parsed)
     parsedJson.value = parsed
     errorMessage.value = ''
-    toast.success('压缩成功')
   } catch (error) {
     errorMessage.value = `JSON 解析错误: ${error instanceof Error ? error.message : '未知错误'}`
     toast.error('压缩失败')
@@ -173,7 +172,7 @@ const clearInput = () => {
   inputJson.value = ''
   parsedJson.value = null
   errorMessage.value = ''
-  toast.success('已清空')
+  toast.warning('已清空')
 }
 
 const copyOutput = () => {

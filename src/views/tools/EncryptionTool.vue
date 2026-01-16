@@ -103,14 +103,13 @@ import Utf8 from 'crypto-js/enc-utf8'
 const inputText = ref('')
 
 // 消息提示
-const { success, error, warning, info } = useToast()
+const {error, warning } = useToast()
 
 // 粘贴功能
 const pasteInput = async () => {
   try {
     const text = await navigator.clipboard.readText()
     inputText.value = text
-    success('粘贴成功')
   } catch {
     error('粘贴失败')
   }
@@ -125,7 +124,6 @@ const copyOutput = async () => {
 
   try {
     await navigator.clipboard.writeText(inputText.value)
-    success('复制成功')
   } catch {
     error('复制失败')
   }
@@ -134,7 +132,6 @@ const copyOutput = async () => {
 // 清空功能
 const clearInput = () => {
   inputText.value = ''
-  info('已清空')
 }
 
 // Base64加密
@@ -146,7 +143,7 @@ const encryptBase64 = () => {
 
   try {
     inputText.value = Base64.stringify(Utf8.parse(inputText.value))
-    success('Base64加密成功')
+
   } catch {
     error('Base64加密失败')
   }
@@ -161,7 +158,6 @@ const decryptBase64 = () => {
 
   try {
     inputText.value = Utf8.stringify(Base64.parse(inputText.value))
-    success('Base64解密成功')
   } catch {
     error('Base64解密失败')
   }
@@ -176,7 +172,6 @@ const encodeUrl = () => {
 
   try {
     inputText.value = encodeURIComponent(inputText.value)
-    success('URL编码成功')
   } catch {
     error('URL编码失败')
   }
@@ -188,10 +183,9 @@ const decodeUrl = () => {
     warning('请先输入文本')
     return
   }
-
   try {
     inputText.value = decodeURIComponent(inputText.value)
-    success('URL解码成功')
+      
   } catch {
     error('URL解码失败')
   }
@@ -207,7 +201,7 @@ const md5_32_upper = () => {
   try {
     const md5Hash = md5(inputText.value).toString()
     inputText.value = md5Hash.toUpperCase()
-    success('MD5 32位大写加密成功')
+
   } catch {
     error('MD5加密失败')
   }
@@ -223,7 +217,6 @@ const md5_32_lower = () => {
   try {
     const md5Hash = md5(inputText.value).toString()
     inputText.value = md5Hash.toLowerCase()
-    success('MD5 32位小写加密成功')
   } catch {
     error('MD5加密失败')
   }
@@ -239,7 +232,6 @@ const md5_16_upper = () => {
   try {
     const md5Hash = md5(inputText.value).toString()
     inputText.value = md5Hash.substring(8, 24).toUpperCase()
-    success('MD5 16位大写加密成功')
   } catch {
     error('MD5加密失败')
   }
@@ -255,7 +247,6 @@ const md5_16_lower = () => {
   try {
     const md5Hash = md5(inputText.value).toString()
     inputText.value = md5Hash.substring(8, 24).toLowerCase()
-    success('MD5 16位小写加密成功')
   } catch {
     error('MD5加密失败')
   }

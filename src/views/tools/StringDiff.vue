@@ -210,7 +210,6 @@ const compare = () => {
 
   const result = computeDiff(text1.value, text2.value)
   diffResult.value = result
-  toast.success('对比完成')
 }
 
 const computeDiff = (str1: string, str2: string) => {
