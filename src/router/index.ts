@@ -24,6 +24,10 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: {
+        title: '在线工具集',
+        description: '提供多种在线工具，包括时间戳转换、JSON格式化、加密解密等实用工具'
+      } as RouteMeta
     },
     {
       path: '/timestamp',
@@ -110,6 +114,31 @@ const router = createRouter({
       } as RouteMeta
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const meta = to.meta as RouteMeta
+  
+  if (meta.title) {
+    document.title = `${meta.title} - 在线工具集`
+  } else {
+    document.title = '在线工具集'
+  }
+
+  let description = meta.description
+  if (!description) {
+    description = '提供多种在线工具，包括时间戳转换、JSON格式化、加密解密等实用工具'
+  }
+
+  let metaDescription = document.querySelector('meta[name="description"]')
+  if (!metaDescription) {
+    metaDescription = document.createElement('meta')
+    metaDescription.setAttribute('name', 'description')
+    document.head.appendChild(metaDescription)
+  }
+  metaDescription.setAttribute('content', description)
+
+  next()
 })
 
 export default router
