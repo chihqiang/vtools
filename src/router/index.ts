@@ -9,6 +9,7 @@ import StringDiff from '@/views/tools/StringDiff.vue'
 import NetworkTools from '@/views/tools/NetworkTools.vue'
 import BrowserInfo from '@/views/tools/BrowserInfo.vue'
 import StringRandom from '@/views/tools/StringRandom.vue'
+import CrontabTool from '@/views/tools/CrontabTool.vue'
 
 // 定义路由元数据类型
 type RouteMeta = {
@@ -137,6 +138,18 @@ const router = createRouter({
         description: '检测浏览器详细信息，包括系统、硬件、网络等',
         icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
         color: 'gray',
+      } as RouteMeta,
+    },
+    {
+      path: '/crontab',
+      name: 'crontab',
+      component: CrontabTool,
+      meta: {
+        showOnHome: true,
+        title: 'Crontab 工具',
+        description: 'Crontab 表达式解析、验证和执行时间生成工具',
+        icon: 'M12 22c1.105 0 2-.895 2-2h-4c0 1.105.895 2 2 2zm6-6v-5c0-3.072-1.639-5.647-4.5-6.32V4c0-.828-.672-1.5-1.5-1.5s-1.5.672-1.5 1.5v.68C9.639 5.353 8 7.928 8 11v5l-2 2v1h16v-1l-2-2z',
+        color: 'purple',
       } as RouteMeta,
     },
   ],
