@@ -47,24 +47,24 @@
         <div class="border-b border-gray-200 p-2 md:p-4 overflow-x-auto">
           <div class="flex gap-2 min-w-max">
             <button
-              v-for="tab in ['basic', 'hardware', 'features', 'network', 'fingerprint']"
-              :key="tab"
-              @click="activeTab = tab"
-              :class="[
-                'flex-1 min-w-[120px] px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
-                activeTab === tab
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              ]"
-            >
-              {{ {
-                basic: '基本信息',
-                hardware: '硬件信息',
-                features: '浏览器功能',
-                network: '网络信息',
-                fingerprint: '浏览器指纹'
-              }[tab] }}
-            </button>
+            v-for="tab in ['basic', 'hardware', 'features', 'network', 'fingerprint']"
+            :key="tab"
+            @click="activeTab = tab"
+            :class="[
+              'flex-1 min-w-[120px] px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap',
+              activeTab === tab
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-600 hover:bg-gray-100'
+            ]"
+          >
+            {{ {
+              basic: '基本信息',
+              hardware: '硬件信息',
+              features: '浏览器功能',
+              network: '网络信息',
+              fingerprint: '浏览器指纹'
+            }[tab] }}
+          </button>
           </div>
         </div>
 
@@ -267,7 +267,22 @@
                       webRTC: 'WebRTC',
                       geolocation: '地理位置',
                       notifications: '通知',
-                      serviceWorker: 'Service Worker'
+                      serviceWorker: 'Service Worker',
+                      webSocket: 'WebSocket',
+                      webWorker: 'Web Worker',
+                      webAudio: 'Web Audio',
+                      webSpeech: '语音识别',
+                      battery: '电池API',
+                      bluetooth: '蓝牙',
+                      clipboard: '剪贴板',
+                      fullscreen: '全屏',
+                      payment: '支付',
+                      webShare: '分享',
+                      mediaDevices: '媒体设备',
+                      gamepad: '游戏手柄',
+                      vr: 'VR',
+                      webUSB: 'USB',
+                      webNFC: 'NFC'
                     }[feature] }}</span>
                   </div>
                 </div>
@@ -305,31 +320,39 @@
           </div>
 
           <div v-if="activeTab === 'fingerprint'" class="space-y-6">
-            <div class="border border-gray-200 rounded-lg overflow-hidden max-w-3xl mx-auto">
-              <div class="flex items-center gap-2 p-4 bg-gray-50 border-b border-gray-200">
-                <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
-                </svg>
-                <h3 class="font-semibold text-gray-900">浏览器指纹</h3>
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <p class="text-sm text-amber-800 leading-relaxed">
+                浏览器指纹是基于您的浏览器和设备特征生成的唯一标识符，可用于识别和跟踪用户。
+              </p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <span class="text-sm text-gray-600 font-medium block mb-2">指纹哈希</span>
+              <div class="flex items-start gap-2">
+                <span class="text-xs text-gray-900 font-mono break-all flex-1">{{ browserInfo.fingerprint }}</span>
+                <button @click="copyToClipboard(browserInfo.fingerprint, '浏览器指纹')" class="p-1.5 bg-gray-200 rounded hover:bg-gray-300 transition-colors flex-shrink-0">
+                  <svg class="w-3.5 h-3.5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
               </div>
-              <div class="p-4 space-y-4">
-                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p class="text-sm text-amber-800 leading-relaxed">
-                    浏览器指纹是基于您的浏览器和设备特征生成的唯一标识符，可用于识别和跟踪用户。
-                  </p>
-                </div>
-                <div class="p-4 bg-gray-50 rounded-lg">
-                  <span class="text-sm text-gray-600 font-medium block mb-2">指纹哈希</span>
-                  <div class="flex items-start gap-2">
-                    <span class="text-xs text-gray-900 font-mono break-all flex-1">{{ browserInfo.fingerprint }}</span>
-                    <button @click="copyToClipboard(browserInfo.fingerprint, '浏览器指纹')" class="p-1.5 bg-gray-200 rounded hover:bg-gray-300 transition-colors flex-shrink-0">
-                      <svg class="w-3.5 h-3.5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
+            </div>
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <span class="text-sm text-gray-600 font-medium block mb-2">生成的规则</span>
+              <ul class="text-sm text-gray-700 space-y-2 list-disc list-inside">
+                <li>User Agent 字符串：包含浏览器名称、版本和操作系统信息</li>
+                <li>屏幕分辨率：屏幕的宽度和高度</li>
+                <li>颜色深度：屏幕的颜色深度</li>
+                <li>时区：用户所在的时区</li>
+                <li>语言设置：浏览器的主要语言</li>
+                <li>CPU 核心数：设备的处理器核心数</li>
+                <li>浏览器功能：支持的 Web API 功能（如 WebGL、Canvas、LocalStorage 等）</li>
+                <li>Canvas 指纹：基于 Canvas 渲染的唯一特征</li>
+                <li>WebGL 指纹：GPU 厂商和渲染器信息</li>
+                <li>平台信息：操作系统平台信息</li>
+              </ul>
+              <p class="text-sm text-gray-700 mt-3">
+                以上信息通过 SHA-256 哈希算法生成唯一的指纹标识符。相同的浏览器和设备环境会生成相同的指纹。
+              </p>
             </div>
           </div>
         </div>
@@ -391,6 +414,21 @@ interface BrowserInfo {
     geolocation: boolean
     notifications: boolean
     serviceWorker: boolean
+    webSocket: boolean
+    webWorker: boolean
+    webAudio: boolean
+    webSpeech: boolean
+    battery: boolean
+    bluetooth: boolean
+    clipboard: boolean
+    fullscreen: boolean
+    payment: boolean
+    webShare: boolean
+    mediaDevices: boolean
+    gamepad: boolean
+    vr: boolean
+    webUSB: boolean
+    webNFC: boolean
   }
   locale: {
     language: string
@@ -519,6 +557,21 @@ const detectFeatures = () => {
     geolocation: 'geolocation' in navigator,
     notifications: 'Notification' in window,
     serviceWorker: 'serviceWorker' in navigator,
+    webSocket: 'WebSocket' in window,
+    webWorker: 'Worker' in window,
+    webAudio: 'AudioContext' in window || 'webkitAudioContext' in window,
+    webSpeech: 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window,
+    battery: 'getBattery' in navigator,
+    bluetooth: 'bluetooth' in navigator,
+    clipboard: 'clipboard' in navigator,
+    fullscreen: 'fullscreenEnabled' in document,
+    payment: 'PaymentRequest' in window,
+    webShare: 'share' in navigator,
+    mediaDevices: 'mediaDevices' in navigator,
+    gamepad: 'getGamepads' in navigator,
+    vr: 'xr' in navigator || 'getVRDisplays' in navigator,
+    webUSB: 'usb' in navigator,
+    webNFC: 'NDEFReader' in window,
   }
 }
 
