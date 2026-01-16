@@ -7,6 +7,7 @@ import CaseConverter from '@/views/tools/CaseConverter.vue'
 import EncryptionTool from '@/views/tools/EncryptionTool.vue'
 import StringDiff from '@/views/tools/StringDiff.vue'
 import NetworkTools from '@/views/tools/NetworkTools.vue'
+import BrowserInfo from '@/views/tools/BrowserInfo.vue'
 
 // 定义路由元数据类型
 type RouteMeta = {
@@ -111,6 +112,18 @@ const router = createRouter({
         description: 'HTTP Ping、端口检测、DNS解析、网速测试',
         icon: 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',
         color: 'indigo'
+      } as RouteMeta
+    },
+    {
+      path: '/browser-info',
+      name: 'browser-info',
+      component: BrowserInfo,
+      meta: {
+        showOnHome: true,
+        title: '浏览器信息',
+        description: '检测浏览器详细信息，包括系统、硬件、网络等',
+        icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+        color: 'gray'
       } as RouteMeta
     },
   ],
