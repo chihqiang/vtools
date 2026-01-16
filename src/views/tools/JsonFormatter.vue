@@ -63,7 +63,7 @@
         <div class="border border-gray-300 rounded-lg bg-white overflow-hidden">
           <div class="overflow-y-auto" :style="{ maxHeight: containerHeight }">
             <div v-if="parsedJson !== null" class="p-4" :style="{ minHeight: containerHeight }">
-              <json-viewer :value="parsedJson" :expand-depth="5" copyable sort></json-viewer>
+              <json-viewer :value="parsedJson" :expand-depth="20" copyable sort></json-viewer>
             </div>
             <div v-else class="flex items-center justify-center text-gray-400" :style="{ minHeight: containerHeight }">
               <span>等待输入有效的 JSON...</span>
