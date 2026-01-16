@@ -1,126 +1,141 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 h-full">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">字符串对比工具</h2>
-    <p class="text-gray-600 mb-6">比较两个字符串的差异，高亮显示不同的部分</p>
-    
+  <div class="bg-white rounded-xl shadow-md p-6 h-full">
+    <!-- Header -->
+    <div class="mb-6 border-b border-gray-100 pb-4">
+      <h2 class="text-2xl font-bold text-gray-800">字符串对比工具</h2>
+      <p class="text-sm text-gray-500 mt-1">比较两个字符串的差异，高亮显示不同的部分</p>
+    </div>
+
+    <!-- 输入区 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div>
-        <div class="flex items-center justify-between mb-3">
+      <!-- 字符串 1 -->
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between mb-2">
           <h3 class="font-semibold text-gray-700">字符串 1</h3>
-          <div class="flex space-x-2">
-            <button
-              @click="clearText1"
-              class="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
-            >
-              清空
-            </button>
-          </div>
+          <button
+            @click="clearText1"
+            class="px-3 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          >
+            清空
+          </button>
         </div>
         <textarea
           v-model="text1"
           placeholder="请输入第一个字符串..."
-          class="w-full p-4 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[300px]"
-        ></textarea>
+          class="w-full min-h-[300px] p-4 rounded-lg border border-gray-300 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
-      <div>
-        <div class="flex items-center justify-between mb-3">
+      <!-- 字符串 2 -->
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between mb-2">
           <h3 class="font-semibold text-gray-700">字符串 2</h3>
-          <div class="flex space-x-2">
-            <button
-              @click="clearText2"
-              class="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
-            >
-              清空
-            </button>
-          </div>
+          <button
+            @click="clearText2"
+            class="px-3 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          >
+            清空
+          </button>
         </div>
         <textarea
           v-model="text2"
           placeholder="请输入第二个字符串..."
-          class="w-full p-4 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[300px]"
-        ></textarea>
+          class="w-full min-h-[300px] p-4 rounded-lg border border-gray-300 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
     </div>
 
-    <div class="mt-6">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold text-gray-700">对比结果</h3>
-        <div class="flex space-x-2">
+    <!-- 操作区 -->
+    <div class="mt-6 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-700">对比结果</h3>
+      <div class="flex gap-2">
+        <button
+          @click="compare"
+          class="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+        >
+          开始对比
+        </button>
+        <button
+          @click="clearAll"
+          class="px-4 py-2 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+        >
+          清空全部
+        </button>
+      </div>
+    </div>
+
+    <!-- 结果区 -->
+    <div v-if="diffResult" class="mt-4 border rounded-lg bg-gray-50 p-4">
+      <!-- 统计 -->
+      <div class="mb-4 flex flex-wrap gap-4 text-sm">
+        <span class="text-red-600 font-semibold">删除 {{ diffStats.removed }}</span>
+        <span class="text-green-600 font-semibold">新增 {{ diffStats.added }}</span>
+        <span class="text-blue-600 font-semibold">修改 {{ diffStats.modified }}</span>
+      </div>
+
+      <!-- diff 1 -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-gray-700">字符串 1</span>
           <button
-            @click="compare"
-            class="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+            @click="copyText1"
+            class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
           >
-            开始对比
+            复制
           </button>
+        </div>
+        <div
+          class="bg-white border border-gray-200 rounded-lg p-3 font-mono text-sm whitespace-pre-wrap break-words"
+        >
+          <span
+            v-for="(part, index) in diffResult.text1"
+            :key="'t1-' + index"
+            :class="{
+              'bg-red-100 text-red-700 px-1 rounded': part.type === 'removed',
+              'bg-green-100 text-green-700 px-1 rounded': part.type === 'added',
+              'bg-blue-100 text-blue-700 px-1 rounded': part.type === 'modified',
+            }"
+          >
+            {{ part.text || ' ' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- diff 2 -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-gray-700">字符串 2</span>
           <button
-            @click="clearAll"
-            class="px-4 py-2 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition-colors"
+            @click="copyText2"
+            class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
           >
-            清空全部
+            复制
           </button>
         </div>
-      </div>
-
-      <div v-if="diffResult" class="border border-gray-300 rounded-lg bg-gray-50 p-4">
-        <div class="mb-3">
-          <span class="text-sm text-gray-600">差异统计：</span>
-          <span class="ml-4 text-sm font-semibold text-red-600">删除 {{ diffStats.removed }} 处</span>
-          <span class="ml-4 text-sm font-semibold text-green-600">新增 {{ diffStats.added }} 处</span>
-          <span class="ml-4 text-sm font-semibold text-blue-600">修改 {{ diffStats.modified }} 处</span>
-        </div>
-        <div class="border-t border-gray-200 pt-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-semibold text-gray-700">字符串 1：</span>
-            <button
-              @click="copyText1"
-              class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
-            >
-              复制
-            </button>
-          </div>
-          <div class="bg-white border border-gray-200 rounded p-3 font-mono text-sm whitespace-pre-wrap break-words">
-            <span
-              v-for="(part, index) in diffResult.text1"
-              :key="'text1-' + index"
-              :class="{
-                'bg-red-100 text-red-700': part.type === 'removed',
-                'bg-green-100 text-green-700': part.type === 'added',
-                'bg-blue-100 text-blue-700': part.type === 'modified'
-              }"
-            >
-              {{ part.text }}
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between mb-2 mt-4">
-            <span class="text-sm font-semibold text-gray-700">字符串 2：</span>
-            <button
-              @click="copyText2"
-              class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
-            >
-              复制
-            </button>
-          </div>
-          <div class="bg-white border border-gray-200 rounded p-3 font-mono text-sm whitespace-pre-wrap break-words">
-            <span
-              v-for="(part, index) in diffResult.text2"
-              :key="'text2-' + index"
-              :class="{
-                'bg-red-100 text-red-700': part.type === 'removed',
-                'bg-green-100 text-green-700': part.type === 'added',
-                'bg-blue-100 text-blue-700': part.type === 'modified'
-              }"
-            >
-              {{ part.text }}
-            </span>
-          </div>
+        <div
+          class="bg-white border border-gray-200 rounded-lg p-3 font-mono text-sm whitespace-pre-wrap break-words"
+        >
+          <span
+            v-for="(part, index) in diffResult.text2"
+            :key="'t2-' + index"
+            :class="{
+              'bg-red-100 text-red-700 px-1 rounded': part.type === 'removed',
+              'bg-green-100 text-green-700 px-1 rounded': part.type === 'added',
+              'bg-blue-100 text-blue-700 px-1 rounded': part.type === 'modified',
+            }"
+          >
+            {{ part.text || ' ' }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <div v-else class="border border-gray-300 rounded-lg bg-gray-50 p-8 text-center text-gray-400">
-        <span>点击"开始对比"按钮查看差异</span>
-      </div>
+    <!-- 空状态 -->
+    <div
+      v-else
+      class="mt-6 border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-400 text-sm"
+    >
+      点击「开始对比」查看差异
     </div>
   </div>
 </template>
@@ -140,20 +155,20 @@ const diffResult = ref<{
 
 const diffStats = computed(() => {
   if (!diffResult.value) return { removed: 0, added: 0, modified: 0 }
-  
+
   let removed = 0
   let added = 0
   let modified = 0
-  
-  diffResult.value.text1.forEach(part => {
+
+  diffResult.value.text1.forEach((part) => {
     if (part.type === 'removed') removed++
     if (part.type === 'modified') modified++
   })
-  
-  diffResult.value.text2.forEach(part => {
+
+  diffResult.value.text2.forEach((part) => {
     if (part.type === 'added') added++
   })
-  
+
   return { removed, added, modified }
 })
 
@@ -179,7 +194,7 @@ const copyText1 = async () => {
     toast.warning('字符串 1 为空')
     return
   }
-  
+
   try {
     await navigator.clipboard.writeText(text1.value)
     toast.success('复制成功')
@@ -193,7 +208,7 @@ const copyText2 = async () => {
     toast.warning('字符串 2 为空')
     return
   }
-  
+
   try {
     await navigator.clipboard.writeText(text2.value)
     toast.success('复制成功')

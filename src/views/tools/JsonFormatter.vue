@@ -12,24 +12,21 @@
           <div class="flex space-x-2">
             <button
               @click="formatJson"
-              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm
-                     hover:bg-blue-700 transition shadow-sm"
+              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition shadow-sm"
             >
               格式化
             </button>
 
             <button
               @click="minifyJson"
-              class="px-3 py-2 bg-slate-500 text-white rounded-md text-sm
-                     hover:bg-slate-600 transition shadow-sm"
+              class="px-3 py-2 bg-slate-500 text-white rounded-md text-sm hover:bg-slate-600 transition shadow-sm"
             >
               压缩
             </button>
 
             <button
               @click="clearInput"
-              class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm
-                     hover:bg-gray-300 transition"
+              class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition"
             >
               清空
             </button>
@@ -42,22 +39,14 @@
               v-model="inputJson"
               @input="handleInput"
               placeholder="请输入或粘贴 JSON 字符串..."
-              class="w-full p-4 font-mono text-sm
-                     bg-gray-50
-                     focus:bg-white
-                     focus:outline-none
-                     focus:ring-1 focus:ring-blue-500
-                     resize-none transition"
+              class="w-full p-4 font-mono text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none transition"
               :style="{ minHeight: containerHeight }"
               spellcheck="false"
             ></textarea>
           </div>
         </div>
 
-        <div
-          v-if="errorMessage"
-          class="mt-2 text-sm text-red-500 flex items-center gap-2"
-        >
+        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">
           <span>⚠</span>
           {{ errorMessage }}
         </div>
@@ -74,16 +63,14 @@
           <div class="flex space-x-2">
             <button
               @click="copyOutput"
-              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm
-                     hover:bg-blue-700 transition shadow-sm"
+              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition shadow-sm"
             >
               复制
             </button>
 
             <button
               @click="downloadJson"
-              class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm
-                     hover:bg-emerald-700 transition shadow-sm"
+              class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 transition shadow-sm"
             >
               下载
             </button>
@@ -97,12 +84,7 @@
               class="p-4 bg-gray-50 border-t border-gray-200"
               :style="{ minHeight: containerHeight }"
             >
-              <json-viewer
-                :value="parsedJson"
-                :expand-depth="20"
-                copyable
-                sort
-              />
+              <json-viewer :value="parsedJson" :expand-depth="20" copyable sort />
             </div>
 
             <div
@@ -117,11 +99,7 @@
                 stroke-width="1.5"
                 viewBox="0 0 24 24"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 7h18M3 12h18M3 17h18"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
               </svg>
               <span class="text-sm">等待输入有效的 JSON</span>
             </div>
@@ -153,12 +131,7 @@ const calculateHeight = () => {
   const buttonHeight = 40
   const errorHeight = errorMessage.value ? 40 : 0
   const availableHeight =
-    windowHeight -
-    headerHeight -
-    padding -
-    titleHeight -
-    buttonHeight -
-    errorHeight
+    windowHeight - headerHeight - padding - titleHeight - buttonHeight - errorHeight
 
   containerHeight.value = `${Math.max(420, availableHeight)}px`
 }
@@ -248,10 +221,7 @@ const downloadJson = () => {
     return
   }
 
-  const blob = new Blob(
-    [JSON.stringify(parsedJson.value, null, 2)],
-    { type: 'application/json' }
-  )
+  const blob = new Blob([JSON.stringify(parsedJson.value, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
@@ -266,8 +236,7 @@ const downloadJson = () => {
 
 <style scoped>
 textarea {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas',
-    'source-code-pro', monospace;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
   line-height: 1.6;
   tab-size: 2;
 }

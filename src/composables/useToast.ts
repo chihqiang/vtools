@@ -26,11 +26,12 @@ export function useToast() {
           }
         }
 
-        return () => h(ToastMessage, {
-          ...options,
-          onClose
-        })
-      }
+        return () =>
+          h(ToastMessage, {
+            ...options,
+            onClose,
+          })
+      },
     })
 
     toastApp.mount(toastContainer.value)
@@ -57,6 +58,6 @@ export function useToast() {
     success,
     error,
     warning,
-    info
+    info,
   }
 }

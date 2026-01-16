@@ -16,25 +16,28 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = withDefaults(defineProps<{
-  // SVG路径
-  iconPath: string
-  // 图标大小
-  size?: string | number
-  // 图标颜色
-  color?: string
-  // 描边宽度
-  strokeWidth?: number
-  // 填充颜色
-  fill?: string
-  // 自定义类名
-  className?: string
-}>(), {
-  size: '24',
-  color: 'currentColor',
-  strokeWidth: 2,
-  fill: 'none'
-})
+const props = withDefaults(
+  defineProps<{
+    // SVG路径
+    iconPath: string
+    // 图标大小
+    size?: string | number
+    // 图标颜色
+    color?: string
+    // 描边宽度
+    strokeWidth?: number
+    // 填充颜色
+    fill?: string
+    // 自定义类名
+    className?: string
+  }>(),
+  {
+    size: '24',
+    color: 'currentColor',
+    strokeWidth: 2,
+    fill: 'none',
+  },
+)
 
 // 合并类名
 const iconClass = computed(() => {

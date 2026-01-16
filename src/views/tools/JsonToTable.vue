@@ -11,8 +11,7 @@
 
           <button
             @click="clearInput"
-            class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm
-                   hover:bg-gray-300 transition"
+            class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition"
           >
             清空
           </button>
@@ -24,22 +23,14 @@
               v-model="inputJson"
               @input="handleInput"
               placeholder="请输入 JSON 数组"
-              class="w-full p-4 font-mono text-sm
-                     bg-gray-50
-                     focus:bg-white
-                     focus:outline-none
-                     focus:ring-1 focus:ring-blue-500
-                     resize-none transition"
+              class="w-full p-4 font-mono text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none transition"
               :style="{ minHeight: containerHeight }"
               spellcheck="false"
             ></textarea>
           </div>
         </div>
 
-        <div
-          v-if="errorMessage"
-          class="mt-2 text-sm text-red-500 flex items-center gap-2"
-        >
+        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">
           <span>⚠</span>
           {{ errorMessage }}
         </div>
@@ -56,9 +47,7 @@
           <button
             @click="downloadCsv"
             :disabled="!tableData.length"
-            class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm
-                   hover:bg-emerald-700 transition shadow-sm
-                   disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             下载 CSV（{{ tableData.length }}）
           </button>
@@ -66,10 +55,7 @@
 
         <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
           <div class="overflow-y-auto" :style="{ maxHeight: containerHeight }">
-            <table
-              v-if="tableData.length"
-              class="min-w-full text-sm border-collapse"
-            >
+            <table v-if="tableData.length" class="min-w-full text-sm border-collapse">
               <thead class="sticky top-0 z-10 bg-gray-100 border-b border-gray-300">
                 <tr>
                   <th
@@ -91,8 +77,7 @@
                   <td
                     v-for="(header, colIndex) in tableHeaders"
                     :key="colIndex"
-                    class="px-4 py-2 text-gray-800 border-b border-gray-100
-                           max-w-xs truncate"
+                    class="px-4 py-2 text-gray-800 border-b border-gray-100 max-w-xs truncate"
                     :title="formatCell(row[header])"
                   >
                     {{ formatCell(row[header]) }}
@@ -114,11 +99,7 @@
                 stroke-width="1.5"
                 viewBox="0 0 24 24"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 7h18M3 12h18M3 17h18"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
               </svg>
               <span class="text-sm">
                 {{ isParsing ? '解析中…' : '等待输入有效的 JSON 数组' }}
@@ -189,17 +170,17 @@ const handleInput = () => {
     }
 
     const headers = new Set<string>()
-    parsed.forEach(item => {
+    parsed.forEach((item) => {
       if (item && typeof item === 'object') {
-        Object.keys(item).forEach(k => headers.add(k))
+        Object.keys(item).forEach((k) => headers.add(k))
       }
     })
 
     tableHeaders.value = Array.from(headers)
 
-    tableData.value = parsed.map(item => {
+    tableData.value = parsed.map((item) => {
       const row: Record<string, unknown> = {}
-      tableHeaders.value.forEach(h => (row[h] = item[h] ?? ''))
+      tableHeaders.value.forEach((h) => (row[h] = item[h] ?? ''))
       return row
     })
 
@@ -233,17 +214,18 @@ const downloadCsv = () => {
   if (!tableData.value.length) return
 
   let csv = '\uFEFF'
-  csv += tableHeaders.value.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\n'
+  csv += tableHeaders.value.map((h) => `"${h.replace(/"/g, '""')}"`).join(',') + '\n'
 
-  tableData.value.forEach(row => {
-    csv += tableHeaders.value
-      .map(h => {
-        const v = formatCell(row[h])
-        return v.includes(',') || v.includes('"') || v.includes('\n')
-          ? `"${v.replace(/"/g, '""')}"`
-          : v
-      })
-      .join(',') + '\n'
+  tableData.value.forEach((row) => {
+    csv +=
+      tableHeaders.value
+        .map((h) => {
+          const v = formatCell(row[h])
+          return v.includes(',') || v.includes('"') || v.includes('\n')
+            ? `"${v.replace(/"/g, '""')}"`
+            : v
+        })
+        .join(',') + '\n'
   })
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })

@@ -7,5 +7,4 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
     <RouterView />
   </DefaultLayout>
 </template>
-<style scoped>
-</style>
+<style scoped></style>
