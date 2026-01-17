@@ -257,14 +257,6 @@
                 </button>
               </div>
             </div>
-
-            <button
-              v-if="generatedFavicons.length > 0"
-              @click="downloadAll"
-              class="w-full py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-            >
-              下载全部
-            </button>
           </div>
         </div>
       </div>
@@ -288,10 +280,16 @@ const generatedFavicons = ref<Array<{ url: string; name: string; size: string; f
 )
 
 // 参数设置
-const selectedSizes = ref<string[]>(['16x16', '32x32', '48x48', '64x64', '128x128', '256x256', '512x512'])
+const selectedSizes = ref<string[]>([
+  '16x16',
+  '32x32',
+  '48x48',
+  '64x64',
+  '128x128',
+  '256x256',
+  '512x512',
+])
 const selectedFormats = ref<string[]>(['ico', 'png'])
-
-
 
 // 处理文件上传
 const handleFileChange = (event: Event) => {
@@ -350,10 +348,10 @@ const generateFavicons = async () => {
         const parts = sizeStr.split('x').map(Number)
         return {
           width: parts[0] || 0,
-          height: parts[1] || 0
+          height: parts[1] || 0,
         }
       })
-      .filter(size => size.width > 0 && size.height > 0)
+      .filter((size) => size.width > 0 && size.height > 0)
     const formats = selectedFormats.value
 
     // 模拟生成过程
@@ -423,10 +421,5 @@ const downloadFavicon = async (favicon: { url: string; name: string }) => {
     console.error(error)
     toast.error('下载失败')
   }
-}
-
-// 下载全部 Favicon
-const downloadAll = () => {
-  toast.warning('全部下载功能开发中')
 }
 </script>
