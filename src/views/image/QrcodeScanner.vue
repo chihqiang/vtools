@@ -195,7 +195,7 @@ hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE])
 
 const reader = new BrowserMultiFormatReader(hints, {
   delayBetweenScanAttempts: 0,
-  delayBetweenScanSuccess: 0
+  delayBetweenScanSuccess: 0,
 })
 
 /* =====================
@@ -225,7 +225,7 @@ const processFile = (file: File) => {
   errorMessage.value = null
 
   const fr = new FileReader()
-  fr.onload = e => {
+  fr.onload = (e) => {
     previewImage.value = e.target?.result as string
     scanQrCodeFromImage(file)
   }
