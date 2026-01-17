@@ -1,17 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
-import TimestampTool from '@/views/tools/TimestampTool.vue'
-import JsonFormatter from '@/views/tools/JsonFormatter.vue'
-import JsonToTable from '@/views/tools/JsonToTable.vue'
-import CaseConverter from '@/views/tools/StringConverter.vue'
-import EncryptionTool from '@/views/tools/EncryptionTool.vue'
-import StringDiff from '@/views/tools/StringDiff.vue'
-import NetworkTools from '@/views/tools/NetworkTools.vue'
-import BrowserInfo from '@/views/tools/BrowserInfo.vue'
-import StringRandom from '@/views/tools/StringRandom.vue'
-import CrontabTool from '@/views/tools/CrontabTool.vue'
-import JsonToYml from '@/views/tools/JsonToYml.vue'
 import { HomeGroup, type HomeRouteMeta } from '@/types/route'
+
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -19,7 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: () => import('@/views/HomeView.vue'),
       meta: {
         title: '在线工具集',
         description: '提供多种在线工具，包括时间戳转换、JSON格式化、加密解密等实用工具',
@@ -28,7 +17,7 @@ const router = createRouter({
     {
       path: '/json-formatter',
       name: 'json-formatter',
-      component: JsonFormatter,
+      component: () => import('@/views/json/ToFormatter.vue'),
       meta: {
         showOnHome: true,
         title: 'JSON 格式化',
@@ -41,7 +30,7 @@ const router = createRouter({
     {
       path: '/json-table',
       name: 'json-table',
-      component: JsonToTable,
+      component: () => import('@/views/json/ToTable.vue'),
       meta: {
         showOnHome: true,
         title: 'JSON 转表格',
@@ -54,7 +43,7 @@ const router = createRouter({
     {
       path: '/json-yml',
       name: 'json-yml',
-      component: JsonToYml,
+      component: () => import('@/views/json/ToYml.vue'),
       meta: {
         showOnHome: true,
         title: 'JSON YAML 转换',
@@ -67,7 +56,7 @@ const router = createRouter({
     {
       path: '/string-converter',
       name: 'string-converter',
-      component: CaseConverter,
+      component: () => import('@/views/strings/ToConverter.vue'),
       meta: {
         showOnHome: true,
         title: '字符串转换',
@@ -80,7 +69,7 @@ const router = createRouter({
     {
       path: '/string-random',
       name: 'string-random',
-      component: StringRandom,
+      component: () => import('@/views/strings/RandomGen.vue'),
       meta: {
         showOnHome: true,
         title: '随机字符串生成器',
@@ -93,7 +82,7 @@ const router = createRouter({
     {
       path: '/string-diff',
       name: 'string-diff',
-      component: StringDiff,
+      component: () => import('@/views/strings/StringDiff.vue'),
       meta: {
         showOnHome: true,
         title: '字符串对比',
@@ -106,7 +95,7 @@ const router = createRouter({
     {
       path: '/crontab',
       name: 'crontab',
-      component: CrontabTool,
+      component: () => import('@/views/development/CrontabView.vue'),
       meta: {
         showOnHome: true,
         title: 'Crontab 工具',
@@ -119,7 +108,7 @@ const router = createRouter({
     {
       path: '/timestamp',
       name: 'timestamp',
-      component: TimestampTool,
+      component: () => import('@/views/development/TimestampView.vue'),
       meta: {
         showOnHome: true,
         title: '时间戳工具',
@@ -132,7 +121,7 @@ const router = createRouter({
     {
       path: '/encryption',
       name: 'encryption',
-      component: EncryptionTool,
+      component: () => import('@/views/encryption/EncryptionTool.vue'),
       meta: {
         showOnHome: true,
         title: '加密解密工具',
@@ -145,7 +134,7 @@ const router = createRouter({
     {
       path: '/network',
       name: 'network',
-      component: NetworkTools,
+      component: () => import('@/views/detect/NetworkView.vue'),
       meta: {
         showOnHome: true,
         title: '网络工具',
@@ -158,7 +147,7 @@ const router = createRouter({
     {
       path: '/browser-info',
       name: 'browser-info',
-      component: BrowserInfo,
+      component: () => import('@/views/detect/BrowserInfoView.vue'),
       meta: {
         showOnHome: true,
         title: '浏览器信息',
@@ -166,6 +155,19 @@ const router = createRouter({
         icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
         color: 'gray',
         group: HomeGroup.NETWORK_TOOLS,
+      } as HomeRouteMeta,
+    },
+    {
+      path: '/favicon-generator',
+      name: 'favicon-generator',
+      component: () => import('@/views/image/FaviconGenerator.vue'),
+      meta: {
+        showOnHome: true,
+        title: 'Favicon 生成器',
+        description: '生成各种尺寸和格式的 Favicon 图标，支持上传图片和自定义配置',
+        icon: 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7',
+        color: 'teal',
+        group: HomeGroup.IMAGE_TOOLS,
       } as HomeRouteMeta,
     },
   ],
