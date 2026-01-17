@@ -183,17 +183,6 @@
                   />
                   <span class="text-sm">512x512</span>
                 </label>
-                <label
-                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
-                >
-                  <input
-                    v-model="selectedSizes"
-                    type="checkbox"
-                    value="all"
-                    class="w-4 h-4 text-blue-600"
-                  />
-                  <span class="text-sm">全部尺寸</span>
-                </label>
               </div>
             </div>
 
@@ -284,7 +273,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
@@ -299,27 +288,10 @@ const generatedFavicons = ref<Array<{ url: string; name: string; size: string; f
 )
 
 // 参数设置
-const selectedSizes = ref<string[]>(['16x16', '32x32', '48x48'])
+const selectedSizes = ref<string[]>(['16x16', '32x32', '48x48', '64x64', '128x128', '256x256', '512x512'])
 const selectedFormats = ref<string[]>(['ico', 'png'])
 
-// 监听尺寸选择，如果选择了"全部尺寸"，则自动选择所有尺寸
-watch(selectedSizes, (newSizes) => {
-  if (newSizes.includes('all')) {
-    selectedSizes.value = [
-      '16x16',
-      '32x32',
-      '48x48',
-      '64x64',
-      '128x128',
-      '256x256',
-      '512x512',
-      'all',
-    ]
-  } else if (newSizes.length === 7 && !newSizes.includes('all')) {
-    // 如果用户手动选择了所有具体尺寸，自动添加"全部尺寸"
-    selectedSizes.value.push('all')
-  }
-})
+
 
 // 处理文件上传
 const handleFileChange = (event: Event) => {
@@ -374,7 +346,6 @@ const generateFavicons = async () => {
 
   try {
     const sizes = selectedSizes.value
-      .filter((size) => size !== 'all')
       .map((size) => size.split('x').map(Number))
     const formats = selectedFormats.value
 
