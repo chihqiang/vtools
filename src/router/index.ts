@@ -26,8 +26,8 @@ const router = createRouter({
       } as HomeRouteMeta,
     },
     {
-      path: '/json',
-      name: 'json',
+      path: '/json-formatter',
+      name: 'json-formatter',
       component: JsonFormatter,
       meta: {
         showOnHome: true,
