@@ -6,6 +6,12 @@
         <h3 class="font-semibold text-gray-700">文本区域</h3>
         <div class="flex space-x-2">
           <button
+            @click="toggleCase"
+            class="px-3 py-2 bg-yellow-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            大小写切换
+          </button>
+          <button
             @click="pasteInput"
             class="px-3 py-2 bg-blue-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
           >
@@ -30,14 +36,16 @@
         <textarea
           v-model="inputText"
           placeholder="请输入要加密 / 解密的文本..."
-          class="w-full min-h-[400px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full min-h-[100px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         ></textarea>
       </div>
     </div>
 
     <!-- 操作区域 -->
-    <div class="mt-6">
+    <div class="mt-6 space-y-6">
+      <!-- 编码/解码 -->
       <div class="border border-gray-300 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">编码/解码</h4>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
           <button
             @click="encryptBase64"
@@ -63,29 +71,105 @@
           >
             URL 解码
           </button>
-          <button
-            @click="md5_32_upper"
-            class="px-3 py-2 bg-purple-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
-          >
-            MD5 32位大写
-          </button>
+        </div>
+      </div>
+
+      <!-- MD5哈希 -->
+      <div class="border border-gray-300 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">MD5哈希</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
           <button
             @click="md5_32_lower"
             class="px-3 py-2 bg-purple-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
           >
-            MD5 32位小写
-          </button>
-          <button
-            @click="md5_16_upper"
-            class="px-3 py-2 bg-purple-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
-          >
-            MD5 16位大写
+            MD5 32位
           </button>
           <button
             @click="md5_16_lower"
             class="px-3 py-2 bg-purple-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
           >
-            MD5 16位小写
+            MD5 16位
+          </button>
+        </div>
+      </div>
+
+      <!-- SHA系列 -->
+      <div class="border border-gray-300 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">SHA系列</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button
+            @click="sha1Hash"
+            class="px-3 py-2 bg-indigo-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            SHA1
+          </button>
+          <button
+            @click="sha224Hash"
+            class="px-3 py-2 bg-indigo-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            SHA224
+          </button>
+          <button
+            @click="sha256Hash"
+            class="px-3 py-2 bg-indigo-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            SHA256
+          </button>
+          <button
+            @click="sha384Hash"
+            class="px-3 py-2 bg-indigo-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            SHA384
+          </button>
+          <button
+            @click="sha512Hash"
+            class="px-3 py-2 bg-indigo-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            SHA512
+          </button>
+        </div>
+      </div>
+
+      <!-- 其他哈希算法 -->
+      <div class="border border-gray-300 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">其他哈希算法</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button
+            @click="sha3Hash"
+            class="px-3 py-2 bg-emerald-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            SHA3
+          </button>
+          <button
+            @click="ripemd160Hash"
+            class="px-3 py-2 bg-emerald-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            RIPEMD160
+          </button>
+        </div>
+      </div>
+
+      <!-- HMAC系列 -->
+      <div class="border border-gray-300 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">HMAC系列（使用默认密钥）</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button
+            @click="hmacMd5Hash"
+            class="px-3 py-2 bg-orange-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            HMAC-MD5
+          </button>
+          <button
+            @click="hmacSha1Hash"
+            class="px-3 py-2 bg-orange-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            HMAC-SHA1
+          </button>
+          <button
+            @click="hmacSha256Hash"
+            class="px-3 py-2 bg-orange-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
+          >
+            HMAC-SHA256
           </button>
         </div>
       </div>
@@ -97,6 +181,16 @@
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
 import md5 from 'crypto-js/md5'
+import sha1 from 'crypto-js/sha1'
+import sha224 from 'crypto-js/sha224'
+import sha256 from 'crypto-js/sha256'
+import sha384 from 'crypto-js/sha384'
+import sha512 from 'crypto-js/sha512'
+import sha3 from 'crypto-js/sha3'
+import ripemd160 from 'crypto-js/ripemd160'
+import hmacMd5 from 'crypto-js/hmac-md5'
+import hmacSha1 from 'crypto-js/hmac-sha1'
+import hmacSha256 from 'crypto-js/hmac-sha256'
 import Base64 from 'crypto-js/enc-base64'
 import Utf8 from 'crypto-js/enc-utf8'
 
@@ -137,6 +231,32 @@ const copyOutput = async () => {
 const clearInput = () => {
   inputText.value = ''
   toast.success('已清空')
+}
+
+/* ---------- 大小写转换 ---------- */
+
+const toggleCase = () => {
+  if (!ensureInput()) return
+
+  // 检查当前文本的大小写状态
+  const hasLowerCase = /[a-z]/.test(inputText.value)
+  const hasUpperCase = /[A-Z]/.test(inputText.value)
+
+  let newText = ''
+  let message = ''
+
+  if (hasUpperCase && !hasLowerCase) {
+    // 全大写 -> 转小写
+    newText = inputText.value.toLowerCase()
+    message = '已转换为小写'
+  } else {
+    // 包含小写或混合大小写 -> 转大写
+    newText = inputText.value.toUpperCase()
+    message = '已转换为大写'
+  }
+
+  inputText.value = newText
+  toast.success(message)
 }
 
 /* ---------- Base64 ---------- */
@@ -185,28 +305,87 @@ const decodeUrl = () => {
 
 /* ---------- MD5 ---------- */
 
-const md5_32_upper = () => {
-  if (!ensureInput()) return
-  inputText.value = md5(inputText.value).toString().toUpperCase()
-  toast.success('MD5 32位大写生成成功')
-}
-
 const md5_32_lower = () => {
   if (!ensureInput()) return
   inputText.value = md5(inputText.value).toString().toLowerCase()
-  toast.success('MD5 32位小写生成成功')
-}
-
-const md5_16_upper = () => {
-  if (!ensureInput()) return
-  inputText.value = md5(inputText.value).toString().substring(8, 24).toUpperCase()
-  toast.success('MD5 16位大写生成成功')
+  toast.success('MD5 32位生成成功')
 }
 
 const md5_16_lower = () => {
   if (!ensureInput()) return
   inputText.value = md5(inputText.value).toString().substring(8, 24).toLowerCase()
-  toast.success('MD5 16位小写生成成功')
+  toast.success('MD5 16位生成成功')
+}
+
+/* ---------- SHA系列 ---------- */
+
+const sha1Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = sha1(inputText.value).toString().toLowerCase()
+  toast.success('SHA1生成成功')
+}
+
+const sha256Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = sha256(inputText.value).toString().toLowerCase()
+  toast.success('SHA256生成成功')
+}
+
+const sha512Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = sha512(inputText.value).toString().toLowerCase()
+  toast.success('SHA512生成成功')
+}
+
+/* ---------- 其他哈希算法 ---------- */
+
+const sha3Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = sha3(inputText.value).toString().toLowerCase()
+  toast.success('SHA3生成成功')
+}
+
+const ripemd160Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = ripemd160(inputText.value).toString().toLowerCase()
+  toast.success('RIPEMD160生成成功')
+}
+
+/* ---------- 更多SHA算法 ---------- */
+
+const sha224Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = sha224(inputText.value).toString().toLowerCase()
+  toast.success('SHA224生成成功')
+}
+
+const sha384Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = sha384(inputText.value).toString().toLowerCase()
+  toast.success('SHA384生成成功')
+}
+
+/* ---------- HMAC系列 ---------- */
+
+// 默认密钥（实际使用中应该让用户输入密钥）
+const defaultHmacKey = 'vtools-secret-key'
+
+const hmacMd5Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = hmacMd5(inputText.value, defaultHmacKey).toString().toLowerCase()
+  toast.success('HMAC-MD5生成成功')
+}
+
+const hmacSha1Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = hmacSha1(inputText.value, defaultHmacKey).toString().toLowerCase()
+  toast.success('HMAC-SHA1生成成功')
+}
+
+const hmacSha256Hash = () => {
+  if (!ensureInput()) return
+  inputText.value = hmacSha256(inputText.value, defaultHmacKey).toString().toLowerCase()
+  toast.success('HMAC-SHA256生成成功')
 }
 </script>
 
