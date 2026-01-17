@@ -105,6 +105,32 @@ const router = createRouter({
       } as HomeRouteMeta,
     },
     {
+      path: '/qrcode-generator',
+      name: 'qrcode-generator',
+      component: () => import('@/views/image/QrcodeGenerator.vue'),
+      meta: {
+        showOnHome: true,
+        title: '二维码生成',
+        description: '生成自定义二维码',
+        icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+        color: 'green',
+        group: HomeGroup.IMAGE_TOOLS,
+      } as HomeRouteMeta,
+    },
+    {
+      path: '/qrcode-scanner',
+      name: 'qrcode-scanner',
+      component: () => import('@/views/image/QrcodeScanner.vue'),
+      meta: {
+        showOnHome: true,
+        title: '二维码识别',
+        description: '识别图片或摄像头中的二维码',
+        icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z',
+        color: 'blue',
+        group: HomeGroup.IMAGE_TOOLS,
+      } as HomeRouteMeta,
+    },
+    {
       path: '/crontab',
       name: 'crontab',
       component: () => import('@/views/development/CrontabView.vue'),

@@ -24,8 +24,10 @@
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
     "install": "^0.13.0",
+    "jsqr": "^1.4.0",
     "pinia": "^3.0.4",
     "pinyin": "^4.0.0",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^4.1.18",
     "vue": "^3.5.26",
     "vue-json-viewer": "^3.0.4",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@tsconfig/node24": "^24.0.3",
     "@types/node": "^24.10.4",
+    "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.6.0",
