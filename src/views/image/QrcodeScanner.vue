@@ -168,120 +168,133 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
-import jsQR from 'jsqr'
+import { BrowserMultiFormatReader } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
 import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
 
-// 文件上传相关
+/* =====================
+ * 基础状态
+ * ===================== */
 const fileInput = ref<HTMLInputElement | null>(null)
 const previewImage = ref<string | null>(null)
 const dragging = ref(false)
 
-// 识别结果
 const scannedResult = ref<string | null>(null)
 const scanning = ref(false)
 const errorMessage = ref<string | null>(null)
 
-// 处理文件选择
-const handleFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (target.files && target.files.length > 0) {
-    const file = target.files[0]
-    if (file) {
-      processFile(file)
-    }
+/* =====================
+ * ZXing Reader（只识别二维码）
+ * ===================== */
+const hints = new Map()
+hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE])
+
+const reader = new BrowserMultiFormatReader(hints, {
+  delayBetweenScanAttempts: 0,
+  delayBetweenScanSuccess: 0
+})
+
+/* =====================
+ * 文件选择 / 拖拽
+ * ===================== */
+const handleFileChange = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  if (input.files?.[0]) {
+    processFile(input.files[0])
+    input.value = ''
   }
 }
 
-// 处理拖放
-const handleDrop = (event: DragEvent) => {
+const handleDrop = (e: DragEvent) => {
   dragging.value = false
-  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    const file = event.dataTransfer.files[0]
-    if (file) {
-      processFile(file)
-    }
-  }
+  const file = e.dataTransfer?.files?.[0]
+  if (file) processFile(file)
 }
 
-// 处理文件
 const processFile = (file: File) => {
   if (!file.type.startsWith('image/')) {
     errorMessage.value = '请选择图片文件'
     return
   }
 
-  // 创建预览
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const imageUrl = e.target?.result as string
-    previewImage.value = imageUrl
-    errorMessage.value = null
-    scanQrCodeFromImage(imageUrl)
+  scannedResult.value = null
+  errorMessage.value = null
+
+  const fr = new FileReader()
+  fr.onload = e => {
+    previewImage.value = e.target?.result as string
+    scanQrCodeFromImage(file)
   }
-  reader.readAsDataURL(file)
+  fr.readAsDataURL(file)
 }
 
-// 从图片识别二维码
-const scanQrCodeFromImage = (imageUrl: string) => {
+/* =====================
+ * 图片加载 & 限制尺寸
+ * ===================== */
+const loadImage = async (file: File, maxSize = 1600): Promise<HTMLImageElement> => {
+  const img = document.createElement('img')
+  const url = URL.createObjectURL(file)
+  img.src = url
+
+  await img.decode()
+
+  const { width: imgWidth, height: imgHeight } = img
+  if (imgWidth <= maxSize && imgHeight <= maxSize) {
+    return img
+  }
+
+  const ratio = Math.min(maxSize / imgWidth, maxSize / imgHeight)
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.floor(imgWidth * ratio)
+  canvas.height = Math.floor(imgHeight * ratio)
+
+  canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+  const resized = document.createElement('img')
+  resized.src = canvas.toDataURL('image/png')
+  await resized.decode()
+
+  URL.revokeObjectURL(url)
+  return resized
+}
+
+/* =====================
+ * 核心识别逻辑（最终版）
+ * ===================== */
+const scanQrCodeFromImage = async (file: File) => {
   scanning.value = true
   errorMessage.value = null
-  scannedResult.value = null
 
-  const image = new Image()
-  image.onload = () => {
-    // 创建canvas并绘制图片
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    if (!ctx) {
-      scanning.value = false
-      errorMessage.value = '无法创建画布上下文'
-      return
-    }
+  let img: HTMLImageElement | null = null
 
-    canvas.width = image.width
-    canvas.height = image.height
-    ctx.drawImage(image, 0, 0)
+  try {
+    img = await loadImage(file)
 
-    // 获取图像数据
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const result = await reader.decodeFromImageElement(img)
 
-    // 识别二维码
-    const result = jsQR(imageData.data, imageData.width, imageData.height)
-
+    scannedResult.value = result.getText()
+    toast.success('二维码识别成功')
+  } catch {
+    errorMessage.value = '未检测到二维码'
+    toast.error('未检测到二维码')
+  } finally {
     scanning.value = false
-
-    if (result) {
-      scannedResult.value = result.data
-      toast.success('二维码识别成功')
-    } else {
-      errorMessage.value = '未检测到二维码'
-      toast.error('未检测到二维码')
-    }
   }
-  image.onerror = () => {
-    scanning.value = false
-    errorMessage.value = '图片加载失败'
-    toast.error('图片加载失败')
-  }
-  image.src = imageUrl
 }
 
-// 复制结果
+/* =====================
+ * 复制结果
+ * ===================== */
 const copyResult = () => {
   if (!scannedResult.value) return
 
   navigator.clipboard
     .writeText(scannedResult.value)
-    .then(() => {
-      toast.success('已复制到剪贴板')
-    })
-    .catch(() => {
-      toast.error('复制失败')
-    })
+    .then(() => toast.success('已复制到剪贴板'))
+    .catch(() => toast.error('复制失败'))
 }
 </script>

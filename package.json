@@ -20,11 +20,12 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@types/crypto-js": "^4.2.2",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "cron-parser": "^5.5.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
     "install": "^0.13.0",
-    "jsqr": "^1.4.0",
     "pinia": "^3.0.4",
     "pinyin": "^4.0.0",
     "qrcode": "^1.5.4",
