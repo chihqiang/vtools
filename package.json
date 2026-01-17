@@ -20,12 +20,15 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@types/crypto-js": "^4.2.2",
+    "@types/lodash": "^4.17.23",
+    "@types/qrcode": "^1.5.6",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "cron-parser": "^5.5.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
     "install": "^0.13.0",
+    "lodash": "^4.17.21",
     "pinia": "^3.0.4",
     "pinyin": "^4.0.0",
     "qrcode": "^1.5.4",
@@ -38,7 +41,6 @@
   "devDependencies": {
     "@tsconfig/node24": "^24.0.3",
     "@types/node": "^24.10.4",
-    "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.6.0",

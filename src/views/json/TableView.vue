@@ -115,6 +115,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from '@/composables/useToast'
+import debounce from 'lodash/debounce'
 
 const toast = useToast()
 
@@ -126,6 +127,7 @@ const errorMessage = ref('')
 const isParsing = ref(false)
 const containerHeight = ref('500px')
 
+// ------------------ 动态高度 ------------------
 const calculateHeight = () => {
   const windowHeight = window.innerHeight
   const baseOffset = 260
@@ -143,7 +145,18 @@ onUnmounted(() => {
   window.removeEventListener('resize', calculateHeight)
 })
 
-const handleInput = () => {
+// ------------------ 格式化单元格 ------------------
+const formatCell = (value: unknown, isCsv = false): string => {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'object') {
+    const str = JSON.stringify(value)
+    return isCsv ? str.replace(/\n/g, '\\n') : str
+  }
+  return String(value)
+}
+
+// ------------------ 解析 JSON（防抖） ------------------
+const parseJson = () => {
   try {
     if (!inputJson.value.trim()) {
       parsedJson.value = []
@@ -195,6 +208,10 @@ const handleInput = () => {
   }
 }
 
+// 防抖处理，避免大 JSON 每次输入都触发解析
+const handleInput = debounce(parseJson, 300)
+
+// ------------------ 清空 ------------------
 const clearInput = () => {
   inputJson.value = ''
   parsedJson.value = []
@@ -204,23 +221,18 @@ const clearInput = () => {
   toast.success('已清空')
 }
 
-const formatCell = (value: unknown): string => {
-  if (value === null || value === undefined) return ''
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
-}
-
+// ------------------ CSV 下载 ------------------
 const downloadCsv = () => {
   if (!tableData.value.length) return
 
-  let csv = '\uFEFF'
+  let csv = '\uFEFF' // UTF-8 BOM
   csv += tableHeaders.value.map((h) => `"${h.replace(/"/g, '""')}"`).join(',') + '\n'
 
   tableData.value.forEach((row) => {
     csv +=
       tableHeaders.value
         .map((h) => {
-          const v = formatCell(row[h])
+          const v = formatCell(row[h], true)
           return v.includes(',') || v.includes('"') || v.includes('\n')
             ? `"${v.replace(/"/g, '""')}"`
             : v
@@ -232,7 +244,8 @@ const downloadCsv = () => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'json-to-table.csv'
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  a.download = `json-to-table-${timestamp}.csv`
   a.click()
   URL.revokeObjectURL(url)
 

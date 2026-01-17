@@ -46,7 +46,7 @@
 
       <!-- 右侧输出 -->
       <div>
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <h3 class="font-semibold text-gray-800 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-green-500"></span>
             输出
@@ -58,19 +58,55 @@
             </span>
           </h3>
 
-          <div class="flex gap-2">
-            <button
-              @click="copyRight"
-              class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
-            >
-              复制
-            </button>
-            <button
-              @click="clearRight"
-              class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
-            >
-              清空
-            </button>
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- JSON 选项 -->
+            <div v-if="rightType === 'json'" class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
+              <label class="text-sm text-gray-600">缩进:</label>
+              <input
+                type="number"
+                v-model="jsonIndent"
+                min="0"
+                max="8"
+                class="w-16 px-2 py-1 border rounded-md text-sm"
+              />
+              <label class="flex items-center gap-1 text-sm text-gray-600">
+                <input type="checkbox" v-model="jsonSortKeys" />
+                排序
+              </label>
+            </div>
+
+            <!-- YAML 选项 -->
+            <div v-if="rightType === 'yaml'" class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
+              <label class="text-sm text-gray-600">缩进:</label>
+              <input
+                type="number"
+                v-model="yamlIndent"
+                min="1"
+                max="8"
+                class="w-16 px-2 py-1 border rounded-md text-sm"
+              />
+            </div>
+
+            <div class="flex gap-2">
+              <button
+                @click="copyRight"
+                class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+              >
+                复制
+              </button>
+              <button
+                @click="downloadRight"
+                class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+              >
+                下载
+              </button>
+              <button
+                @click="clearRight"
+                class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+              >
+                清空
+              </button>
+            </div>
           </div>
         </div>
 
@@ -88,34 +124,7 @@
       </div>
     </div>
 
-    <!-- 转换选项 -->
-    <div class="mt-6 flex flex-wrap gap-4">
-      <div v-if="rightType === 'json'" class="flex items-center gap-2">
-        <label class="text-sm text-gray-600">JSON 缩进</label>
-        <input
-          type="number"
-          v-model="jsonIndent"
-          min="0"
-          max="8"
-          class="w-16 px-2 py-1 border rounded-md text-sm"
-        />
-        <label class="flex items-center gap-1 text-sm text-gray-600">
-          <input type="checkbox" v-model="jsonSortKeys" />
-          排序键
-        </label>
-      </div>
 
-      <div v-if="rightType === 'yaml'" class="flex items-center gap-2">
-        <label class="text-sm text-gray-600">YAML 缩进</label>
-        <input
-          type="number"
-          v-model="yamlIndent"
-          min="1"
-          max="8"
-          class="w-16 px-2 py-1 border rounded-md text-sm"
-        />
-      </div>
-    </div>
   </div>
 </template>
 
@@ -123,6 +132,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as YAML from 'yaml'
 import { useToast } from '@/composables/useToast'
+import { debounce } from 'lodash'
 
 /* ================= Toast ================= */
 const toast = useToast()
@@ -169,13 +179,6 @@ watch([jsonIndent, jsonSortKeys, yamlIndent], () => {
   }
 })
 /* ================= 工具 ================= */
-const debounce = <T extends (...args: unknown[]) => void>(fn: T, delay = 500) => {
-  let timer: number | undefined
-  return (...args: Parameters<T>) => {
-    clearTimeout(timer)
-    timer = window.setTimeout(() => fn(...args), delay)
-  }
-}
 
 const detectInput = (content: string) => {
   try {
@@ -237,7 +240,7 @@ const convertContent = (showToast = false) => {
   }
 }
 
-const debouncedConvert = debounce(() => convertContent(false))
+const debouncedConvert = debounce(() => convertContent(false), 300)
 
 /* ================= 操作 ================= */
 const clearLeft = () => {
@@ -257,7 +260,20 @@ const copyRight = async () => {
   await navigator.clipboard.writeText(rightContent.value)
   toast.success('已复制')
 }
+const downloadRight = () => {
+  if (!rightContent.value) return
 
+  const blob = new Blob([rightContent.value], { type: 'text/plain;charset=utf-8' })
+  const filename = `data.${rightType.value}`
+
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  toast.success(`已下载 ${filename}`)
+}
 const swapContent = () => {
   if (!rightContent.value) return
   leftContent.value = rightContent.value

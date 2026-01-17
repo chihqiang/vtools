@@ -125,7 +125,7 @@ import { ref } from 'vue'
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
-import { debounce } from '@/utils/debounce'
+import debounce from 'lodash/debounce'
 
 const toast = useToast()
 
