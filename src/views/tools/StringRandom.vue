@@ -97,14 +97,24 @@
                   <span class="text-sm">数字 (0-9)</span>
                 </label>
 
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input
-                    v-model="includeSpecialChars"
-                    type="checkbox"
-                    class="w-4 h-4 text-blue-600"
-                  />
-                  <span class="text-sm"> 特殊字符 (!@#$%^&*()-_=+[]{}|;:'",.&lt;&gt;/?) </span>
-                </label>
+                <div>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input
+                      v-model="includeSpecialChars"
+                      type="checkbox"
+                      class="w-4 h-4 text-blue-600"
+                    />
+                    <span class="text-sm"> 特殊字符 (自定义) </span>
+                  </label>
+                  <div v-if="includeSpecialChars" class="mt-2 pl-7">
+                    <input
+                      v-model="customSpecialChars"
+                      type="text"
+                      placeholder="输入特殊字符，如: !@#$%"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -169,6 +179,7 @@ const includeUppercase = ref(true)
 const includeLowercase = ref(true)
 const includeNumbers = ref(true)
 const includeSpecialChars = ref(true)
+const customSpecialChars = ref('!@#$%^&*_')
 
 const randomStrings = ref<string[]>([])
 
@@ -191,13 +202,21 @@ const generateRandomStrings = () => {
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const lowercase = 'abcdefghijklmnopqrstuvwxyz'
   const numbers = '0123456789'
-  const special = '!@#$%^&*()-_=+[]{}|;:\'",.<>/?'
+
+  // 使用用户自定义的特殊字符
+  const special = customSpecialChars.value
+
+  // 如果用户选择了特殊字符但没有输入任何字符，给出警告
+  if (includeSpecialChars.value && !special.trim()) {
+    toast.warning('请输入特殊字符或取消选择特殊字符选项')
+    return
+  }
 
   let charset = ''
   if (includeUppercase.value) charset += uppercase
   if (includeLowercase.value) charset += lowercase
   if (includeNumbers.value) charset += numbers
-  if (includeSpecialChars.value) charset += special
+  if (includeSpecialChars.value && special) charset += special
 
   try {
     for (let i = 0; i < count.value; i++) {
