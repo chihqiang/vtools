@@ -106,36 +106,92 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-3">生成尺寸</label>
               <div class="grid grid-cols-3 gap-2">
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="16x16" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="16x16"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">16x16</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="32x32" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="32x32"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">32x32</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="48x48" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="48x48"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">48x48</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="64x64" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="64x64"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">64x64</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="128x128" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="128x128"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">128x128</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="256x256" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="256x256"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">256x256</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="512x512" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="512x512"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">512x512</span>
                 </label>
-                <label class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedSizes" type="checkbox" value="all" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedSizes"
+                    type="checkbox"
+                    value="all"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">全部尺寸</span>
                 </label>
               </div>
@@ -145,12 +201,26 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-3">输出格式</label>
               <div class="flex flex-wrap gap-3">
-                <label class="inline-flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedFormats" type="checkbox" value="ico" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="inline-flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedFormats"
+                    type="checkbox"
+                    value="ico"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">ICO</span>
                 </label>
-                <label class="inline-flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors">
-                  <input v-model="selectedFormats" type="checkbox" value="png" class="w-4 h-4 text-blue-600" />
+                <label
+                  class="inline-flex items-center gap-2 p-2 border border-gray-300 rounded-md cursor-pointer hover:border-blue-500 transition-colors"
+                >
+                  <input
+                    v-model="selectedFormats"
+                    type="checkbox"
+                    value="png"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <span class="text-sm">PNG</span>
                 </label>
               </div>
@@ -167,15 +237,27 @@
           </div>
 
           <div v-else class="space-y-4">
-            <div v-for="(favicon, index) in generatedFavicons" :key="index" class="p-3 bg-gray-50 rounded-lg border">
+            <div
+              v-for="(favicon, index) in generatedFavicons"
+              :key="index"
+              class="p-3 bg-gray-50 rounded-lg border"
+            >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 border border-gray-200 rounded flex items-center justify-center bg-white">
-                    <img :src="favicon.url" :alt="favicon.name" class="max-w-full max-h-full object-contain" />
+                  <div
+                    class="w-12 h-12 border border-gray-200 rounded flex items-center justify-center bg-white"
+                  >
+                    <img
+                      :src="favicon.url"
+                      :alt="favicon.name"
+                      class="max-w-full max-h-full object-contain"
+                    />
                   </div>
                   <div>
                     <p class="text-sm font-medium">{{ favicon.name }}</p>
-                    <p class="text-xs text-gray-500">{{ favicon.size }} · {{ favicon.format.toUpperCase() }}</p>
+                    <p class="text-xs text-gray-500">
+                      {{ favicon.size }} · {{ favicon.format.toUpperCase() }}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -212,7 +294,9 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const generating = ref(false)
 const imageFile = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
-const generatedFavicons = ref<Array<{ url: string; name: string; size: string; format: string }>>([])
+const generatedFavicons = ref<Array<{ url: string; name: string; size: string; format: string }>>(
+  [],
+)
 
 // 参数设置
 const selectedSizes = ref<string[]>(['16x16', '32x32', '48x48'])
@@ -221,7 +305,16 @@ const selectedFormats = ref<string[]>(['ico', 'png'])
 // 监听尺寸选择，如果选择了"全部尺寸"，则自动选择所有尺寸
 watch(selectedSizes, (newSizes) => {
   if (newSizes.includes('all')) {
-    selectedSizes.value = ['16x16', '32x32', '48x48', '64x64', '128x128', '256x256', '512x512', 'all']
+    selectedSizes.value = [
+      '16x16',
+      '32x32',
+      '48x48',
+      '64x64',
+      '128x128',
+      '256x256',
+      '512x512',
+      'all',
+    ]
   } else if (newSizes.length === 7 && !newSizes.includes('all')) {
     // 如果用户手动选择了所有具体尺寸，自动添加"全部尺寸"
     selectedSizes.value.push('all')
@@ -280,11 +373,13 @@ const generateFavicons = async () => {
   generatedFavicons.value = []
 
   try {
-    const sizes = selectedSizes.value.filter(size => size !== 'all').map(size => size.split('x').map(Number))
+    const sizes = selectedSizes.value
+      .filter((size) => size !== 'all')
+      .map((size) => size.split('x').map(Number))
     const formats = selectedFormats.value
 
     // 模拟生成过程
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     // 生成预览数据（实际项目中应该使用 Canvas 进行图像处理）
     for (const size of sizes) {
@@ -294,7 +389,7 @@ const generateFavicons = async () => {
           url: imagePreview.value || '',
           name: `favicon_${sizeStr}.${format}`,
           size: sizeStr,
-          format
+          format,
         })
       }
     }

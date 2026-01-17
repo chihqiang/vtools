@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { HomeGroup, type HomeRouteMeta } from '@/types/route'
 
-
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
@@ -17,7 +16,7 @@ const router = createRouter({
     {
       path: '/json-formatter',
       name: 'json-formatter',
-      component: () => import('@/views/json/ToFormatter.vue'),
+      component: () => import('@/views/json/FormatterView.vue'),
       meta: {
         showOnHome: true,
         title: 'JSON 格式化',
@@ -30,7 +29,7 @@ const router = createRouter({
     {
       path: '/json-table',
       name: 'json-table',
-      component: () => import('@/views/json/ToTable.vue'),
+      component: () => import('@/views/json/TableView.vue'),
       meta: {
         showOnHome: true,
         title: 'JSON 转表格',
@@ -43,7 +42,7 @@ const router = createRouter({
     {
       path: '/json-yml',
       name: 'json-yml',
-      component: () => import('@/views/json/ToYml.vue'),
+      component: () => import('@/views/json/YmlView.vue'),
       meta: {
         showOnHome: true,
         title: 'JSON YAML 转换',
@@ -56,7 +55,7 @@ const router = createRouter({
     {
       path: '/string-converter',
       name: 'string-converter',
-      component: () => import('@/views/strings/ToConverter.vue'),
+      component: () => import('@/views/strings/ConverterView.vue'),
       meta: {
         showOnHome: true,
         title: '字符串转换',
@@ -69,7 +68,7 @@ const router = createRouter({
     {
       path: '/string-random',
       name: 'string-random',
-      component: () => import('@/views/strings/RandomGen.vue'),
+      component: () => import('@/views/strings/RandomGenView.vue'),
       meta: {
         showOnHome: true,
         title: '随机字符串生成器',
@@ -82,7 +81,7 @@ const router = createRouter({
     {
       path: '/string-diff',
       name: 'string-diff',
-      component: () => import('@/views/strings/StringDiff.vue'),
+      component: () => import('@/views/strings/DiffView.vue'),
       meta: {
         showOnHome: true,
         title: '字符串对比',
@@ -121,7 +120,7 @@ const router = createRouter({
     {
       path: '/encryption',
       name: 'encryption',
-      component: () => import('@/views/encryption/EncryptionTool.vue'),
+      component: () => import('@/views/encryption/EncryptionView.vue'),
       meta: {
         showOnHome: true,
         title: '加密解密工具',
