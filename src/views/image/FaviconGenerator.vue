@@ -346,18 +346,49 @@ const generateFavicons = async () => {
 
   try {
     const sizes = selectedSizes.value
-      .map((size) => size.split('x').map(Number))
+      .map((sizeStr) => {
+        const parts = sizeStr.split('x').map(Number)
+        return {
+          width: parts[0] || 0,
+          height: parts[1] || 0
+        }
+      })
+      .filter(size => size.width > 0 && size.height > 0)
     const formats = selectedFormats.value
 
     // 模拟生成过程
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    // 生成预览数据（实际项目中应该使用 Canvas 进行图像处理）
+    // 使用 Canvas 实际调整图片大小
+    const image = new Image()
+    image.src = imagePreview.value || ''
+
+    await new Promise((resolve, reject) => {
+      image.onload = resolve
+      image.onerror = reject
+    })
+
     for (const size of sizes) {
       for (const format of formats) {
-        const sizeStr = `${size[0]}x${size[1]}`
+        const { width, height } = size
+        const sizeStr = `${width}x${height}`
+
+        // 创建 Canvas 并调整图片大小
+        const canvas = document.createElement('canvas')
+        canvas.width = width as number
+        canvas.height = height as number
+
+        const ctx = canvas.getContext('2d')
+        if (!ctx) continue
+
+        // 绘制调整大小后的图片
+        ctx.drawImage(image, 0, 0, width as number, height as number)
+
+        // 转换为数据 URL
+        const imageUrl = canvas.toDataURL(`image/${format}`)
+
         generatedFavicons.value.push({
-          url: imagePreview.value || '',
+          url: imageUrl,
           name: `favicon_${sizeStr}.${format}`,
           size: sizeStr,
           format,
