@@ -23,7 +23,13 @@ jobs:
 
     - name: Build project
       run: pnpm build
-      
+
+    - name: Add nojekyll file
+      run: touch dist/.nojekyll
+
+    - name: Verify dist contents
+      run: ls -al dist
+
     - name: Publish to gh-pages branch
       uses: chihqiang/gh-pages-action@main
       with:
