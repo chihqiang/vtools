@@ -68,7 +68,7 @@
                 @click="fileInput?.click()"
                 class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
               >
-                选择图片
+                选择图片扫描二维码
               </button>
             </div>
           </div>
