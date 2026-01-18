@@ -60,7 +60,10 @@
 
           <div class="flex flex-wrap items-center gap-3">
             <!-- JSON 选项 -->
-            <div v-if="rightType === 'json'" class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
+            <div
+              v-if="rightType === 'json'"
+              class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md"
+            >
               <label class="text-sm text-gray-600">缩进:</label>
               <input
                 type="number"
@@ -76,7 +79,10 @@
             </div>
 
             <!-- YAML 选项 -->
-            <div v-if="rightType === 'yaml'" class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
+            <div
+              v-if="rightType === 'yaml'"
+              class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md"
+            >
               <label class="text-sm text-gray-600">缩进:</label>
               <input
                 type="number"
@@ -123,8 +129,6 @@
         </div>
       </div>
     </div>
-
-
   </div>
 </template>
 
