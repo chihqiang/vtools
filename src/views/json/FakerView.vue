@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+  <div class="h-full p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
     <div class="flex items-center gap-3 mb-6">
       <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -15,7 +15,7 @@
     <!-- 左右布局 -->
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <!-- 左侧：KV输入区域 -->
-      <div class="border border-gray-200 rounded-lg p-4 bg-white lg:col-span-3">
+      <div class="border border-gray-200 rounded-lg p-4 bg-white lg:col-span-3 flex flex-col">
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1.5">字段配置</label>
           <div class="overflow-x-auto">
