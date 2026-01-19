@@ -7,7 +7,6 @@
 
     <!-- 三列布局 -->
     <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
-
       <!-- 左列：生成参数 -->
       <div class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
         <h4 class="font-medium text-gray-800 mb-4">生成参数</h4>
@@ -21,9 +20,7 @@
             >
               <option value="RSA">RSA（OAEP / PKCS1 通用）</option>
             </select>
-            <p class="text-xs text-gray-500 mt-1">
-              注：OAEP 是加密方式，密钥本身相同
-            </p>
+            <p class="text-xs text-gray-500 mt-1">注：OAEP 是加密方式，密钥本身相同</p>
           </div>
 
           <!-- 密钥长度 -->
@@ -72,9 +69,10 @@
 
       <!-- 中列：密钥对（私钥在上，公钥在下） -->
       <div class="w-full lg:w-2/4 flex flex-col gap-6 overflow-hidden">
-
         <!-- 私钥 -->
-        <div class="flex-1 bg-white border border-gray-200 rounded-lg p-5 shadow-sm overflow-hidden">
+        <div
+          class="flex-1 bg-white border border-gray-200 rounded-lg p-5 shadow-sm overflow-hidden"
+        >
           <div class="flex items-center justify-between mb-3">
             <h4 class="font-medium text-gray-800">私钥</h4>
             <div class="flex gap-2" v-if="privateKey">
@@ -104,7 +102,10 @@
           />
 
           <!-- OpenSSL 命令示例 -->
-          <div v-if="privateKey" class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700">
+          <div
+            v-if="privateKey"
+            class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700"
+          >
             <p>OpenSSL 生成对应私钥命令示例：</p>
             <pre class="break-all mt-1">
 openssl genrsa -out private_{{ config.keySize }}.pem {{ config.keySize }}
@@ -113,7 +114,9 @@ openssl genrsa -out private_{{ config.keySize }}.pem {{ config.keySize }}
         </div>
 
         <!-- 公钥 -->
-        <div class="flex-1 bg-white border border-gray-200 rounded-lg p-5 shadow-sm overflow-hidden">
+        <div
+          class="flex-1 bg-white border border-gray-200 rounded-lg p-5 shadow-sm overflow-hidden"
+        >
           <div class="flex items-center justify-between mb-3">
             <h4 class="font-medium text-gray-800">公钥</h4>
             <div class="flex gap-2" v-if="publicKey">
@@ -139,18 +142,22 @@ openssl genrsa -out private_{{ config.keySize }}.pem {{ config.keySize }}
           />
 
           <!-- OpenSSL 命令示例 -->
-          <div v-if="publicKey" class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700">
+          <div
+            v-if="publicKey"
+            class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700"
+          >
             <p>OpenSSL 生成对应公钥命令示例：</p>
             <pre class="break-all mt-1">
 openssl rsa -in private_{{ config.keySize }}.pem -pubout -out public_{{ config.keySize }}.pem
             </pre>
           </div>
         </div>
-
       </div>
 
       <!-- 右列：加密 / 解密 -->
-      <div class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col">
+      <div
+        class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col"
+      >
         <h4 class="font-medium text-gray-800 mb-4">加密 / 解密</h4>
 
         <!-- 明文 -->
@@ -193,7 +200,6 @@ openssl rsa -in private_{{ config.keySize }}.pem -pubout -out public_{{ config.k
           placeholder="解密后的内容"
         />
       </div>
-
     </div>
   </div>
 </template>

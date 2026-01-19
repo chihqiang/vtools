@@ -195,7 +195,7 @@ const router = createRouter({
         group: HomeGroup.ENCRYPTION_TOOLS,
       } as HomeRouteMeta,
     },
-        {
+    {
       path: '/key-pair',
       name: 'key-pair',
       component: () => import('@/views/encryption/KeyPairGenerator.vue'),
