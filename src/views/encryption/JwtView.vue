@@ -4,7 +4,12 @@
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
       <h3 class="font-semibold text-gray-800 flex items-center gap-2">
         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2h2a2 2 0 012 2v9a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h2m-2 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 7a2 2 0 012 2h2a2 2 0 012 2v9a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h2m-2 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2"
+          ></path>
         </svg>
         JWT 在线解析工具
       </h3>
@@ -678,8 +683,14 @@
         <div>
           <h5 class="text-sm font-semibold text-gray-800 mb-2">时间戳说明</h5>
           <div class="bg-white p-3 rounded border border-gray-200 text-xs text-gray-700">
-            <p class="mb-1">JWT 中的时间戳（exp、iat、nbf）使用的是 <span class="font-mono bg-gray-100 px-1 rounded">Unix 时间戳（秒）</span></p>
-            <p class="mb-1">例如：2024-01-01 00:00:00 UTC 对应的 Unix 时间戳为 <span class="font-mono bg-gray-100 px-1 rounded">1704067200</span></p>
+            <p class="mb-1">
+              JWT 中的时间戳（exp、iat、nbf）使用的是
+              <span class="font-mono bg-gray-100 px-1 rounded">Unix 时间戳（秒）</span>
+            </p>
+            <p class="mb-1">
+              例如：2024-01-01 00:00:00 UTC 对应的 Unix 时间戳为
+              <span class="font-mono bg-gray-100 px-1 rounded">1704067200</span>
+            </p>
             <p>工具会自动将时间戳转换为可读格式显示</p>
           </div>
         </div>
