@@ -1,0 +1,1099 @@
+<template>
+  <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 flex flex-col h-full">
+    <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
+      <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+        JWT 解析工具
+      </h3>
+      <div class="flex space-x-2">
+        <button
+          @click="pasteInput"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition shadow-sm flex items-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            ></path>
+          </svg>
+          粘贴
+        </button>
+        <button
+          @click="clearInput"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition flex items-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
+          清空
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
+      <div class="flex-1 flex flex-col min-h-0">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="font-medium text-gray-700 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            输入 JWT Token
+          </h4>
+          <button
+            @click="formatTokenDisplay = !formatTokenDisplay"
+            class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md text-xs hover:bg-indigo-200 transition"
+          >
+            {{ formatTokenDisplay ? '关闭格式化' : '格式化显示' }}
+          </button>
+        </div>
+        <div
+          class="border border-gray-300 rounded-lg overflow-hidden flex-1 flex flex-col bg-white shadow-sm"
+        >
+          <textarea
+            v-model="inputToken"
+            placeholder="请输入或粘贴 JWT Token..."
+            class="w-full p-4 font-mono text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none flex-1 transition"
+            spellcheck="false"
+          ></textarea>
+          <div
+            v-if="formatTokenDisplay && inputToken"
+            class="p-4 bg-gray-100 border-t border-gray-200"
+          >
+            <div class="text-xs font-mono break-all" v-html="getFormattedToken()"></div>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-4">
+          <button
+            @click="parseJWT"
+            class="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            解析 JWT
+          </button>
+          <button
+            @click="verifyJWT"
+            class="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            验证 JWT
+          </button>
+        </div>
+
+        <div
+          v-if="tokenStatus"
+          class="mt-4 p-4 rounded-lg"
+          :class="
+            tokenStatus.isExpired
+              ? 'bg-red-50 border border-red-200'
+              : tokenStatus.isExpiringSoon
+                ? 'bg-yellow-50 border border-yellow-200'
+                : 'bg-green-50 border border-green-200'
+          "
+        >
+          <div class="flex items-start gap-3">
+            <svg
+              class="w-5 h-5 mt-0.5 flex-shrink-0"
+              :class="
+                tokenStatus.isExpired
+                  ? 'text-red-500'
+                  : tokenStatus.isExpiringSoon
+                    ? 'text-yellow-500'
+                    : 'text-green-500'
+              "
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                v-if="tokenStatus.isExpired"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+              <path
+                v-else-if="tokenStatus.isExpiringSoon"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              ></path>
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <div class="flex-1">
+              <p
+                class="font-medium"
+                :class="
+                  tokenStatus.isExpired
+                    ? 'text-red-700'
+                    : tokenStatus.isExpiringSoon
+                      ? 'text-yellow-700'
+                      : 'text-green-700'
+                "
+              >
+                {{
+                  tokenStatus.isExpired
+                    ? 'Token 已过期'
+                    : tokenStatus.isExpiringSoon
+                      ? 'Token 即将过期'
+                      : 'Token 有效'
+                }}
+              </p>
+              <div
+                v-if="tokenStatus.expDate"
+                class="text-sm mt-2 space-y-1"
+                :class="
+                  tokenStatus.isExpired
+                    ? 'text-red-600'
+                    : tokenStatus.isExpiringSoon
+                      ? 'text-yellow-600'
+                      : 'text-green-600'
+                "
+              >
+                <p>
+                  过期时间: {{ formatTimestamp(Math.floor(tokenStatus.expDate.getTime() / 1000)) }}
+                </p>
+                <p v-if="tokenStatus.expiresIn !== null">
+                  剩余时间: {{ formatDuration(tokenStatus.expiresIn) }}
+                </p>
+                <p v-if="tokenStatus.expiredFor !== null">
+                  已过期: {{ formatDuration(tokenStatus.expiredFor) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="verifyResult"
+          class="mt-4 p-4 rounded-lg"
+          :class="
+            verifyResult.valid
+              ? 'bg-green-50 border border-green-200'
+              : 'bg-red-50 border border-red-200'
+          "
+        >
+          <div class="flex items-start gap-3">
+            <svg
+              class="w-5 h-5 mt-0.5 flex-shrink-0"
+              :class="verifyResult.valid ? 'text-green-500' : 'text-red-500'"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                v-if="verifyResult.valid"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <div>
+              <p
+                class="font-medium"
+                :class="verifyResult.valid ? 'text-green-700' : 'text-red-700'"
+              >
+                {{ verifyResult.valid ? 'JWT 验证通过' : 'JWT 验证失败' }}
+              </p>
+              <p
+                v-if="verifyResult.message"
+                class="text-sm mt-1"
+                :class="verifyResult.valid ? 'text-green-600' : 'text-red-600'"
+              >
+                {{ verifyResult.message }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 flex flex-col min-h-0 overflow-auto">
+        <div v-if="parsedData" class="space-y-4">
+          <div class="border border-gray-300 rounded-lg bg-white shadow-sm overflow-hidden">
+            <div class="flex border-b border-gray-200">
+              <button
+                @click="activeTab = 'header'"
+                :class="
+                  activeTab === 'header'
+                    ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                Header (头部)
+              </button>
+              <button
+                @click="activeTab = 'payload'"
+                :class="
+                  activeTab === 'payload'
+                    ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                Payload (载荷)
+              </button>
+              <button
+                @click="activeTab = 'signature'"
+                :class="
+                  activeTab === 'signature'
+                    ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                Signature (签名)
+              </button>
+            </div>
+
+            <div class="p-4">
+              <div v-if="activeTab === 'header'">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="font-medium text-gray-700">Header 内容</h4>
+                  <div class="flex gap-2">
+                    <button
+                      @click="showFormattedTime = !showFormattedTime"
+                      class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md text-xs hover:bg-indigo-200 transition"
+                    >
+                      {{ showFormattedTime ? '显示时间戳' : '显示时间' }}
+                    </button>
+                    <button
+                      @click="copyToClipboard(parsedData.header)"
+                      class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-gray-200 transition flex items-center gap-1"
+                    >
+                      <svg
+                        class="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      复制
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="bg-gray-50 rounded-lg p-3 overflow-auto max-h-[300px] border border-gray-200"
+                >
+                  <table class="w-full text-sm">
+                    <tbody>
+                      <tr
+                        v-for="(value, key) in parsedData.header"
+                        :key="key"
+                        class="border-b border-gray-200"
+                      >
+                        <td class="py-2 px-3 font-medium text-gray-700 bg-gray-100 w-1/3">
+                          {{ formatFieldName(key) }}
+                        </td>
+                        <td class="py-2 px-3 text-gray-800 font-mono">
+                          {{
+                            showFormattedTime && isTimestampField(key) && typeof value === 'number'
+                              ? formatTimestamp(value)
+                              : formatValue(value)
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <h5 class="text-sm font-medium text-gray-600">JSON (只读)</h5>
+                  </div>
+                  <div
+                    class="bg-gray-50 rounded-lg p-3 overflow-auto max-h-[150px] border border-gray-200"
+                  >
+                    <pre class="text-xs font-mono text-gray-800 leading-relaxed">{{
+                      JSON.stringify(parsedData.header, null, 2)
+                    }}</pre>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="activeTab === 'payload'">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="font-medium text-gray-700">Payload 内容</h4>
+                  <div class="flex gap-2">
+                    <button
+                      @click="showFormattedTime = !showFormattedTime"
+                      class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md text-xs hover:bg-indigo-200 transition"
+                    >
+                      {{ showFormattedTime ? '显示时间戳' : '显示时间' }}
+                    </button>
+                    <button
+                      @click="copyToClipboard(parsedData.payload)"
+                      class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-gray-200 transition flex items-center gap-1"
+                    >
+                      <svg
+                        class="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      复制
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="bg-gray-50 rounded-lg p-3 overflow-auto max-h-[300px] border border-gray-200"
+                >
+                  <table class="w-full text-sm">
+                    <tbody>
+                      <tr
+                        v-for="(value, key) in parsedData.payload"
+                        :key="key"
+                        class="border-b border-gray-200"
+                      >
+                        <td class="py-2 px-3 font-medium text-gray-700 bg-gray-100 w-1/3">
+                          {{ formatFieldName(key) }}
+                        </td>
+                        <td class="py-2 px-3 text-gray-800 font-mono">
+                          {{
+                            showFormattedTime && isTimestampField(key) && typeof value === 'number'
+                              ? formatTimestamp(value)
+                              : formatValue(value)
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <h5 class="text-sm font-medium text-gray-600">JSON 编辑</h5>
+                    <button
+                      @click="applyPayloadEdit"
+                      class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md text-xs hover:bg-indigo-200 transition flex items-center gap-1"
+                    >
+                      应用修改
+                    </button>
+                  </div>
+                  <textarea
+                    v-model="editablePayload"
+                    class="w-full h-[150px] p-3 font-mono text-xs bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                    spellcheck="false"
+                    placeholder="编辑 Payload JSON..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div v-if="activeTab === 'signature'">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="font-medium text-gray-700">Signature 内容</h4>
+                  <button
+                    @click="copyToClipboard(parsedData.signature)"
+                    class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-gray-200 transition flex items-center gap-1"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                    复制
+                  </button>
+                </div>
+                <div
+                  class="bg-gray-50 rounded-lg p-3 overflow-auto max-h-[300px] border border-gray-200"
+                >
+                  <pre class="text-xs font-mono text-gray-800 leading-relaxed break-all">{{
+                    parsedData.signature
+                  }}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="border border-indigo-300 rounded-lg p-4 bg-indigo-50 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-medium text-gray-700 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                重新生成 Token
+              </h4>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">签名算法</label>
+                <select
+                  v-model="generateConfig.algorithm"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <optgroup
+                    v-for="group in algorithmGroups"
+                    :key="group.label"
+                    :label="group.label"
+                  >
+                    <option
+                      v-for="option in group.options"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </optgroup>
+                </select>
+              </div>
+              <div v-if="isSymmetricAlgorithm">
+                <label class="block text-sm font-medium text-gray-700 mb-1">签名密钥</label>
+                <input
+                  v-model="generateConfig.secret"
+                  type="text"
+                  placeholder="请输入签名密钥..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div v-else>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >私钥 (PEM 格式)</label
+                  >
+                  <textarea
+                    v-model="generateConfig.privateKey"
+                    placeholder="-----BEGIN PRIVATE KEY-----..."
+                    class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono text-xs"
+                    spellcheck="false"
+                  ></textarea>
+                </div>
+                <div class="mt-3">
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >公钥 (PEM 格式)</label
+                  >
+                  <textarea
+                    v-model="generateConfig.publicKey"
+                    placeholder="-----BEGIN PUBLIC KEY-----..."
+                    class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono text-xs"
+                    spellcheck="false"
+                  ></textarea>
+                </div>
+              </div>
+              <button
+                @click="generateJWT"
+                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
+                </svg>
+                生成 JWT
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="generatedToken"
+            class="border border-green-300 rounded-lg p-4 bg-green-50 shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-medium text-gray-700 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                生成的 Token
+              </h4>
+              <button
+                @click="copyToClipboard(generatedToken)"
+                class="px-3 py-1.5 bg-green-100 text-green-700 rounded-md text-xs hover:bg-green-200 transition flex items-center gap-1"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                复制
+              </button>
+            </div>
+            <div
+              class="bg-white rounded-lg p-3 overflow-auto max-h-[150px] border border-green-200"
+            >
+              <pre class="text-xs font-mono text-gray-800 leading-relaxed break-all">{{
+                generatedToken
+              }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-start gap-3">
+            <svg
+              class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <p class="text-red-600 text-sm">{{ error }}</p>
+          </div>
+        </div>
+
+        <div
+          v-if="!parsedData && !error"
+          class="flex flex-col items-center justify-center h-full text-gray-400"
+        >
+          <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          <p class="text-sm">请输入 JWT Token 并点击解析</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onUnmounted } from 'vue'
+import { useToast } from '@/composables/useToast'
+import { decodeJwt, SignJWT, jwtVerify, importPKCS8, importSPKI } from 'jose'
+
+interface ParsedData {
+  header: Record<string, unknown>
+  payload: Record<string, unknown>
+  signature: string
+}
+
+interface VerifyResult {
+  valid: boolean
+  message: string
+}
+
+interface TokenStatus {
+  isExpired: boolean
+  isExpiringSoon: boolean
+  expiresIn: number | null
+  expiredFor: number | null
+  expDate: Date | null
+}
+
+interface AlgorithmOption {
+  value: string
+  label: string
+}
+
+interface AlgorithmGroup {
+  label: string
+  options: AlgorithmOption[]
+}
+
+const toast = useToast()
+const inputToken = ref('')
+const parsedData = ref<ParsedData | null>(null)
+const error = ref('')
+const verifyResult = ref<VerifyResult | null>(null)
+const generatedToken = ref('')
+const activeTab = ref<'header' | 'payload' | 'signature'>('header')
+const editablePayload = ref('')
+const showFormattedTime = ref(false)
+const tokenStatus = ref<TokenStatus | null>(null)
+const formatTokenDisplay = ref(false)
+let countdownTimer: number | null = null
+
+const generateConfig = ref({
+  algorithm: 'HS256',
+  secret: 'your-secret-key',
+  publicKey: '',
+  privateKey: '',
+})
+const algorithmGroups: AlgorithmGroup[] = [
+  {
+    label: 'HMAC (对称加密)',
+    options: [
+      { value: 'HS256', label: 'HS256 (HMAC SHA256)' },
+      { value: 'HS384', label: 'HS384 (HMAC SHA384)' },
+      { value: 'HS512', label: 'HS512 (HMAC SHA512)' },
+    ],
+  },
+  {
+    label: 'RSA (非对称加密)',
+    options: [
+      { value: 'RS256', label: 'RS256 (RSA SHA256)' },
+      { value: 'RS384', label: 'RS384 (RSA SHA384)' },
+      { value: 'RS512', label: 'RS512 (RSA SHA512)' },
+    ],
+  },
+  {
+    label: 'ECDSA (椭圆曲线)',
+    options: [
+      { value: 'ES256', label: 'ES256 (ECDSA P-256 SHA256)' },
+      { value: 'ES384', label: 'ES384 (ECDSA P-384 SHA384)' },
+      { value: 'ES512', label: 'ES512 (ECDSA P-521 SHA512)' },
+    ],
+  },
+  {
+    label: 'EdDSA',
+    options: [{ value: 'EdDSA', label: 'EdDSA (Ed25519)' }],
+  },
+  {
+    label: '其他',
+    options: [{ value: 'none', label: 'None (无签名)' }],
+  },
+]
+
+const isSymmetricAlgorithm = computed(() => {
+  return (
+    generateConfig.value.algorithm.startsWith('HS') || generateConfig.value.algorithm === 'none'
+  )
+})
+
+const ensureInput = () => {
+  if (!inputToken.value.trim()) {
+    toast.warning('请先输入 JWT Token')
+    return false
+  }
+  return true
+}
+
+const pasteInput = async () => {
+  try {
+    inputToken.value = await navigator.clipboard.readText()
+    toast.success('已粘贴')
+  } catch {
+    toast.error('粘贴失败')
+  }
+}
+
+const clearInput = () => {
+  inputToken.value = ''
+  parsedData.value = null
+  error.value = ''
+  verifyResult.value = null
+  generatedToken.value = ''
+  tokenStatus.value = null
+  stopCountdown()
+  toast.success('已清空')
+}
+
+const parseJWT = () => {
+  if (!ensureInput()) return
+
+  error.value = ''
+  verifyResult.value = null
+  parsedData.value = null
+  tokenStatus.value = null
+
+  try {
+    const parts = inputToken.value.split('.')
+    if (parts.length !== 3) {
+      throw new Error('JWT Token 格式不正确，应该包含 Header、Payload 和 Signature 三部分')
+    }
+
+    const [headerB64, , signature] = parts
+
+    if (!headerB64 || !signature) {
+      throw new Error('JWT Token 格式不正确')
+    }
+
+    const header = JSON.parse(atob(headerB64))
+    const payload = decodeJwt(inputToken.value)
+
+    parsedData.value = {
+      header,
+      payload: payload as Record<string, unknown>,
+      signature,
+    }
+
+    editablePayload.value = JSON.stringify(payload, null, 2)
+
+    calculateTokenStatus(payload as Record<string, unknown>)
+
+    if (header.alg) {
+      generateConfig.value.algorithm = header.alg
+    }
+
+    toast.success('JWT 解析成功')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '解析失败，请检查 JWT Token 格式'
+    toast.error('JWT 解析失败')
+  }
+}
+
+const calculateTokenStatus = (payload: Record<string, unknown>) => {
+  const exp = payload.exp
+  const now = Math.floor(Date.now() / 1000)
+
+  if (typeof exp === 'number') {
+    const expDate = new Date(exp * 1000)
+    const isExpired = now > exp
+    const expiresIn = isExpired ? null : exp - now
+    const expiredFor = isExpired ? now - exp : null
+    const isExpiringSoon = !isExpired && expiresIn !== null && expiresIn < 3600
+
+    tokenStatus.value = {
+      isExpired,
+      isExpiringSoon,
+      expiresIn,
+      expiredFor,
+      expDate,
+    }
+
+    startCountdown()
+  } else {
+    tokenStatus.value = {
+      isExpired: false,
+      isExpiringSoon: false,
+      expiresIn: null,
+      expiredFor: null,
+      expDate: null,
+    }
+
+    stopCountdown()
+  }
+}
+
+const startCountdown = () => {
+  stopCountdown()
+  countdownTimer = window.setInterval(() => {
+    if (tokenStatus.value && tokenStatus.value.expiresIn !== null) {
+      const now = Math.floor(Date.now() / 1000)
+      const exp = Math.floor(tokenStatus.value.expDate!.getTime() / 1000)
+      const isExpired = now > exp
+      const expiresIn = isExpired ? null : exp - now
+      const expiredFor = isExpired ? now - exp : null
+      const isExpiringSoon = !isExpired && expiresIn !== null && expiresIn < 3600
+
+      tokenStatus.value = {
+        ...tokenStatus.value,
+        isExpired,
+        isExpiringSoon,
+        expiresIn,
+        expiredFor,
+      }
+    } else {
+      stopCountdown()
+    }
+  }, 1000)
+}
+
+const stopCountdown = () => {
+  if (countdownTimer !== null) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+}
+
+onUnmounted(() => {
+  stopCountdown()
+})
+
+const applyPayloadEdit = () => {
+  try {
+    const newPayload = JSON.parse(editablePayload.value)
+    if (parsedData.value) {
+      parsedData.value.payload = newPayload
+      toast.success('Payload 已更新')
+    }
+  } catch {
+    toast.error('JSON 格式错误，请检查输入')
+  }
+}
+
+const verifyJWT = async () => {
+  if (!ensureInput()) return
+
+  error.value = ''
+  verifyResult.value = null
+
+  try {
+    const parts = inputToken.value.split('.')
+    if (parts.length !== 3) {
+      throw new Error('JWT Token 格式不正确')
+    }
+
+    const headerB64 = parts[0]
+    if (!headerB64) {
+      throw new Error('JWT Token 格式不正确')
+    }
+
+    const header = JSON.parse(atob(headerB64))
+    const algorithm = header.alg
+
+    if (algorithm === 'none') {
+      verifyResult.value = {
+        valid: false,
+        message: 'None 算法不安全，无法验证',
+      }
+      toast.warning('None 算法不安全')
+      return
+    }
+
+    let key: Uint8Array | CryptoKey
+
+    if (algorithm.startsWith('HS')) {
+      key = new TextEncoder().encode(generateConfig.value.secret)
+    } else {
+      if (!generateConfig.value.publicKey) {
+        throw new Error('请提供公钥以验证非对称加密算法')
+      }
+      key = await importSPKI(generateConfig.value.publicKey, algorithm)
+    }
+
+    try {
+      await jwtVerify(inputToken.value, key)
+      verifyResult.value = {
+        valid: true,
+        message: '签名验证通过，Token 有效',
+      }
+      toast.success('JWT 验证通过')
+    } catch {
+      verifyResult.value = {
+        valid: false,
+        message: '签名验证失败，请检查密钥或 Token 是否被篡改',
+      }
+      toast.error('JWT 验证失败')
+    }
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '验证失败，请检查 JWT Token 格式'
+    toast.error('JWT 验证失败')
+  }
+}
+
+const generateJWT = async () => {
+  if (!parsedData.value) {
+    toast.warning('请先解析一个 JWT Token')
+    return
+  }
+
+  try {
+    let payload: Record<string, unknown>
+
+    try {
+      payload = JSON.parse(editablePayload.value)
+    } catch {
+      payload = parsedData.value.payload as Record<string, unknown>
+    }
+
+    let key: Uint8Array | CryptoKey
+
+    if (isSymmetricAlgorithm.value) {
+      if (!generateConfig.value.secret) {
+        throw new Error('请提供签名密钥')
+      }
+      key = new TextEncoder().encode(generateConfig.value.secret)
+    } else {
+      if (!generateConfig.value.privateKey) {
+        throw new Error('请提供私钥以生成非对称加密算法的 JWT')
+      }
+      key = await importPKCS8(generateConfig.value.privateKey, generateConfig.value.algorithm)
+    }
+
+    const cleanPayload = JSON.parse(JSON.stringify(payload))
+
+    const headerWithoutAlg = { ...parsedData.value.header }
+    delete headerWithoutAlg.alg
+    let jwt = new SignJWT(cleanPayload).setProtectedHeader({
+      alg: generateConfig.value.algorithm,
+      ...headerWithoutAlg,
+    })
+
+    if (typeof cleanPayload.exp === 'number') {
+      jwt = jwt.setExpirationTime(cleanPayload.exp)
+    }
+    if (typeof cleanPayload.iat === 'number') {
+      jwt = jwt.setIssuedAt(cleanPayload.iat)
+    }
+    if (typeof cleanPayload.nbf === 'number') {
+      jwt = jwt.setNotBefore(cleanPayload.nbf)
+    }
+    if (typeof cleanPayload.iss === 'string') {
+      jwt = jwt.setIssuer(cleanPayload.iss)
+    }
+    if (typeof cleanPayload.sub === 'string') {
+      jwt = jwt.setSubject(cleanPayload.sub)
+    }
+    if (typeof cleanPayload.aud === 'string' || Array.isArray(cleanPayload.aud)) {
+      jwt = jwt.setAudience(cleanPayload.aud)
+    }
+
+    const token = await jwt.sign(key)
+    generatedToken.value = token
+    toast.success('JWT 生成成功')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '生成失败'
+    toast.error('JWT 生成失败')
+  }
+}
+
+const copyToClipboard = async (data: unknown) => {
+  try {
+    const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
+    await navigator.clipboard.writeText(text)
+    toast.success('已复制到剪贴板')
+  } catch {
+    toast.error('复制失败')
+  }
+}
+
+const formatValue = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return 'null'
+  }
+  if (typeof value === 'string') {
+    return `"${value}"`
+  }
+  if (typeof value === 'number') {
+    return value.toString()
+  }
+  if (typeof value === 'boolean') {
+    return value.toString()
+  }
+  if (Array.isArray(value)) {
+    return `Array(${value.length})`
+  }
+  if (typeof value === 'object') {
+    return 'Object'
+  }
+  return String(value)
+}
+
+const isTimestampField = (key: string) => {
+  return ['exp', 'iat', 'nbf'].includes(key)
+}
+
+const formatFieldName = (key: string) => {
+  const fieldMap: Record<string, string> = {
+    alg: '算法 (alg)',
+    typ: '类型 (typ)',
+    cty: '内容类型 (cty)',
+    kid: '密钥 ID (kid)',
+    jku: 'JWK Set URL (jku)',
+    x5u: 'X.509 URL (x5u)',
+    x5c: 'X.509 证书链 (x5c)',
+    x5t: 'X.509 证书指纹 (x5t)',
+    'x5t#S256': 'X.509 证书指纹 SHA256 (x5t#S256)',
+    sub: '主题 (sub)',
+    iss: '签发者 (iss)',
+    aud: '受众 (aud)',
+    exp: '过期时间 (exp)',
+    iat: '签发时间 (iat)',
+    nbf: '生效时间 (nbf)',
+    jti: 'JWT ID (jti)',
+    azp: '授权方 (azp)',
+    nonce: '随机数 (nonce)',
+    auth_time: '认证时间 (auth_time)',
+    at_hash: '访问令牌哈希 (at_hash)',
+    c_hash: '代码哈希 (c_hash)',
+    acr: '认证上下文引用 (acr)',
+    amr: '认证方法引用 (amr)',
+    scopes: '作用域 (scopes)',
+    client_id: '客户端 ID (client_id)',
+    preferred_username: '首选用户名 (preferred_username)',
+    email: '邮箱 (email)',
+    email_verified: '邮箱已验证 (email_verified)',
+    name: '姓名 (name)',
+    given_name: '名 (given_name)',
+    family_name: '姓 (family_name)',
+    picture: '头像 (picture)',
+    locale: '地区 (locale)',
+    updated_at: '更新时间 (updated_at)',
+  }
+  return fieldMap[key] || key
+}
+
+const formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
+
+const formatToken = (token: string) => {
+  const parts = token.split('.')
+  if (parts.length !== 3) return token
+
+  const colors = ['text-purple-600', 'text-green-600', 'text-orange-600']
+  return parts.map((part, index) => `<span class="${colors[index]}">${part}</span>`).join('.')
+}
+
+const getFormattedToken = () => {
+  if (!formatTokenDisplay.value || !inputToken.value) return inputToken.value
+  return formatToken(inputToken.value)
+}
+
+const formatDuration = (seconds: number) => {
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  const parts = []
+  if (days > 0) parts.push(`${days}天`)
+  if (hours > 0) parts.push(`${hours}小时`)
+  if (minutes > 0) parts.push(`${minutes}分钟`)
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}秒`)
+
+  return parts.join(' ')
+}
+</script>
+
+<style scoped></style>

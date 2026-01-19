@@ -183,6 +183,19 @@ const router = createRouter({
       } as HomeRouteMeta,
     },
     {
+      path: '/jwt',
+      name: 'jwt',
+      component: () => import('@/views/encryption/JwtView.vue'),
+      meta: {
+        showOnHome: true,
+        title: 'JWT 解析工具',
+        description: 'JWT Token 解析工具，支持解码 Header、Payload 和验证签名',
+        icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+        color: 'indigo',
+        group: HomeGroup.ENCRYPTION_TOOLS,
+      } as HomeRouteMeta,
+    },
+    {
       path: '/network',
       name: 'network',
       component: () => import('@/views/detect/NetworkView.vue'),
