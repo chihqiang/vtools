@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+  <div class="h-full p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
     <!-- Header -->
     <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 md:p-6 mb-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -21,7 +21,7 @@
     <!-- 主要内容区域 -->
     <div class="flex flex-col lg:flex-row gap-6">
       <!-- 左侧：二维码设置 -->
-      <div class="flex-1 bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="flex-2 bg-white rounded-xl shadow-sm p-4 md:p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-6">二维码设置</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -302,7 +302,7 @@
       </div>
 
       <!-- 右侧：二维码预览 -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 min-w-[300px] max-w-md">
+      <div class="flex-1 bg-white rounded-xl shadow-sm p-4 md:p-6 min-w-[300px]">
         <h2 class="text-lg font-semibold text-gray-900 mb-6">二维码预览</h2>
 
         <div class="space-y-6">
@@ -313,7 +313,7 @@
               <div v-if="!generatedQrCode" class="relative">
                 <div class="w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center">
                   <!-- 生成一个简单的假二维码图案 -->
-                  <div class="grid grid-cols-8 gap-1 w-48 h-48">
+                  <div class="grid grid-cols-8 gap-1 w-56 h-56">
                     <!-- 左上角定位图案 -->
                     <div class="col-span-3 row-span-3 bg-gray-300 rounded-sm"></div>
                     <div class="col-span-1 row-span-1 bg-gray-200 rounded-sm"></div>
@@ -379,7 +379,12 @@
               </div>
 
               <!-- 生成的真实二维码 -->
-              <img v-else :src="generatedQrCode" alt="生成的二维码" class="max-w-full max-h-96" />
+              <img
+                v-else
+                :src="generatedQrCode"
+                alt="生成的二维码"
+                class="w-64 h-64 object-contain"
+              />
             </div>
           </div>
 
@@ -387,7 +392,7 @@
           <div class="flex flex-col sm:flex-row gap-3">
             <button
               @click="downloadQrCode"
-              class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              class="flex-1 px-6 py-3.5 bg-blue-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
               :disabled="!generatedQrCode"
             >
               <svg
@@ -407,7 +412,7 @@
             </button>
             <button
               @click="copyQrCode"
-              class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+              class="flex-1 px-6 py-3.5 bg-blue-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
               :disabled="!generatedQrCode"
             >
               <svg
@@ -433,7 +438,7 @@
             <div
               @dragover.prevent
               @drop.prevent="handleLogoDrop"
-              class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors"
+              class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
             >
               <input
                 ref="logoInput"
@@ -444,12 +449,12 @@
               />
               <button
                 @click="triggerLogoInput"
-                class="mb-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                class="mb-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium shadow-md hover:shadow-lg hover:bg-blue-700 transition-all duration-300 text-sm"
               >
                 选择Logo
               </button>
-              <p class="text-xs text-gray-500">支持 JPG, PNG 等格式</p>
-              <p class="text-xs text-gray-400 mt-1">或直接拖放图片到此处</p>
+              <p class="text-sm text-gray-500">支持 JPG, PNG 等格式</p>
+              <p class="text-sm text-gray-400 mt-1">或直接拖放图片到此处</p>
 
               <div v-if="logoPreview" class="mt-3">
                 <img
@@ -490,10 +495,10 @@
               <div class="grid grid-cols-2 gap-4">
                 <!-- 尺寸 -->
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1.5">尺寸</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">尺寸</label>
                   <select
                     v-model="qrSize"
-                    class="w-full px-4 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   >
                     <option value="128">128x128</option>
                     <option value="256">256x256</option>
@@ -504,10 +509,10 @@
 
                 <!-- 纠错级别 -->
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1.5">纠错级别</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">纠错级别</label>
                   <select
                     v-model="errorCorrection"
-                    class="w-full px-4 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   >
                     <option value="L">L (7%)</option>
                     <option value="M">M (15%)</option>
@@ -518,48 +523,48 @@
 
                 <!-- 边距 -->
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1.5">边距</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">边距</label>
                   <input
                     v-model.number="margin"
                     type="number"
                     min="0"
                     max="20"
-                    class="w-full px-4 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   />
                 </div>
 
                 <!-- 前景色 -->
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1.5">前景色</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">前景色</label>
                   <div class="flex items-center gap-2">
                     <input
                       v-model="foregroundColor"
                       type="color"
-                      class="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                      class="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer"
                     />
                     <input
                       v-model="foregroundColor"
                       type="text"
                       placeholder="#000000"
-                      class="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                      class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     />
                   </div>
                 </div>
 
                 <!-- 背景色 -->
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1.5">背景色</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">背景色</label>
                   <div class="flex items-center gap-2">
                     <input
                       v-model="backgroundColor"
                       type="color"
-                      class="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                      class="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer"
                     />
                     <input
                       v-model="backgroundColor"
                       type="text"
                       placeholder="#FFFFFF"
-                      class="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                      class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     />
                   </div>
                 </div>
