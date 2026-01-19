@@ -58,32 +58,27 @@
               <label for="expandDepth" class="text-xs text-gray-600 whitespace-nowrap"
                 >展开深度:</label
               >
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-0.5">
+                <button
+                  @click="decreaseDepth"
+                  class="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 transition-colors font-medium shadow-sm"
+                >
+                  -
+                </button>
                 <input
                   id="expandDepth"
                   v-model.number="userExpandDepth"
-                  type="range"
+                  type="number"
                   min="0"
-                  max="20"
-                  step="1"
-                  class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  @input="updateExpandDepth"
+                  class="w-16 text-sm text-center border border-blue-200 rounded p-1.5 bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500 text-blue-700"
+                  @change="updateExpandDepth"
                 />
-                <div class="flex items-center gap-1">
-                  <input
-                    v-model.number="userExpandDepth"
-                    type="number"
-                    min="0"
-                    class="w-16 text-xs text-center border border-gray-300 rounded-md p-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    @change="updateExpandDepth"
-                  />
-                  <button
-                    @click="expandAll"
-                    class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
-                  >
-                    全部
-                  </button>
-                </div>
+                <button
+                  @click="increaseDepth"
+                  class="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 transition-colors font-medium shadow-sm"
+                >
+                  +
+                </button>
               </div>
             </div>
             <button
@@ -153,10 +148,18 @@ const updateExpandDepth = () => {
   currentExpandDepth.value = userExpandDepth.value
 }
 
-// 展开全部层级
-const expandAll = () => {
-  userExpandDepth.value = 9999
-  currentExpandDepth.value = 9999
+// 减少展开深度
+const decreaseDepth = () => {
+  if (userExpandDepth.value > 0) {
+    userExpandDepth.value--
+    updateExpandDepth()
+  }
+}
+
+// 增加展开深度
+const increaseDepth = () => {
+  userExpandDepth.value++
+  updateExpandDepth()
 }
 
 // 防抖解析 JSON
