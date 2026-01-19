@@ -1,149 +1,147 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6">
-    <div class="max-w-7xl mx-auto space-y-6">
-      <!-- 当前时间 -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <svg
-              class="w-6 h-6 text-indigo-600"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <h2 class="text-lg md:text-xl font-semibold text-gray-900">当前时间</h2>
-          </div>
-
-          <button
-            @click="toggleTimer"
-            :class="[
-              'inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
-              isRunning
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-green-500 text-white hover:bg-green-600',
-            ]"
+  <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+    <!-- 当前时间 -->
+    <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <svg
+            class="w-6 h-6 text-indigo-600"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
           >
-            {{ isRunning ? '停止' : '开始' }}
-          </button>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h2 class="text-lg md:text-xl font-semibold text-gray-900">当前时间</h2>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-          <!-- 时间戳 -->
-          <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50">
-            <span class="text-sm text-gray-500 min-w-[80px]">时间戳：</span>
-            <span class="text-lg font-bold font-mono text-gray-900 flex-1">
-              {{ currentTimestamp.value }}
-            </span>
-            <button
-              @click="copy(currentTimestamp.value)"
-              title="复制"
-              class="ml-2 text-gray-400 hover:text-indigo-600"
-            >
-              ⧉
-            </button>
-          </div>
-
-          <!-- 单位 -->
-          <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50">
-            <span class="text-sm text-gray-500 min-w-[80px]">单位：</span>
-            <select v-model="timestampUnitNow" class="bg-transparent font-semibold cursor-pointer">
-              <option value="seconds">秒</option>
-              <option value="milliseconds">毫秒</option>
-            </select>
-          </div>
-
-          <!-- 日期 -->
-          <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50">
-            <span class="text-sm text-gray-500 min-w-[80px]">日期：</span>
-            <span class="text-sm font-mono text-gray-700 flex-1">
-              {{ currentTimestamp.datetime }}
-            </span>
-            <button
-              @click="copy(currentTimestamp.datetime)"
-              title="复制"
-              class="ml-2 text-gray-400 hover:text-indigo-600"
-            >
-              ⧉
-            </button>
-          </div>
-        </div>
+        <button
+          @click="toggleTimer"
+          :class="[
+            'inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+            isRunning
+              ? 'bg-red-500 text-white hover:bg-red-600'
+              : 'bg-green-500 text-white hover:bg-green-600',
+          ]"
+        >
+          {{ isRunning ? '停止' : '开始' }}
+        </button>
       </div>
 
-      <!-- 转换区 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- 时间戳 -> 日期 -->
-        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-          <h3 class="font-semibold text-gray-900 mb-4">时间戳转日期</h3>
-
-          <input
-            v-model="timestampInput"
-            @keydown.enter="convertTimestampToDate"
-            placeholder="输入时间戳"
-            class="w-full mb-3 px-4 py-2 border rounded-lg"
-          />
-
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <select v-model="timestampUnit" class="px-3 py-2 border rounded-lg">
-              <option value="seconds">秒</option>
-              <option value="milliseconds">毫秒</option>
-            </select>
-            <select v-model="timestampTimezone" class="px-3 py-2 border rounded-lg">
-              <option v-for="t in timezoneOptions" :key="t.value" :value="t.value">
-                {{ t.label }}
-              </option>
-            </select>
-          </div>
-
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <!-- 时间戳 -->
+        <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50">
+          <span class="text-sm text-gray-500 min-w-[80px]">时间戳：</span>
+          <span class="text-lg font-bold font-mono text-gray-900 flex-1">
+            {{ currentTimestamp.value }}
+          </span>
           <button
-            @click="convertTimestampToDate"
-            class="w-full bg-indigo-600 text-white py-2 rounded-lg"
+            @click="copy(currentTimestamp.value)"
+            title="复制"
+            class="ml-2 text-gray-400 hover:text-indigo-600"
           >
-            转换
+            ⧉
           </button>
-
-          <div v-if="timestampResult" class="mt-4 p-3 bg-indigo-50 rounded-lg">
-            <span class="font-mono font-bold text-indigo-600">
-              {{ timestampResult }}
-            </span>
-          </div>
         </div>
 
-        <!-- 日期 -> 时间戳 -->
-        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-          <h3 class="font-semibold text-gray-900 mb-4">日期转时间戳</h3>
+        <!-- 单位 -->
+        <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50">
+          <span class="text-sm text-gray-500 min-w-[80px]">单位：</span>
+          <select v-model="timestampUnitNow" class="bg-transparent font-semibold cursor-pointer">
+            <option value="seconds">秒</option>
+            <option value="milliseconds">毫秒</option>
+          </select>
+        </div>
 
-          <input
-            v-model="dateInput"
-            @keydown.enter="convertDateToTimestamp"
-            placeholder="YYYY-MM-DD HH:mm:ss"
-            class="w-full mb-3 px-4 py-2 border rounded-lg"
-          />
+        <!-- 日期 -->
+        <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50">
+          <span class="text-sm text-gray-500 min-w-[80px]">日期：</span>
+          <span class="text-sm font-mono text-gray-700 flex-1">
+            {{ currentTimestamp.datetime }}
+          </span>
+          <button
+            @click="copy(currentTimestamp.datetime)"
+            title="复制"
+            class="ml-2 text-gray-400 hover:text-indigo-600"
+          >
+            ⧉
+          </button>
+        </div>
+      </div>
+    </div>
 
-          <select v-model="dateTimezone" class="w-full px-3 py-2 border rounded-lg mb-3">
+    <!-- 转换区 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- 时间戳 -> 日期 -->
+      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">时间戳转日期</h3>
+
+        <input
+          v-model="timestampInput"
+          @keydown.enter="convertTimestampToDate"
+          placeholder="输入时间戳"
+          class="w-full mb-3 px-4 py-2 border rounded-lg"
+        />
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <select v-model="timestampUnit" class="px-3 py-2 border rounded-lg">
+            <option value="seconds">秒</option>
+            <option value="milliseconds">毫秒</option>
+          </select>
+          <select v-model="timestampTimezone" class="px-3 py-2 border rounded-lg">
             <option v-for="t in timezoneOptions" :key="t.value" :value="t.value">
               {{ t.label }}
             </option>
           </select>
+        </div>
 
-          <button
-            @click="convertDateToTimestamp"
-            class="w-full bg-indigo-600 text-white py-2 rounded-lg"
-          >
-            转换
-          </button>
+        <button
+          @click="convertTimestampToDate"
+          class="w-full bg-indigo-600 text-white py-2 rounded-lg"
+        >
+          转换
+        </button>
 
-          <div v-if="dateResult.value" class="mt-4 p-3 bg-indigo-50 rounded-lg">
-            <span class="font-mono font-bold text-indigo-600">
-              {{ dateResult.value }}
-            </span>
-          </div>
+        <div v-if="timestampResult" class="mt-4 p-3 bg-indigo-50 rounded-lg">
+          <span class="font-mono font-bold text-indigo-600">
+            {{ timestampResult }}
+          </span>
+        </div>
+      </div>
+
+      <!-- 日期 -> 时间戳 -->
+      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">日期转时间戳</h3>
+
+        <input
+          v-model="dateInput"
+          @keydown.enter="convertDateToTimestamp"
+          placeholder="YYYY-MM-DD HH:mm:ss"
+          class="w-full mb-3 px-4 py-2 border rounded-lg"
+        />
+
+        <select v-model="dateTimezone" class="w-full px-3 py-2 border rounded-lg mb-3">
+          <option v-for="t in timezoneOptions" :key="t.value" :value="t.value">
+            {{ t.label }}
+          </option>
+        </select>
+
+        <button
+          @click="convertDateToTimestamp"
+          class="w-full bg-indigo-600 text-white py-2 rounded-lg"
+        >
+          转换
+        </button>
+
+        <div v-if="dateResult.value" class="mt-4 p-3 bg-indigo-50 rounded-lg">
+          <span class="font-mono font-bold text-indigo-600">
+            {{ dateResult.value }}
+          </span>
         </div>
       </div>
     </div>

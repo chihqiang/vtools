@@ -1,8 +1,79 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6">
-    <div class="max-w-7xl mx-auto">
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+    <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <svg
+            class="w-6 h-6 text-indigo-600"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h2 class="text-lg md:text-xl font-semibold text-gray-900">基本信息</h2>
+        </div>
+        <button
+          @click="refreshNetworkInfo"
+          :disabled="infoLoading"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg
+            v-if="!infoLoading"
+            class="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          <svg
+            v-else
+            class="w-4 h-4 animate-spin"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          {{ infoLoading ? '刷新中' : '刷新' }}
+        </button>
+      </div>
+      <div v-if="networkInfoItems.length === 0" class="text-center text-gray-600 py-5 text-sm">
+        正在获取网络信息...
+      </div>
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+        <div
+          v-for="(item, index) in networkInfoItems"
+          :key="index"
+          class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50 hover:border-indigo-500 hover:bg-slate-100 transition-all"
+        >
+          <span class="text-sm font-medium text-gray-500 min-w-[80px] flex-shrink-0"
+            >{{ item.label }}：</span
+          >
+          <span class="text-sm font-semibold text-gray-900 font-mono">{{ item.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div class="flex items-center gap-3">
             <svg
               class="w-6 h-6 text-indigo-600"
@@ -14,352 +85,276 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
               />
             </svg>
-            <h2 class="text-lg md:text-xl font-semibold text-gray-900">基本信息</h2>
+            <h3 class="text-base font-semibold text-gray-900">HTTP Ping 测试</h3>
           </div>
           <button
-            @click="refreshNetworkInfo"
-            :disabled="infoLoading"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            @click="runPingTest"
+            :disabled="pingLoading"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
-            <svg
-              v-if="!infoLoading"
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            <svg
-              v-else
-              class="w-4 h-4 animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            {{ infoLoading ? '刷新中' : '刷新' }}
+            {{ pingLoading ? '测试中...' : '开始测试' }}
           </button>
         </div>
-        <div v-if="networkInfoItems.length === 0" class="text-center text-gray-600 py-5 text-sm">
-          正在获取网络信息...
-        </div>
-        <div
-          v-else
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4"
-        >
-          <div
-            v-for="(item, index) in networkInfoItems"
-            :key="index"
-            class="flex items-center p-4 border border-gray-200 rounded-lg bg-slate-50 hover:border-indigo-500 hover:bg-slate-100 transition-all"
-          >
-            <span class="text-sm font-medium text-gray-500 min-w-[80px] flex-shrink-0"
-              >{{ item.label }}：</span
-            >
-            <span class="text-sm font-semibold text-gray-900 font-mono">{{ item.value }}</span>
+        <div class="space-y-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">目标主机</label>
+            <input
+              v-model="pingHost"
+              type="text"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="例: www.baidu.com"
+            />
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">测试次数</label>
+            <input
+              v-model.number="pingCount"
+              type="number"
+              min="1"
+              max="20"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            />
+          </div>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
+          <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
+            pingResult
+          }}</pre>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <svg
-                class="w-6 h-6 text-indigo-600"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
-                />
-              </svg>
-              <h3 class="text-base font-semibold text-gray-900">HTTP Ping 测试</h3>
-            </div>
-            <button
-              @click="runPingTest"
-              :disabled="pingLoading"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+          <div class="flex items-center gap-3">
+            <svg
+              class="w-6 h-6 text-indigo-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
             >
-              {{ pingLoading ? '测试中...' : '开始测试' }}
-            </button>
-          </div>
-          <div class="space-y-4 mb-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">目标主机</label>
-              <input
-                v-model="pingHost"
-                type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="例: www.baidu.com"
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
               />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">测试次数</label>
-              <input
-                v-model.number="pingCount"
-                type="number"
-                min="1"
-                max="20"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
+            </svg>
+            <h3 class="text-base font-semibold text-gray-900">端口检测</h3>
           </div>
-          <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
-            <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
-              pingResult
-            }}</pre>
+          <button
+            @click="runPortTest"
+            :disabled="portLoading"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {{ portLoading ? '检测中...' : '检测端口' }}
+          </button>
+        </div>
+        <div class="space-y-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">目标主机</label>
+            <input
+              v-model="portHost"
+              type="text"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="例: www.baidu.com"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">端口号</label>
+            <input
+              v-model.number="portNumber"
+              type="number"
+              min="1"
+              max="65535"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">超时时间(秒)</label>
+            <input
+              v-model.number="portTimeout"
+              type="number"
+              min="1"
+              max="30"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            />
           </div>
         </div>
+        <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
+          <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
+            portResult
+          }}</pre>
+        </div>
+      </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <svg
-                class="w-6 h-6 text-indigo-600"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-              <h3 class="text-base font-semibold text-gray-900">端口检测</h3>
-            </div>
-            <button
-              @click="runPortTest"
-              :disabled="portLoading"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+          <div class="flex items-center gap-3">
+            <svg
+              class="w-6 h-6 text-indigo-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
             >
-              {{ portLoading ? '检测中...' : '检测端口' }}
-            </button>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+              />
+            </svg>
+            <h3 class="text-base font-semibold text-gray-900">DNS 解析</h3>
           </div>
-          <div class="space-y-4 mb-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">目标主机</label>
-              <input
-                v-model="portHost"
-                type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="例: www.baidu.com"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">端口号</label>
-              <input
-                v-model.number="portNumber"
-                type="number"
-                min="1"
-                max="65535"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">超时时间(秒)</label>
-              <input
-                v-model.number="portTimeout"
-                type="number"
-                min="1"
-                max="30"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
+          <button
+            @click="runDnsTest"
+            :disabled="dnsLoading"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {{ dnsLoading ? '解析中...' : '解析域名' }}
+          </button>
+        </div>
+        <div class="space-y-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">域名</label>
+            <input
+              v-model="dnsHost"
+              type="text"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="例: www.baidu.com"
+            />
           </div>
-          <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
-            <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
-              portResult
-            }}</pre>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">记录类型</label>
+            <select
+              v-model="dnsType"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            >
+              <option value="A">A (IPv4地址)</option>
+              <option value="AAAA">AAAA (IPv6地址)</option>
+              <option value="MX">MX (邮件服务器)</option>
+              <option value="CNAME">CNAME (别名)</option>
+              <option value="TXT">TXT (文本记录)</option>
+            </select>
           </div>
         </div>
+        <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
+          <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
+            dnsResult
+          }}</pre>
+        </div>
+      </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <svg
-                class="w-6 h-6 text-indigo-600"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                />
-              </svg>
-              <h3 class="text-base font-semibold text-gray-900">DNS 解析</h3>
-            </div>
-            <button
-              @click="runDnsTest"
-              :disabled="dnsLoading"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+          <div class="flex items-center gap-3">
+            <svg
+              class="w-6 h-6 text-indigo-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
             >
-              {{ dnsLoading ? '解析中...' : '解析域名' }}
-            </button>
-          </div>
-          <div class="space-y-4 mb-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">域名</label>
-              <input
-                v-model="dnsHost"
-                type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="例: www.baidu.com"
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
               />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">记录类型</label>
-              <select
-                v-model="dnsType"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              >
-                <option value="A">A (IPv4地址)</option>
-                <option value="AAAA">AAAA (IPv6地址)</option>
-                <option value="MX">MX (邮件服务器)</option>
-                <option value="CNAME">CNAME (别名)</option>
-                <option value="TXT">TXT (文本记录)</option>
-              </select>
-            </div>
+            </svg>
+            <h3 class="text-base font-semibold text-gray-900">网速测试</h3>
           </div>
-          <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
-            <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
-              dnsResult
-            }}</pre>
+          <button
+            @click="runSpeedTest"
+            :disabled="speedLoading"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {{ speedLoading ? '测试中...' : '开始测试' }}
+          </button>
+        </div>
+        <div class="space-y-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">测试URL</label>
+            <input
+              v-model="speedTestUrl"
+              type="text"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="例: https://httpbin.org/bytes/1024"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">测试次数</label>
+            <input
+              v-model.number="speedTestCount"
+              type="number"
+              min="1"
+              max="10"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            />
           </div>
         </div>
+        <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
+          <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
+            speedResult
+          }}</pre>
+        </div>
+      </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <svg
-                class="w-6 h-6 text-indigo-600"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-              <h3 class="text-base font-semibold text-gray-900">网速测试</h3>
-            </div>
-            <button
-              @click="runSpeedTest"
-              :disabled="speedLoading"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+      <div
+        class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow md:col-span-2"
+      >
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+          <div class="flex items-center gap-3">
+            <svg
+              class="w-6 h-6 text-indigo-600"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
             >
-              {{ speedLoading ? '测试中...' : '开始测试' }}
-            </button>
-          </div>
-          <div class="space-y-4 mb-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">测试URL</label>
-              <input
-                v-model="speedTestUrl"
-                type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="例: https://httpbin.org/bytes/1024"
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
               />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">测试次数</label>
-              <input
-                v-model.number="speedTestCount"
-                type="number"
-                min="1"
-                max="10"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
+            </svg>
+            <h3 class="text-base font-semibold text-gray-900">HTTP 状态检测</h3>
           </div>
-          <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
-            <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
-              speedResult
-            }}</pre>
+          <button
+            @click="runHttpTest"
+            :disabled="httpLoading"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {{ httpLoading ? '检测中...' : '检测状态' }}
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">网站URL</label>
+            <input
+              v-model="httpUrl"
+              type="text"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="例: https://www.baidu.com"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">请求方法</label>
+            <select
+              v-model="httpMethod"
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            >
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="HEAD">HEAD</option>
+            </select>
           </div>
         </div>
-
-        <div
-          class="bg-white rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow md:col-span-2"
-        >
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <svg
-                class="w-6 h-6 text-indigo-600"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-              <h3 class="text-base font-semibold text-gray-900">HTTP 状态检测</h3>
-            </div>
-            <button
-              @click="runHttpTest"
-              :disabled="httpLoading"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
-            >
-              {{ httpLoading ? '检测中...' : '检测状态' }}
-            </button>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">网站URL</label>
-              <input
-                v-model="httpUrl"
-                type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="例: https://www.baidu.com"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-2">请求方法</label>
-              <select
-                v-model="httpMethod"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              >
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-                <option value="HEAD">HEAD</option>
-              </select>
-            </div>
-          </div>
-          <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
-            <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
-              httpResult
-            }}</pre>
-          </div>
+        <div class="bg-slate-50 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
+          <pre class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{
+            httpResult
+          }}</pre>
         </div>
       </div>
     </div>

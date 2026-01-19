@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
+  <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
     <div class="flex items-center gap-3 mb-6">
       <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
