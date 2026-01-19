@@ -1,9 +1,12 @@
 <template>
   <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 flex flex-col h-full">
+    <!-- 第一行：标题栏 -->
     <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
       <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-        JWT 解析工具
+        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2h2a2 2 0 012 2v9a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h2m-2 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2m0 0a2 2 0 012 2v2"></path>
+        </svg>
+        JWT 在线解析工具
       </h3>
       <div class="flex space-x-2">
         <button
@@ -37,6 +40,7 @@
       </div>
     </div>
 
+    <!-- 第二行：左右布局 -->
     <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
       <div class="flex-1 flex flex-col min-h-0">
         <div class="flex items-center justify-between mb-3">
@@ -600,6 +604,84 @@
             ></path>
           </svg>
           <p class="text-sm">请输入 JWT Token 并点击解析</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第三行：JWT 参数说明 -->
+    <div class="mt-8 border border-indigo-200 rounded-lg p-4 bg-indigo-50 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-medium text-gray-700 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+          JWT 参数说明
+        </h4>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <h5 class="text-sm font-semibold text-gray-800 mb-2">Header (头部)</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-indigo-700">alg</span>
+              <span class="text-gray-600 ml-1">签名算法</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-indigo-700">typ</span>
+              <span class="text-gray-600 ml-1">令牌类型</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-indigo-700">kid</span>
+              <span class="text-gray-600 ml-1">密钥ID</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-indigo-700">cty</span>
+              <span class="text-gray-600 ml-1">内容类型</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h5 class="text-sm font-semibold text-gray-800 mb-2">Payload (载荷) - 标准声明</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">iss</span>
+              <span class="text-gray-600 ml-1">签发者</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">sub</span>
+              <span class="text-gray-600 ml-1">主题</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">aud</span>
+              <span class="text-gray-600 ml-1">受众</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">exp</span>
+              <span class="text-gray-600 ml-1">过期时间</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">iat</span>
+              <span class="text-gray-600 ml-1">签发时间</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">nbf</span>
+              <span class="text-gray-600 ml-1">生效时间</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">jti</span>
+              <span class="text-gray-600 ml-1">JWT ID</span>
+            </div>
+            <div class="bg-white p-2 rounded border border-gray-200">
+              <span class="font-medium text-green-700">azp</span>
+              <span class="text-gray-600 ml-1">授权方</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h5 class="text-sm font-semibold text-gray-800 mb-2">时间戳说明</h5>
+          <div class="bg-white p-3 rounded border border-gray-200 text-xs text-gray-700">
+            <p class="mb-1">JWT 中的时间戳（exp、iat、nbf）使用的是 <span class="font-mono bg-gray-100 px-1 rounded">Unix 时间戳（秒）</span></p>
+            <p class="mb-1">例如：2024-01-01 00:00:00 UTC 对应的 Unix 时间戳为 <span class="font-mono bg-gray-100 px-1 rounded">1704067200</span></p>
+            <p>工具会自动将时间戳转换为可读格式显示</p>
+          </div>
         </div>
       </div>
     </div>
