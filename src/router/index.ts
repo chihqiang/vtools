@@ -195,6 +195,19 @@ const router = createRouter({
         group: HomeGroup.ENCRYPTION_TOOLS,
       } as HomeRouteMeta,
     },
+        {
+      path: '/key-pair',
+      name: 'key-pair',
+      component: () => import('@/views/encryption/KeyPairGenerator.vue'),
+      meta: {
+        showOnHome: true,
+        title: '密钥对生成器',
+        description: '生成 RSA 密钥对，支持公钥和私钥格式',
+        icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+        color: 'indigo',
+        group: HomeGroup.ENCRYPTION_TOOLS,
+      } as HomeRouteMeta,
+    },
     {
       path: '/network',
       name: 'network',
