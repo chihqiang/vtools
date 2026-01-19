@@ -78,12 +78,6 @@
             >
               下载
             </button>
-            <button
-              @click="toggleExpandDepth"
-              class="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
-            >
-              {{ isExpanded ? '收起' : '展开全部' }}
-            </button>
           </div>
         </div>
 
@@ -130,15 +124,14 @@ const errorMessage = ref('')
 
 // 展开层级
 const defaultExpandDepth = 3
-const isExpanded = ref(false)
-const currentExpandDepth = ref(defaultExpandDepth)
 const userExpandDepth = ref(defaultExpandDepth)
+const currentExpandDepth = ref(defaultExpandDepth)
 
 // 更新展开深度
 const updateExpandDepth = () => {
   if (userExpandDepth.value < 0) userExpandDepth.value = 0
   if (userExpandDepth.value > 20) userExpandDepth.value = 20
-  if (!isExpanded.value) currentExpandDepth.value = userExpandDepth.value
+  currentExpandDepth.value = userExpandDepth.value
 }
 
 // 防抖解析 JSON
@@ -226,11 +219,7 @@ const downloadJson = () => {
   }
 }
 
-// 展开 / 收起
-const toggleExpandDepth = () => {
-  isExpanded.value = !isExpanded.value
-  currentExpandDepth.value = isExpanded.value ? 20 : userExpandDepth.value
-}
+
 </script>
 
 <style scoped>
