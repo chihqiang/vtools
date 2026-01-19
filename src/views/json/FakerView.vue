@@ -336,6 +336,8 @@ const languageLabels: Record<Language, string> = {
   [Language.ENGLISH]: '英文',
   [Language.CHINESE]: '中文',
 }
+// 选中的语言
+const selectedLanguage = ref(Language.ENGLISH)
 
 // 定义KV项类型枚举
 enum ValueType {
@@ -357,6 +359,10 @@ const valueTypeLabels: Record<ValueType, string> = {
   [ValueType.FAKER]: 'Faker函数',
 }
 
+const fields = ref<MockField[]>([
+  { key: 'id', type: ValueType.FAKER, value: 'faker.string.uuid()' },
+])
+
 // 定义字段类型
 interface MockField {
   key: string
@@ -371,16 +377,9 @@ interface MockTemplate {
   items: MockField[]
 }
 
-const fields = ref<MockField[]>([
-  { key: 'id', type: ValueType.FAKER, value: 'faker.string.uuid()' },
-])
-
 const generateCount = ref(1)
 const mockResult = ref('')
 const loading = ref(false)
-
-// 选中的语言
-const selectedLanguage = ref(Language.CHINESE)
 
 // 选中的输入框索引
 const selectedItemIndex = ref<number | null>(null)
@@ -645,53 +644,177 @@ const fakerInstance = computed(() => {
   const locale = selectedLanguage.value === Language.CHINESE ? zh_CN : en
   return new Faker({ locale })
 })
-
-// Faker函数的中文别名映射
 const fakerFunctionAliases = {
-  姓名: 'faker.person.fullName()',
-  名字: 'faker.person.firstName()',
-  姓氏: 'faker.person.lastName()',
-  邮箱: 'faker.internet.email()',
-  用户名: 'faker.internet.username()',
-  密码: 'faker.internet.password({ length: 12 })',
-  网址: 'faker.internet.url()',
-  域名: 'faker.internet.domainName()',
-  IP地址: 'faker.internet.ip()',
-  MAC地址: 'faker.internet.mac()',
-  随机数字: 'faker.number.int({ min: 0, max: 100 })',
-  年龄: 'faker.number.int({ min: 18, max: 80 })',
-  随机小数: 'faker.number.float({ min: 0, max: 100, precision: 2 })',
-  布尔值: 'faker.datatype.boolean()',
-  UUID: 'faker.string.uuid()',
-  过去时间: 'faker.date.past()',
-  未来时间: 'faker.date.future()',
-  生日: 'faker.date.birthdate()',
-  月份: 'faker.date.month()',
-  街道地址: 'faker.location.streetAddress()',
-  城市: 'faker.location.city()',
-  省份: 'faker.location.state()',
-  国家: 'faker.location.country()',
-  国家代码: 'faker.location.countryCode()',
-  邮政编码: 'faker.location.zipCode()',
-  时区: 'faker.location.timeZone()',
-  电话号码: 'faker.phone.number()',
-  公司名称: 'faker.company.name()',
-  公司口号: 'faker.company.catchPhrase()',
-  公司标语: 'faker.company.buzzPhrase()',
-  职位: 'faker.person.jobTitle()',
-  产品名称: 'faker.commerce.productName()',
-  产品价格: 'faker.commerce.price()',
-  部门: 'faker.commerce.department()',
-  头像: 'faker.image.avatar()',
-  图片: 'faker.image.imageUrl(640, 480)',
-  随机图片: 'faker.image.urlLoremFlickr()',
-  随机单词: 'faker.lorem.word()',
-  随机句子: 'faker.lorem.sentence()',
-  随机段落: 'faker.lorem.paragraph()',
-  随机标签: 'faker.lorem.slug()',
-  颜色名称: 'faker.color.human()',
-  RGB颜色: 'faker.color.rgb()',
-  订单状态: 'faker.helpers.arrayElement(["pending", "processing", "shipped", "delivered"])',
+  /* ================= Airline ================= */
+  航空_航空公司名称: 'faker.airline.airline()',
+  航空_航班号: 'faker.airline.flight()',
+
+  /* ================= Animal ================= */
+  动物_类型: 'faker.animal.type()',
+  动物_猫: 'faker.animal.cat()',
+  动物_狗: 'faker.animal.dog()',
+
+  /* ================= Book ================= */
+  书_书名: 'faker.book.title()',
+  书_作者: 'faker.book.author()',
+  书_出版社: 'faker.book.publisher()',
+
+  /* ================= Color ================= */
+  颜色_名称: 'faker.color.human()',
+  颜色_HEX: 'faker.color.rgb({ format: "hex" })',
+  颜色_RGB: 'faker.color.rgb()',
+
+  /* ================= Commerce ================= */
+  商业_产品名称: 'faker.commerce.productName()',
+  商业_产品描述: 'faker.commerce.productDescription()',
+  商业_产品价格: 'faker.commerce.price()',
+  商业_部门: 'faker.commerce.department()',
+  商业_产品材质: 'faker.commerce.productMaterial()',
+  商业_产品类型: 'faker.commerce.productAdjective()',
+
+  /* ================= Company ================= */
+  公司_公司名称: 'faker.company.name()',
+  公司_口号: 'faker.company.catchPhrase()',
+  公司_标语: 'faker.company.buzzPhrase()',
+
+  /* ================= Database ================= */
+  数据库_列名: 'faker.database.column()',
+  数据库_表类型: 'faker.database.type()',
+  数据库_引擎: 'faker.database.engine()',
+
+  /* ================= Datatype ================= */
+  数据类型_随机整数: 'faker.number.int()',
+  数据类型_随机小数: 'faker.number.float()',
+  数据类型_布尔值: 'faker.datatype.boolean()',
+
+  /* ================= Date ================= */
+  日期_当前时间: 'new Date()',
+  日期_过去时间: 'faker.date.past()',
+  日期_未来时间: 'faker.date.future()',
+  日期_最近时间: 'faker.date.recent()',
+  日期_即将发生: 'faker.date.soon()',
+  日期_月份: 'faker.date.month()',
+  日期_星期: 'faker.date.weekday()',
+  日期_时区: 'faker.location.timeZone()',
+
+  /* ================= Finance ================= */
+  金融_银行账号: 'faker.finance.accountNumber()',
+  金融_交易金额: 'faker.finance.amount()',
+  金融_货币名称: 'faker.finance.currencyName()',
+  金融_货币代码: 'faker.finance.currencyCode()',
+  金融_信用卡号: 'faker.finance.creditCardNumber()',
+  金融_IBAN: 'faker.finance.iban()',
+
+  /* ================= Food ================= */
+  食物_成分: 'faker.food.ingredient()',
+  食物_菜名: 'faker.food.dish()',
+  食物_水果: 'faker.food.fruit()',
+  食物_蔬菜: 'faker.food.vegetable()',
+  食物_香料: 'faker.food.spice()',
+
+  /* ================= Git ================= */
+  Git_分支名: 'faker.git.branch()',
+  Git_提交哈希: 'faker.git.commitSha()',
+
+  /* ================= Hacker ================= */
+  黑客_名词: 'faker.hacker.noun()',
+  黑客_动词: 'faker.hacker.verb()',
+  黑客_形容词: 'faker.hacker.adjective()',
+  黑客_短语: 'faker.hacker.phrase()',
+
+  /* ================= Helpers ================= */
+  辅助_随机数组元素: 'faker.helpers.arrayElement(["A","B","C","D"])',
+  辅助_随机数组多元素: 'faker.helpers.arrayElements(["A","B","C","D"], { min: 1, max: 3 })',
+  辅助_随机对象键: 'faker.helpers.objectKey({ a: 1, b: 2 })',
+
+  /* ================= Image ================= */
+  图片_头像: 'faker.image.avatar()',
+  图片_人像照片: 'faker.image.urlPicsumPhotos({ width: 128, height: 128 })',
+  图片_随机图片: 'faker.image.urlLoremFlickr()',
+  图片_占位图片: 'faker.image.url()',
+
+  /* ================= Internet ================= */
+  网络_邮箱: 'faker.internet.email()',
+  网络_用户名: 'faker.internet.userName()',
+  网络_密码: 'faker.internet.password({ length: 12 })',
+  网络_网址: 'faker.internet.url()',
+  网络_域名: 'faker.internet.domainName()',
+  网络_IP地址: 'faker.internet.ip()',
+  网络_IPv4: 'faker.internet.ipv4()',
+  网络_IPv6: 'faker.internet.ipv6()',
+  网络_MAC地址: 'faker.internet.mac()',
+  网络_用户代理: 'faker.internet.userAgent()',
+  网络_端口号: 'faker.internet.port()',
+
+  /* ================= Location ================= */
+  地址_街道: 'faker.location.streetAddress()',
+  地址_楼号: 'faker.location.buildingNumber()',
+  地址_城市: 'faker.location.city()',
+  地址_省份: 'faker.location.state()',
+  地址_国家: 'faker.location.country()',
+  地址_国家代码: 'faker.location.countryCode()',
+  地址_邮政编码: 'faker.location.zipCode()',
+  地址_纬度: 'faker.location.latitude()',
+  地址_经度: 'faker.location.longitude()',
+
+  /* ================= Lorem ================= */
+  文本_随机单词: 'faker.lorem.word()',
+  文本_多个单词: 'faker.lorem.words(3)',
+  文本_随机句子: 'faker.lorem.sentence()',
+  文本_多个句子: 'faker.lorem.sentences(2)',
+  文本_随机段落: 'faker.lorem.paragraph()',
+  文本_多段文本: 'faker.lorem.paragraphs(2)',
+  文本_随机标签: 'faker.lorem.slug()',
+
+  /* ================= Music ================= */
+  音乐_歌曲名: 'faker.music.songName()',
+  音乐_专辑名: 'faker.music.album()',
+  音乐_艺术家: 'faker.music.artist()',
+  音乐_流派: 'faker.music.genre()',
+
+  /* ================= Number ================= */
+  数字_随机数: 'faker.number.int()',
+  数字_随机浮点数: 'faker.number.float()',
+
+  /* ================= Person ================= */
+  人_全名: 'faker.person.fullName()',
+  人_名字: 'faker.person.firstName()',
+  人_姓氏: 'faker.person.lastName()',
+  人_性别: 'faker.person.gender()',
+  人_生日: 'faker.date.birthdate()',
+
+  /* ================= Phone ================= */
+  电话_电话号码: 'faker.phone.number()',
+
+  /* ================= Science ================= */
+  科学_单位: 'faker.science.unit()',
+  科学_元素符号: 'faker.science.element()',
+  科学_化学名称: 'faker.science.chemical()',
+
+  /* ================= String ================= */
+  字符串_随机字符串: 'faker.string.alphanumeric(10)',
+  字符串_字母: 'faker.string.alpha(5)',
+  字符串_数字: 'faker.string.numeric(5)',
+  字符串_UUID: 'faker.string.uuid()',
+  字符串_NanoID: 'faker.string.nanoid()',
+  字符串_ULID: 'faker.string.ulid()',
+
+  /* ================= System ================= */
+  系统_文件名: 'faker.system.fileName()',
+  系统_文件类型: 'faker.system.fileType()',
+  系统_MIME类型: 'faker.system.mimeType()',
+  系统_语义版本号: 'faker.system.semver()',
+
+  /* ================= Vehicle ================= */
+  车辆_型号: 'faker.vehicle.model()',
+  车辆_制造商: 'faker.vehicle.manufacturer()',
+  车辆_VIN: 'faker.vehicle.vin()',
+  车辆_类型: 'faker.vehicle.type()',
+
+  /* ================= Word ================= */
+  词_名词: 'faker.word.noun()',
+  词_动词: 'faker.word.verb()',
+  词_形容词: 'faker.word.adjective()',
 }
 
 // 处理Faker函数选择按钮点击事件
