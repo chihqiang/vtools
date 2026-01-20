@@ -234,6 +234,19 @@ const router = createRouter({
         group: HomeGroup.NETWORK_TOOLS,
       } as HomeRouteMeta,
     },
+    {
+      path: '/http-request',
+      name: 'http-request',
+      component: () => import('@/views/detect/AxiosRequest.vue'),
+      meta: {
+        showOnHome: true,
+        title: 'API 接口调试工具',
+        description: '构建并发送 HTTP 请求，支持多种请求方法与参数格式，便于接口调试与测试',
+        icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+        color: 'blue',
+        group: HomeGroup.NETWORK_TOOLS,
+      } as HomeRouteMeta,
+    },
   ],
 })
 
