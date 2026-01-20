@@ -244,54 +244,52 @@
       </div>
 
       <div class="flex flex-col gap-4">
-        <!-- RSA 密钥生成 -->
+        <!-- 常见场景生成方式 -->
         <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <h5 class="font-medium text-gray-700 mb-3 flex items-center">
-            <span class="mr-2">🔐</span>
-            RSA 密钥生成
+            常见场景生成方式
           </h5>
-          <div class="space-y-3">
+          <div class="space-y-4">
             <div>
-              <p class="text-xs text-gray-500 mb-1">生成私钥：</p>
+              <h6 class="text-xs font-medium text-gray-600 mb-2">Web 服务器 HTTPS 证书密钥</h6>
               <pre
                 class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
               >
-openssl genrsa -out private_2048.pem 2048</pre
+# 生成 2048 位 RSA 私钥
+openssl genrsa -out server.key 2048
+
+# 生成证书签名请求 (CSR)
+openssl req -new -key server.key -out server.csr
+
+# 生成自签名证书
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt</pre
               >
             </div>
 
             <div>
-              <p class="text-xs text-gray-500 mb-1">提取公钥：</p>
+              <h6 class="text-xs font-medium text-gray-600 mb-2">SSH 登录密钥</h6>
               <pre
                 class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
               >
-openssl rsa -in private_2048.pem -pubout -out public_2048.pem</pre
-              >
-            </div>
-          </div>
-        </div>
+# 生成 RSA SSH 密钥对
+ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa
 
-        <!-- ED25519 密钥生成 -->
-        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <h5 class="font-medium text-gray-700 mb-3 flex items-center">
-            <span class="mr-2">🔑</span>
-            ED25519 密钥生成
-          </h5>
-          <div class="space-y-3">
-            <div>
-              <p class="text-xs text-gray-500 mb-1">生成私钥：</p>
-              <pre
-                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
-              >
-openssl genpkey -algorithm ED25519 -out private_ed25519.pem</pre
+# 生成 ED25519 SSH 密钥对 (推荐)
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519</pre
               >
             </div>
 
             <div>
-              <p class="text-xs text-gray-500 mb-1">提取公钥：</p>
+              <h6 class="text-xs font-medium text-gray-600 mb-2">通用加密密钥</h6>
               <pre
                 class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
               >
+# 生成 2048 位 RSA 密钥对
+openssl genrsa -out private_key.pem 2048
+openssl rsa -in private_key.pem -pubout -out public_key.pem
+
+# 生成 ED25519 密钥对
+openssl genpkey -algorithm ED25519 -out private_ed25519.pem
 openssl pkey -in private_ed25519.pem -pubout -out public_ed25519.pem</pre
               >
             </div>
@@ -301,12 +299,47 @@ openssl pkey -in private_ed25519.pem -pubout -out public_ed25519.pem</pre
         <!-- 其他常用命令 -->
         <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <h5 class="font-medium text-gray-700 mb-3 flex items-center">
-            <span class="mr-2">📋</span>
             其他常用命令
           </h5>
           <div class="space-y-3">
             <div>
-              <p class="text-xs text-gray-500 mb-1">查看私钥：</p>
+              <p class="text-xs text-gray-500 mb-1">生成 RSA 私钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl genrsa -out private_2048.pem 2048</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">提取 RSA 公钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl rsa -in private_2048.pem -pubout -out public_2048.pem</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">生成 ED25519 私钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl genpkey -algorithm ED25519 -out private_ed25519.pem</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">提取 ED25519 公钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl pkey -in private_ed25519.pem -pubout -out public_ed25519.pem</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">查看 RSA 私钥：</p>
               <pre
                 class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
               >
@@ -315,11 +348,29 @@ openssl rsa -in private_2048.pem -text -noout</pre
             </div>
 
             <div>
-              <p class="text-xs text-gray-500 mb-1">查看公钥：</p>
+              <p class="text-xs text-gray-500 mb-1">查看 RSA 公钥：</p>
               <pre
                 class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
               >
 openssl rsa -in public_2048.pem -pubin -text -noout</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">查看 ED25519 私钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl pkey -in private_ed25519.pem -text -noout</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">查看 ED25519 公钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl pkey -in public_ed25519.pem -pubin -text -noout</pre
               >
             </div>
           </div>
