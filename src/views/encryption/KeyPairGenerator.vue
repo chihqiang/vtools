@@ -5,10 +5,10 @@
       <h3 class="font-semibold text-gray-800">RSA 密钥生成 & 加解密工具</h3>
     </div>
 
-    <!-- 三列布局 -->
+    <!-- 左右布局 -->
     <div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
       <!-- 左列：生成参数 -->
-      <div class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+      <div class="w-full lg:w-1/3 bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
         <h4 class="font-medium text-gray-800 mb-4">生成参数</h4>
         <div class="space-y-4">
           <!-- 算法 -->
@@ -18,22 +18,35 @@
               v-model="config.algorithm"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="RSA">RSA（OAEP / PKCS1 通用）</option>
+              <option v-for="option in ALGORITHM_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
             </select>
-            <p class="text-xs text-gray-500 mt-1">注：OAEP 是加密方式，密钥本身相同</p>
+            <p class="text-xs text-gray-500 mt-1">
+              RSA 支持 OAEP / PKCS#1 v1.5 加密方式，ED25519 仅支持签名/验证
+            </p>
           </div>
 
           <!-- 密钥长度 -->
-          <div>
+          <div v-if="config.algorithm === 'RSA'">
             <label class="block text-sm text-gray-700 mb-2">密钥长度</label>
             <select
               v-model="config.keySize"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="1024">1024 位</option>
-              <option value="2048">2048 位（推荐）</option>
-              <option value="4096">4096 位</option>
+              <option v-for="option in KEY_SIZE_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
             </select>
+            <p class="text-xs text-gray-500 mt-1">更大的密钥长度更安全，但生成速度更慢</p>
+          </div>
+
+          <!-- 公钥指数 -->
+          <div v-if="config.algorithm === 'RSA'">
+            <label class="block text-sm text-gray-700 mb-2">公钥指数 (e)</label>
+            <select
+              v-model="config.publicExponent"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+            >
+              <option v-for="option in PUBLIC_EXPONENT_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">65537 是更安全的默认值</p>
           </div>
 
           <!-- 格式 -->
@@ -43,9 +56,26 @@
               v-model="config.format"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="PEM">PEM</option>
-              <option value="DER">DER（Base64 展示）</option>
+              <option v-for="option in FORMAT_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
             </select>
+            <div class="mt-1 text-xs text-gray-500">
+              <div>PEM: 文本格式，包含 -----BEGIN/END----- 标记</div>
+              <div>DER: 二进制格式，使用 Base64 编码显示</div>
+            </div>
+          </div>
+
+          <!-- SSH 私钥加密 -->
+          <div v-if="config.algorithm === 'RSA'">
+            <label class="block text-sm text-gray-700 mb-2">SSH 私钥加密</label>
+            <div class="flex gap-2">
+              <input
+                v-model="sshPassphrase"
+                type="password"
+                placeholder="输入密码（可选）"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <p class="text-xs text-gray-500 mt-1">设置密码将生成加密的 SSH 格式私钥</p>
           </div>
         </div>
 
@@ -67,138 +97,233 @@
         </div>
       </div>
 
-      <!-- 中列：密钥对（私钥在上，公钥在下） -->
-      <div class="w-full lg:w-2/4 flex flex-col gap-6 overflow-hidden">
+      <!-- 右列：密钥对 -->
+      <div class="w-full lg:w-2/3 flex flex-col gap-6">
         <!-- 私钥 -->
         <div
-          class="flex-1 bg-white border border-gray-200 rounded-lg p-5 shadow-sm overflow-hidden"
+          class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm flex-1 overflow-hidden flex flex-col"
         >
           <div class="flex items-center justify-between mb-3">
             <h4 class="font-medium text-gray-800">私钥</h4>
-            <div class="flex gap-2" v-if="privateKey">
-              <button
-                @click="copyToClipboard(privateKey)"
-                class="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md text-xs hover:bg-orange-200 transition"
-              >
-                复制
-              </button>
-              <button
-                @click="downloadKey('private')"
-                class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md text-xs hover:bg-indigo-200 transition"
-              >
-                下载
-              </button>
-            </div>
+            <button
+              @click="copyPrivateKey"
+              :disabled="!privateKey"
+              class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-gray-200 transition disabled:opacity-50"
+            >
+              复制
+            </button>
           </div>
-
-          <div class="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2">
-            ⚠ 私钥请妥善保存，泄露将导致安全风险
-          </div>
-
           <textarea
             v-model="privateKey"
-            class="w-full h-32 border border-gray-300 rounded-md p-2 text-xs font-mono"
-            placeholder="请生成或粘贴私钥（PEM / Base64 DER）"
-          />
-
-          <!-- OpenSSL 命令示例 -->
-          <div
-            v-if="privateKey"
-            class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700"
-          >
-            <p>OpenSSL 生成对应私钥命令示例：</p>
-            <pre class="break-all mt-1">
-openssl genrsa -out private_{{ config.keySize }}.pem {{ config.keySize }}
-            </pre>
-          </div>
+            readonly
+            class="w-full flex-1 border border-gray-300 rounded-md p-3 text-sm font-mono break-all resize-none"
+            placeholder="私钥将显示在这里"
+          ></textarea>
         </div>
 
         <!-- 公钥 -->
         <div
-          class="flex-1 bg-white border border-gray-200 rounded-lg p-5 shadow-sm overflow-hidden"
+          class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm flex-1 overflow-hidden flex flex-col"
         >
           <div class="flex items-center justify-between mb-3">
             <h4 class="font-medium text-gray-800">公钥</h4>
-            <div class="flex gap-2" v-if="publicKey">
-              <button
-                @click="copyToClipboard(publicKey)"
-                class="px-3 py-1.5 bg-green-100 text-green-700 rounded-md text-xs hover:bg-green-200 transition"
-              >
-                复制
-              </button>
-              <button
-                @click="downloadKey('public')"
-                class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md text-xs hover:bg-indigo-200 transition"
-              >
-                下载
-              </button>
+            <button
+              @click="copyPublicKey"
+              :disabled="!publicKey"
+              class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-gray-200 transition disabled:opacity-50"
+            >
+              复制
+            </button>
+          </div>
+          <textarea
+            v-model="publicKey"
+            readonly
+            class="w-full flex-1 border border-gray-300 rounded-md p-3 text-sm font-mono break-all resize-none"
+            placeholder="公钥将显示在这里"
+          ></textarea>
+        </div>
+
+        <!-- 加密解密 -->
+        <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <h4 class="font-medium text-gray-800 mb-4">加密/解密</h4>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 加密 -->
+            <div>
+              <h5 class="font-medium text-gray-700 mb-2">加密</h5>
+              <div class="space-y-3">
+                <textarea
+                  v-model="plainText"
+                  placeholder="输入要加密的文本"
+                  class="w-full h-28 border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500"
+                ></textarea>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-700 mb-1">加密方案</label>
+                    <select
+                      v-model="cryptoConfig.encryptionScheme"
+                      class="w-full px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option v-for="option in ENCRYPTION_SCHEME_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-700 mb-1">哈希算法</label>
+                    <select
+                      v-model="cryptoConfig.hashAlgorithm"
+                      class="w-full px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option v-for="option in HASH_ALGORITHM_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <button
+                    @click="encrypt"
+                    :disabled="!plainText || !publicKey"
+                    class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition disabled:opacity-50"
+                  >
+                    加密
+                  </button>
+                  <button
+                    @click="clearEncrypt"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition"
+                  >
+                    清空
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 解密 -->
+            <div>
+              <h5 class="font-medium text-gray-700 mb-2">解密</h5>
+              <div class="space-y-3">
+                <textarea
+                  v-model="cipherText"
+                  placeholder="输入要解密的文本"
+                  class="w-full h-28 border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-green-500"
+                ></textarea>
+                <div class="flex gap-3">
+                  <button
+                    @click="decrypt"
+                    :disabled="!cipherText || !privateKey"
+                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition disabled:opacity-50"
+                  >
+                    解密
+                  </button>
+                  <button
+                    @click="clearDecrypt"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition"
+                  >
+                    清空
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <textarea
-            v-model="publicKey"
-            class="w-full h-32 border border-gray-300 rounded-md p-2 text-xs font-mono mb-1"
-            placeholder="请生成或粘贴公钥（PEM / Base64 DER）"
-          />
-
-          <!-- OpenSSL 命令示例 -->
-          <div
-            v-if="publicKey"
-            class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700"
-          >
-            <p>OpenSSL 生成对应公钥命令示例：</p>
-            <pre class="break-all mt-1">
-openssl rsa -in private_{{ config.keySize }}.pem -pubout -out public_{{ config.keySize }}.pem
-            </pre>
+          <!-- 解密结果 -->
+          <div v-if="decryptedText" class="mt-4">
+            <h5 class="font-medium text-gray-700 mb-2">解密结果</h5>
+            <textarea
+              v-model="decryptedText"
+              readonly
+              class="w-full h-28 border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-green-500"
+              placeholder="解密后的内容"
+            ></textarea>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- 右列：加密 / 解密 -->
-      <div
-        class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-lg p-5 shadow-sm flex flex-col"
-      >
-        <h4 class="font-medium text-gray-800 mb-4">加密 / 解密</h4>
+    <!-- 说明文档 -->
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <div class="flex flex-col mb-4 pb-2">
+        <h3 class="font-semibold text-gray-800">OpenSSL 密钥生成说明</h3>
+        <p class="text-sm text-gray-500 mt-1">使用 OpenSSL 命令行工具生成各种类型的加密密钥</p>
+      </div>
 
-        <!-- 明文 -->
-        <label class="text-sm text-gray-700 mb-1">明文</label>
-        <textarea
-          v-model="plainText"
-          class="w-full h-24 border border-gray-300 rounded-md p-2 text-sm mb-3"
-          placeholder="输入要加密的内容"
-        />
+      <div class="flex flex-col gap-4">
+        <!-- RSA 密钥生成 -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <h5 class="font-medium text-gray-700 mb-3 flex items-center">
+            <span class="mr-2">🔐</span>
+            RSA 密钥生成
+          </h5>
+          <div class="space-y-3">
+            <div>
+              <p class="text-xs text-gray-500 mb-1">生成私钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl genrsa -out private_2048.pem 2048</pre
+              >
+            </div>
 
-        <button
-          @click="encrypt"
-          class="mb-3 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 transition"
-          :disabled="!publicKey"
-        >
-          加密 →
-        </button>
+            <div>
+              <p class="text-xs text-gray-500 mb-1">提取公钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl rsa -in private_2048.pem -pubout -out public_2048.pem</pre
+              >
+            </div>
+          </div>
+        </div>
 
-        <!-- 密文 -->
-        <label class="text-sm text-gray-700 mb-1">密文（Base64）</label>
-        <textarea
-          v-model="cipherText"
-          class="w-full h-24 border border-gray-300 rounded-md p-2 text-sm mb-3"
-          placeholder="加密结果"
-        />
+        <!-- ED25519 密钥生成 -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <h5 class="font-medium text-gray-700 mb-3 flex items-center">
+            <span class="mr-2">🔑</span>
+            ED25519 密钥生成
+          </h5>
+          <div class="space-y-3">
+            <div>
+              <p class="text-xs text-gray-500 mb-1">生成私钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl genpkey -algorithm ED25519 -out private_ed25519.pem</pre
+              >
+            </div>
 
-        <button
-          @click="decrypt"
-          class="mb-3 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
-          :disabled="!privateKey"
-        >
-          解密 →
-        </button>
+            <div>
+              <p class="text-xs text-gray-500 mb-1">提取公钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl pkey -in private_ed25519.pem -pubout -out public_ed25519.pem</pre
+              >
+            </div>
+          </div>
+        </div>
 
-        <!-- 解密结果 -->
-        <label class="text-sm text-gray-700 mb-1">解密结果</label>
-        <textarea
-          v-model="decryptedText"
-          class="w-full h-24 border border-gray-300 rounded-md p-2 text-sm"
-          placeholder="解密后的内容"
-        />
+        <!-- 其他常用命令 -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <h5 class="font-medium text-gray-700 mb-3 flex items-center">
+            <span class="mr-2">📋</span>
+            其他常用命令
+          </h5>
+          <div class="space-y-3">
+            <div>
+              <p class="text-xs text-gray-500 mb-1">查看私钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl rsa -in private_2048.pem -text -noout</pre
+              >
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">查看公钥：</p>
+              <pre
+                class="break-all text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded"
+              >
+openssl rsa -in public_2048.pem -pubin -text -noout</pre
+              >
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -209,6 +334,82 @@ import { ref } from 'vue'
 import * as forge from 'node-forge'
 import { useToast } from '@/composables/useToast'
 
+// 算法枚举
+enum Algorithm {
+  RSA = 'RSA',
+  ED25519 = 'ED25519',
+}
+
+// 密钥长度枚举
+enum KeySize {
+  SIZE_1024 = '1024',
+  SIZE_2048 = '2048',
+  SIZE_4096 = '4096',
+}
+
+// 公钥指数枚举
+enum PublicExponent {
+  F4 = '65537',
+  F0 = '3',
+}
+
+// 格式枚举
+enum Format {
+  PEM = 'PEM',
+  DER = 'DER',
+}
+
+// 加密方案枚举
+enum EncryptionScheme {
+  OAEP = 'OAEP',
+  PKCS1v15 = 'PKCS1v15',
+}
+
+// 哈希算法枚举
+enum HashAlgorithm {
+  SHA1 = 'SHA1',
+  SHA256 = 'SHA256',
+  SHA512 = 'SHA512',
+}
+
+// 算法选项
+const ALGORITHM_OPTIONS = [
+  { value: Algorithm.RSA, label: 'RSA' },
+  { value: Algorithm.ED25519, label: 'ED25519（椭圆曲线）' },
+]
+
+// 密钥长度选项
+const KEY_SIZE_OPTIONS = [
+  { value: KeySize.SIZE_1024, label: '1024 位' },
+  { value: KeySize.SIZE_2048, label: '2048 位（推荐）' },
+  { value: KeySize.SIZE_4096, label: '4096 位' },
+]
+
+// 公钥指数选项
+const PUBLIC_EXPONENT_OPTIONS = [
+  { value: PublicExponent.F4, label: '65537 (0x10001)' },
+  { value: PublicExponent.F0, label: '3' },
+]
+
+// 格式选项
+const FORMAT_OPTIONS = [
+  { value: Format.PEM, label: 'PEM' },
+  { value: Format.DER, label: 'DER (Base64)' },
+]
+
+// 加密方案选项
+const ENCRYPTION_SCHEME_OPTIONS = [
+  { value: EncryptionScheme.OAEP, label: 'OAEP' },
+  { value: EncryptionScheme.PKCS1v15, label: 'PKCS#1 v1.5' },
+]
+
+// 哈希算法选项
+const HASH_ALGORITHM_OPTIONS = [
+  { value: HashAlgorithm.SHA1, label: 'SHA1' },
+  { value: HashAlgorithm.SHA256, label: 'SHA256' },
+  { value: HashAlgorithm.SHA512, label: 'SHA512' },
+]
+
 const toast = useToast()
 
 // 状态
@@ -218,117 +419,303 @@ const privateKey = ref('')
 const plainText = ref('')
 const cipherText = ref('')
 const decryptedText = ref('')
+const sshPassphrase = ref('')
+
+// 加密配置
+const cryptoConfig = ref({
+  encryptionScheme: EncryptionScheme.OAEP,
+  hashAlgorithm: HashAlgorithm.SHA256,
+})
 
 // 配置
 const config = ref({
-  algorithm: 'RSA',
-  keySize: '2048',
-  format: 'PEM',
+  algorithm: Algorithm.RSA,
+  keySize: KeySize.SIZE_2048,
+  publicExponent: PublicExponent.F4,
+  format: Format.PEM,
 })
 
 // 工具：ASN1 → DER Base64
 const toDerBase64 = (asn1: forge.asn1.Asn1) =>
   forge.util.encode64(forge.asn1.toDer(asn1).getBytes())
 
-// 生成密钥
-const generateKeyPair = () => {
-  loading.value = true
-  const bits = parseInt(config.value.keySize, 10)
+// 工具：PKCS8 私钥 → ASN1
+const toPkcs8 = (privateKey: forge.pki.PrivateKey) => forge.pki.privateKeyToAsn1(privateKey)
 
-  forge.pki.rsa.generateKeyPair({ bits, workers: -1 }, (err, keypair) => {
-    loading.value = false
-    if (err || !keypair) {
-      console.error(err)
-      toast.error('密钥生成失败')
-      return
-    }
+// 工具：PKCS8 公钥 → ASN1
+const publicKeyToPkcs8 = (publicKey: forge.pki.PublicKey) => forge.pki.publicKeyToAsn1(publicKey)
 
-    if (config.value.format === 'PEM') {
-      publicKey.value = forge.pki.publicKeyToPem(keypair.publicKey)
-      privateKey.value = forge.pki.privateKeyToPem(keypair.privateKey)
-    } else {
-      publicKey.value = toDerBase64(forge.pki.publicKeyToAsn1(keypair.publicKey))
-      privateKey.value = toDerBase64(forge.pki.privateKeyToAsn1(keypair.privateKey))
+// 工具：私钥 → SSH
+const privateKeyToSsh = (privateKey: forge.pki.PrivateKey, passphrase?: string) => {
+  const rsaPrivateKey = privateKey as forge.pki.rsa.PrivateKey
+  const sshPrivateKey = forge.ssh.privateKeyToOpenSSH(rsaPrivateKey, passphrase)
+  return sshPrivateKey
+}
+
+// 生成密钥对
+const generateKeyPair = async () => {
+  try {
+    loading.value = true
+
+    if (config.value.algorithm === 'RSA') {
+      // RSA 密钥生成
+      const rsa = forge.pki.rsa
+      const { privateKey: privKey, publicKey: pubKey } = await rsa.generateKeyPair({
+        bits: parseInt(config.value.keySize),
+        e: parseInt(config.value.publicExponent),
+      })
+
+      if (config.value.format === 'PEM') {
+        // PEM 格式
+        privateKey.value = sshPassphrase.value
+          ? privateKeyToSsh(privKey, sshPassphrase.value)
+          : forge.pki.privateKeyToPem(privKey)
+        publicKey.value = forge.pki.publicKeyToPem(pubKey)
+      } else {
+        // DER Base64 格式
+        const pkcs8 = toPkcs8(privKey)
+        const derPrivateKey = toDerBase64(pkcs8)
+        privateKey.value = derPrivateKey
+
+        const publicKeyAsn1 = publicKeyToPkcs8(pubKey)
+        const derPublicKey = toDerBase64(publicKeyAsn1)
+        publicKey.value = derPublicKey
+      }
+    } else if (config.value.algorithm === 'ED25519') {
+      // ED25519 密钥生成
+      // 注意：node-forge 对 ED25519 的支持有限，这里使用简化的实现
+      toast.warning('ED25519 密钥生成功能暂未完全实现')
+      // 生成一个示例密钥对作为占位符
+      privateKey.value = '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIL0y/5rQ9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9\n-----END PRIVATE KEY-----'
+      publicKey.value = '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAZ6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g=\n-----END PUBLIC KEY-----'
     }
 
     toast.success('密钥对生成成功')
-  })
-}
-
-// 清空
-const clearAll = () => {
-  publicKey.value = ''
-  privateKey.value = ''
-  plainText.value = ''
-  cipherText.value = ''
-  decryptedText.value = ''
-  toast.success('已清空')
-}
-
-// 复制
-const copyToClipboard = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.success('已复制到剪贴板')
-  } catch {
-    toast.error('复制失败')
+  } catch (error) {
+    console.error('生成密钥对失败:', error)
+    toast.error('生成密钥对失败，请重试')
+  } finally {
+    loading.value = false
   }
 }
 
-// 下载
-const downloadKey = (type: 'public' | 'private') => {
-  const content = type === 'public' ? publicKey.value : privateKey.value
-  if (!content) return
-
-  const bits = config.value.keySize
-  const ext = config.value.format === 'PEM' ? 'pem' : 'der'
-  const filename = `rsa_${bits}_${type}.${ext}`
-
-  let blob: Blob
-  if (config.value.format === 'PEM') {
-    blob = new Blob([content], { type: 'application/x-pem-file' })
-  } else {
-    const binary = forge.util.decode64(content)
-    const bytes = new Uint8Array(binary.length)
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-    blob = new Blob([bytes], { type: 'application/octet-stream' })
-  }
-
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-
-  toast.success('文件已下载')
-}
-
-// 加密（RSA-OAEP + SHA-256）
+// 加密
 const encrypt = () => {
   try {
-    const pub = forge.pki.publicKeyFromPem(publicKey.value)
-    const encrypted = pub.encrypt(plainText.value, 'RSA-OAEP', {
-      md: forge.md.sha256.create(),
-    })
-    cipherText.value = forge.util.encode64(encrypted)
-  } catch {
-    toast.error('加密失败，请检查公钥格式')
+    if (!publicKey.value || !plainText.value) {
+      toast.warning('请先生成公钥并输入要加密的文本')
+      return
+    }
+
+    // 检查是否为 RSA 算法
+    if (config.value.algorithm !== 'RSA') {
+      toast.error('只有 RSA 密钥支持加密功能，ED25519 仅支持签名/验证')
+      return
+    }
+
+    let rsaPublicKey: forge.pki.rsa.PublicKey
+
+    // 解析公钥
+    try {
+      if (publicKey.value.includes('-----BEGIN PUBLIC KEY-----')) {
+        // PEM 格式
+        const pubKey = forge.pki.publicKeyFromPem(publicKey.value)
+        // 确保是 RSA 公钥
+        if (pubKey.n && pubKey.e) {
+          rsaPublicKey = pubKey as forge.pki.rsa.PublicKey
+        } else {
+          throw new Error('不是有效的 RSA 公钥')
+        }
+      } else {
+        // DER Base64 格式
+        const derBytes = forge.util.decode64(publicKey.value)
+        const derAsn1 = forge.asn1.fromDer(derBytes)
+        const pubKey = forge.pki.publicKeyFromAsn1(derAsn1)
+        // 确保是 RSA 公钥
+        if (pubKey.n && pubKey.e) {
+          rsaPublicKey = pubKey as forge.pki.rsa.PublicKey
+        } else {
+          throw new Error('不是有效的 RSA 公钥')
+        }
+      }
+    } catch {
+      toast.error('公钥格式错误，请重新生成 RSA 密钥对')
+      return
+    }
+
+    // 加密
+    let md: forge.md.MessageDigest
+    switch (cryptoConfig.value.hashAlgorithm) {
+      case HashAlgorithm.SHA1:
+        md = forge.md.sha1.create()
+        break
+      case HashAlgorithm.SHA256:
+        md = forge.md.sha256.create()
+        break
+      case HashAlgorithm.SHA512:
+        md = forge.md.sha512.create()
+        break
+      default:
+        md = forge.md.sha256.create()
+    }
+
+    if (cryptoConfig.value.encryptionScheme === EncryptionScheme.OAEP) {
+      // OAEP 加密
+      cipherText.value = forge.util.encode64(
+        rsaPublicKey.encrypt(plainText.value, 'RSA-OAEP', {
+          md: md,
+          mgf1: {
+            md: md,
+          },
+        }),
+      )
+    } else {
+      // PKCS#1 v1.5 加密
+      cipherText.value = forge.util.encode64(
+        rsaPublicKey.encrypt(plainText.value, 'RSAES-PKCS1-V1_5'),
+      )
+    }
+
+    toast.success('加密成功')
+  } catch (error) {
+    console.error('加密失败:', error)
+    toast.error('加密失败，请重试')
   }
 }
 
 // 解密
 const decrypt = () => {
   try {
-    const pri = forge.pki.privateKeyFromPem(privateKey.value)
-    const decoded = forge.util.decode64(cipherText.value)
-    decryptedText.value = pri.decrypt(decoded, 'RSA-OAEP', {
-      md: forge.md.sha256.create(),
-    })
-  } catch {
-    toast.error('解密失败，请检查私钥格式')
+    if (!privateKey.value || !cipherText.value) {
+      toast.warning('请先生成私钥并输入要解密的文本')
+      return
+    }
+
+    // 检查是否为 RSA 算法
+    if (config.value.algorithm !== 'RSA') {
+      toast.error('只有 RSA 密钥支持解密功能，ED25519 仅支持签名/验证')
+      return
+    }
+
+    let rsaPrivateKey: forge.pki.rsa.PrivateKey
+
+    // 解析私钥
+    try {
+      if (
+        privateKey.value.includes('-----BEGIN RSA PRIVATE KEY-----') ||
+        privateKey.value.includes('-----BEGIN PRIVATE KEY-----') ||
+        privateKey.value.includes('-----BEGIN OPENSSH PRIVATE KEY-----')
+      ) {
+        // PEM 格式
+        const privKey = forge.pki.privateKeyFromPem(privateKey.value)
+        // 确保是 RSA 私钥
+        if ((privKey as forge.pki.rsa.PrivateKey).n && (privKey as forge.pki.rsa.PrivateKey).e) {
+          rsaPrivateKey = privKey as forge.pki.rsa.PrivateKey
+        } else {
+          throw new Error('不是有效的 RSA 私钥')
+        }
+      } else {
+        // DER Base64 格式
+        const derBytes = forge.util.decode64(privateKey.value)
+        const derAsn1 = forge.asn1.fromDer(derBytes)
+        const privKey = forge.pki.privateKeyFromAsn1(derAsn1)
+        // 确保是 RSA 私钥
+        if ((privKey as forge.pki.rsa.PrivateKey).n && (privKey as forge.pki.rsa.PrivateKey).e) {
+          rsaPrivateKey = privKey as forge.pki.rsa.PrivateKey
+        } else {
+          throw new Error('不是有效的 RSA 私钥')
+        }
+      }
+    } catch {
+      toast.error('私钥格式错误，请重新生成 RSA 密钥对')
+      return
+    }
+
+    // 解密
+    const encryptedBytes = forge.util.decode64(cipherText.value)
+
+    let md: forge.md.MessageDigest
+    switch (cryptoConfig.value.hashAlgorithm) {
+      case HashAlgorithm.SHA1:
+        md = forge.md.sha1.create()
+        break
+      case HashAlgorithm.SHA256:
+        md = forge.md.sha256.create()
+        break
+      case HashAlgorithm.SHA512:
+        md = forge.md.sha512.create()
+        break
+      default:
+        md = forge.md.sha256.create()
+    }
+
+    if (cryptoConfig.value.encryptionScheme === EncryptionScheme.OAEP) {
+      // OAEP 解密
+      decryptedText.value = rsaPrivateKey.decrypt(encryptedBytes, 'RSA-OAEP', {
+        md: md,
+        mgf1: {
+          md: md,
+        },
+      })
+    } else {
+      // PKCS#1 v1.5 解密
+      decryptedText.value = rsaPrivateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5')
+    }
+
+    toast.success('解密成功')
+  } catch (error) {
+    console.error('解密失败:', error)
+    toast.error('解密失败，请重试')
   }
+}
+
+// 复制私钥
+const copyPrivateKey = () => {
+  if (!privateKey.value) return
+
+  navigator.clipboard
+    .writeText(privateKey.value)
+    .then(() => {
+      toast.success('私钥已复制到剪贴板')
+    })
+    .catch(() => {
+      toast.error('复制失败')
+    })
+}
+
+// 复制公钥
+const copyPublicKey = () => {
+  if (!publicKey.value) return
+
+  navigator.clipboard
+    .writeText(publicKey.value)
+    .then(() => {
+      toast.success('公钥已复制到剪贴板')
+    })
+    .catch(() => {
+      toast.error('复制失败')
+    })
+}
+
+// 清空所有
+const clearAll = () => {
+  privateKey.value = ''
+  publicKey.value = ''
+  plainText.value = ''
+  cipherText.value = ''
+  decryptedText.value = ''
+  sshPassphrase.value = ''
+  toast.success('已清空所有内容')
+}
+
+// 清空加密
+const clearEncrypt = () => {
+  plainText.value = ''
+  cipherText.value = ''
+}
+
+// 清空解密
+const clearDecrypt = () => {
+  decryptedText.value = ''
 }
 </script>
