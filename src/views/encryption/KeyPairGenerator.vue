@@ -18,7 +18,9 @@
               v-model="config.algorithm"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option v-for="option in ALGORITHM_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+              <option v-for="option in ALGORITHM_OPTIONS" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
             </select>
             <p class="text-xs text-gray-500 mt-1">
               RSA 支持 OAEP / PKCS#1 v1.5 加密方式，ED25519 仅支持签名/验证
@@ -32,7 +34,9 @@
               v-model="config.keySize"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option v-for="option in KEY_SIZE_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+              <option v-for="option in KEY_SIZE_OPTIONS" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
             </select>
             <p class="text-xs text-gray-500 mt-1">更大的密钥长度更安全，但生成速度更慢</p>
           </div>
@@ -44,7 +48,13 @@
               v-model="config.publicExponent"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option v-for="option in PUBLIC_EXPONENT_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+              <option
+                v-for="option in PUBLIC_EXPONENT_OPTIONS"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
             </select>
             <p class="text-xs text-gray-500 mt-1">65537 是更安全的默认值</p>
           </div>
@@ -56,7 +66,9 @@
               v-model="config.format"
               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
             >
-              <option v-for="option in FORMAT_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+              <option v-for="option in FORMAT_OPTIONS" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
             </select>
             <div class="mt-1 text-xs text-gray-500">
               <div>PEM: 文本格式，包含 -----BEGIN/END----- 标记</div>
@@ -163,7 +175,13 @@
                       v-model="cryptoConfig.encryptionScheme"
                       class="w-full px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500"
                     >
-                      <option v-for="option in ENCRYPTION_SCHEME_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+                      <option
+                        v-for="option in ENCRYPTION_SCHEME_OPTIONS"
+                        :key="option.value"
+                        :value="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
                     </select>
                   </div>
                   <div>
@@ -172,7 +190,13 @@
                       v-model="cryptoConfig.hashAlgorithm"
                       class="w-full px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500"
                     >
-                      <option v-for="option in HASH_ALGORITHM_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+                      <option
+                        v-for="option in HASH_ALGORITHM_OPTIONS"
+                        :key="option.value"
+                        :value="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -246,9 +270,7 @@
       <div class="flex flex-col gap-4">
         <!-- 常见场景生成方式 -->
         <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <h5 class="font-medium text-gray-700 mb-3 flex items-center">
-            常见场景生成方式
-          </h5>
+          <h5 class="font-medium text-gray-700 mb-3 flex items-center">常见场景生成方式</h5>
           <div class="space-y-4">
             <div>
               <h6 class="text-xs font-medium text-gray-600 mb-2">Web 服务器 HTTPS 证书密钥</h6>
@@ -298,9 +320,7 @@ openssl pkey -in private_ed25519.pem -pubout -out public_ed25519.pem</pre
 
         <!-- 其他常用命令 -->
         <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <h5 class="font-medium text-gray-700 mb-3 flex items-center">
-            其他常用命令
-          </h5>
+          <h5 class="font-medium text-gray-700 mb-3 flex items-center">其他常用命令</h5>
           <div class="space-y-3">
             <div>
               <p class="text-xs text-gray-500 mb-1">生成 RSA 私钥：</p>
@@ -537,8 +557,10 @@ const generateKeyPair = async () => {
       // 注意：node-forge 对 ED25519 的支持有限，这里使用简化的实现
       toast.warning('ED25519 密钥生成功能暂未完全实现')
       // 生成一个示例密钥对作为占位符
-      privateKey.value = '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIL0y/5rQ9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9\n-----END PRIVATE KEY-----'
-      publicKey.value = '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAZ6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g=\n-----END PUBLIC KEY-----'
+      privateKey.value =
+        '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIL0y/5rQ9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9\n-----END PRIVATE KEY-----'
+      publicKey.value =
+        '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAZ6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g=\n-----END PUBLIC KEY-----'
     }
 
     toast.success('密钥对生成成功')
