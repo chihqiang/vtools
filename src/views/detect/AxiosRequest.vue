@@ -123,16 +123,16 @@
               <div class="flex">
                 <button
                   v-for="tab in paramTabs"
-                  :key="tab.value"
-                  @click="activeParamTab = tab.value"
+                  :key="tab"
+                  @click="activeParamTab = tab"
                   :class="[
                     'px-4 py-2 text-sm font-medium',
-                    activeParamTab === tab.value
+                    activeParamTab === tab
                       ? 'border-b-2 border-indigo-500 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50',
                   ]"
                 >
-                  {{ tab.label }}
+                  {{ paramTabLabels[tab] }}
                 </button>
               </div>
             </div>
@@ -140,7 +140,7 @@
             <!-- 请求体参数内容 -->
             <div class="p-4 border-b border-gray-200">
               <!-- form-data -->
-              <div v-if="activeParamTab === 'form-data'" class="space-y-4">
+              <div v-if="activeParamTab === ParamTabType.FORM_DATA" class="space-y-4">
                 <div
                   v-for="(item, index) in formDataParams"
                   :key="index"
@@ -206,7 +206,7 @@
               </div>
 
               <!-- x-www-form-urlencoded -->
-              <div v-else-if="activeParamTab === 'x-www-form-urlencoded'" class="space-y-4">
+              <div v-else-if="activeParamTab === ParamTabType.URL_ENCODED" class="space-y-4">
                 <div
                   v-for="(item, index) in urlEncodedParams"
                   :key="index"
@@ -251,7 +251,7 @@
               </div>
 
               <!-- json -->
-              <div v-else-if="activeParamTab === 'json'" class="space-y-4">
+              <div v-else-if="activeParamTab === ParamTabType.JSON" class="space-y-4">
                 <textarea
                   v-model="jsonParams"
                   placeholder="输入JSON格式的参数"
@@ -260,7 +260,7 @@
               </div>
 
               <!-- Query Params -->
-              <div v-else-if="activeParamTab === 'query-params'" class="space-y-4">
+              <div v-else-if="activeParamTab === ParamTabType.QUERY_PARAMS" class="space-y-4">
                 <div v-for="(item, index) in queryParams" :key="index" class="flex gap-2">
                   <input
                     v-model="item.key"
@@ -472,14 +472,25 @@ const presetHeaders = [
   { key: 'Referer', value: 'https://tools.zhiqiag.wang' },
 ]
 
+// 请求体参数选项卡枚举
+enum ParamTabType {
+  QUERY_PARAMS = 'query',
+  FORM_DATA = 'form-data',
+  URL_ENCODED = 'x-www-form-urlencoded',
+  JSON = 'json',
+}
+
+// 请求体参数选项卡标签映射
+const paramTabLabels: Record<ParamTabType, string> = {
+  [ParamTabType.QUERY_PARAMS]: ParamTabType.QUERY_PARAMS,
+  [ParamTabType.FORM_DATA]: ParamTabType.FORM_DATA,
+  [ParamTabType.URL_ENCODED]: ParamTabType.URL_ENCODED,
+  [ParamTabType.JSON]: ParamTabType.JSON,
+}
+
 // 请求体参数选项卡
-const activeParamTab = ref<string>('x-www-form-urlencoded')
-const paramTabs = [
-  { label: 'form-data', value: 'form-data' },
-  { label: 'x-www-form-urlencoded', value: 'x-www-form-urlencoded' },
-  { label: 'json', value: 'json' },
-  { label: 'Query Params', value: 'query-params' },
-]
+const activeParamTab = ref<ParamTabType>(ParamTabType.QUERY_PARAMS)
+const paramTabs = Object.values(ParamTabType)
 
 // 请求参数
 const formDataParams = reactive<FormDataParam[]>([
@@ -507,7 +518,7 @@ const isLoading = ref(false)
 const isHeadersExpanded = ref(true)
 
 // 计算属性：当前是否为x-www-form-urlencoded模式
-const isUrlEncodedMode = computed(() => activeParamTab.value === 'x-www-form-urlencoded')
+const isUrlEncodedMode = computed(() => activeParamTab.value === ParamTabType.URL_ENCODED)
 
 // 请求历史记录相关
 interface RequestHistoryItem {
@@ -655,7 +666,15 @@ const restoreRequestFromHistory = (item: RequestHistoryItem) => {
 
   // 恢复选项卡状态
   activeContentTab.value = item.requestData.activeContentTab
-  activeParamTab.value = item.requestData.activeParamTab
+
+  // 安全地转换activeParamTab类型
+  const savedTab = item.requestData.activeParamTab
+  if (Object.values(ParamTabType).includes(savedTab as ParamTabType)) {
+    activeParamTab.value = savedTab as ParamTabType
+  } else {
+    // 如果恢复的值无效，使用默认值
+    activeParamTab.value = ParamTabType.URL_ENCODED
+  }
 
   // 恢复参数
   formDataParams.length = 0
@@ -815,10 +834,9 @@ const removeQueryParam = (index: number) => {
 
 // 构建带查询参数的URL
 const buildUrlWithQueryParams = (url: string) => {
-  if (activeParamTab.value !== 'query-params') {
+  if (activeParamTab.value !== ParamTabType.QUERY_PARAMS) {
     return url
   }
-
   // 确保URL不包含未编码的空格
   const encodedUrl = url.replace(/\s+/g, '%20')
 
@@ -898,7 +916,7 @@ const sendRequest = async () => {
     if (
       request.method !== HttpMethod.GET &&
       request.method !== HttpMethod.HEAD &&
-      activeParamTab.value !== 'query-params'
+      activeParamTab.value !== ParamTabType.QUERY_PARAMS
     ) {
       config.data = await getRequestBody()
     }
@@ -988,9 +1006,9 @@ const sendRequest = async () => {
 
 // 获取内容类型
 const getContentType = () => {
-  if (activeParamTab.value === 'json') {
+  if (activeParamTab.value === ParamTabType.JSON) {
     return 'application/json'
-  } else if (activeParamTab.value === 'x-www-form-urlencoded') {
+  } else if (activeParamTab.value === ParamTabType.URL_ENCODED) {
     return 'application/x-www-form-urlencoded'
   } else {
     return '' // 对于form-data和query-params，不需要手动设置Content-Type
@@ -1040,7 +1058,7 @@ const convertParamValue = (
 const getRequestBody = async () => {
   if (activeParamTab.value === 'json' && jsonParams.value) {
     return jsonParams.value
-  } else if (activeParamTab.value === 'x-www-form-urlencoded') {
+  } else if (activeParamTab.value === ParamTabType.URL_ENCODED) {
     const params = urlEncodedParams
       .filter((p) => p.key) // 只包含有键的参数
       .map((p) => {
@@ -1055,7 +1073,7 @@ const getRequestBody = async () => {
       })
       .join('&')
     return params
-  } else if (activeParamTab.value === 'form-data') {
+  } else if (activeParamTab.value === ParamTabType.FORM_DATA) {
     const formData = new FormData()
     formDataParams.forEach((param) => {
       if (param.key && param.type === ParamType.FILE && param.file) {
