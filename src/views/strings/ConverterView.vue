@@ -1,39 +1,47 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full">
-    <!-- 输入区 -->
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold text-gray-700">文本内容</h3>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="btn in clipboardButtons"
-            :key="btn.text"
-            @click="btn.method"
-            :class="btn.class"
-          >
-            {{ btn.text }}
-          </button>
+    <!-- 输入区和统计区（左右布局） -->
+    <div class="flex flex-col md:flex-row gap-4 mb-6">
+      <!-- 左侧：文本内容 -->
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-gray-700">文本内容</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="btn in clipboardButtons"
+              :key="btn.text"
+              @click="btn.method"
+              :class="btn.class"
+            >
+              {{ btn.text }}
+            </button>
+          </div>
+        </div>
+
+        <div class="border border-gray-300 rounded-lg overflow-hidden">
+          <textarea
+            v-model="inputText"
+            placeholder="请输入文本，然后选择转换方式..."
+            class="w-full min-h-[400px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            spellcheck="false"
+          ></textarea>
         </div>
       </div>
 
-      <div class="border border-gray-300 rounded-lg overflow-hidden">
-        <textarea
-          v-model="inputText"
-          placeholder="请输入文本，然后选择转换方式..."
-          class="w-full min-h-[400px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          spellcheck="false"
-        ></textarea>
-      </div>
-
-      <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div
-          v-for="(value, key) in textStats"
-          :key="key"
-          :class="statColors[key]"
-          class="rounded-lg p-3 border shadow-sm"
-        >
-          <div class="text-xs font-medium mb-1 text-gray-600">{{ statLabels[key] }}</div>
-          <div class="text-2xl font-bold font-mono">{{ value }}</div>
+      <!-- 右侧：文本统计 -->
+      <div class="w-full md:w-72">
+        <h3 class="font-semibold text-gray-700 mb-3">文本统计</h3>
+        <div class="grid grid-cols-2 gap-1" style="height: 400px">
+          <div
+            v-for="(value, key) in textStats"
+            :key="key"
+            :class="statColors[key]"
+            class="rounded-lg p-2 border shadow-sm flex items-center justify-between"
+            style="height: 50px"
+          >
+            <div class="text-xs font-medium text-gray-600">{{ statLabels[key] }}</div>
+            <div class="text-sm font-bold font-mono">{{ value }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -85,19 +93,73 @@ const inputText = ref('')
 /* ---------- 文本统计 ---------- */
 const textStats = computed(() => {
   const text = inputText.value
+
+  // 基本统计
+  const charCount = text.length
+  const byteCount = new Blob([text]).size
+  const lines = text.split('\n')
+  const lineCount = lines.length
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0
+
+  // 新增统计项
+  const textNoNewline = text.replace(/\n/g, '')
+  const totalLengthNoNewline = textNoNewline.length
+
+  // 不区分全/半角的长度（将全角字符视为1个字符）
+  const totalLengthNoNewlineNoWidth = textNoNewline.length
+
+  // 中文（包括汉字、标点等）
+  const chineseCount = (text.match(/[\u4e00-\u9fa5\u3000-\u303f]/g) || []).length
+
+  // 字母（大小写）
+  const letterCount = (text.match(/[a-zA-Z]/g) || []).length
+
+  // 数字
+  const numberCount = (text.match(/[0-9]/g) || []).length
+
+  // 空格（包括普通空格和全角空格）
+  const spaceCount = (text.match(/[ \u00A0]/g) || []).length
+
+  // 半角字符（ASCII字符，除了换行）
+  const halfWidthCount = (text.match(/[\x00-\x7F]/g) || []).length
+
+  // 全角字符（非ASCII字符，除了中文）
+  const fullWidthCount = charCount - halfWidthCount
+
+  // 换行符数量
+  const newlineCount = (text.match(/\n/g) || []).length
+
   return {
-    charCount: text.length,
-    byteCount: new Blob([text]).size,
-    lineCount: text ? text.split('\n').length : 0,
-    wordCount: text.trim() ? text.trim().split(/\s+/).length : 0,
+    charCount,
+    byteCount,
+    lineCount,
+    wordCount,
+    totalLengthNoNewline,
+    totalLengthNoNewlineNoWidth,
+    chineseCount,
+    letterCount,
+    numberCount,
+    spaceCount,
+    halfWidthCount,
+    fullWidthCount,
+    newlineCount,
   }
 })
 
 const statLabels: Record<string, string> = {
   charCount: '字符数',
   byteCount: '字节数',
-  lineCount: '行数',
+  lineCount: '总行数',
   wordCount: '单词数',
+  totalLengthNoNewline: '文本总长（不含换行）',
+  totalLengthNoNewlineNoWidth: '文本总长（不含换行,不区分全/半角）',
+  chineseCount: '中文',
+  letterCount: '字母',
+  numberCount: '数字',
+  spaceCount: '空格',
+  halfWidthCount: '半角',
+  fullWidthCount: '全角',
+  newlineCount: '换行',
 }
 
 const statColors: Record<string, string> = {
@@ -105,6 +167,16 @@ const statColors: Record<string, string> = {
   byteCount: 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 text-green-700',
   lineCount: 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 text-purple-700',
   wordCount: 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 text-orange-700',
+  totalLengthNoNewline: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-700',
+  totalLengthNoNewlineNoWidth:
+    'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 text-yellow-700',
+  chineseCount: 'bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200 text-teal-700',
+  letterCount: 'bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-700',
+  numberCount: 'bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200 text-pink-700',
+  spaceCount: 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 text-gray-700',
+  halfWidthCount: 'bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 text-cyan-700',
+  fullWidthCount: 'bg-gradient-to-br from-lime-50 to-lime-100 border-lime-200 text-lime-700',
+  newlineCount: 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 text-amber-700',
 }
 
 /* ---------- 工具函数 ---------- */
