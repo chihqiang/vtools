@@ -118,8 +118,20 @@ const ensureInput = () => {
 
 const removeSpaces = () => {
   if (!ensureInput()) return
-  inputText.value = inputText.value.replace(/\s+/g, '')
+  // 先清除整个字符串的前后空格，然后对每一行清除行内的空格
+  inputText.value = inputText.value
+    .trim()
+    .split('\n')
+    .map((line) => line.replace(/[ ]+/g, ''))
+    .join('\n')
   toast.success('已清除所有空格')
+}
+
+// 压缩文本（移除所有空格和换行符）
+const compressText = () => {
+  if (!ensureInput()) return
+  inputText.value = inputText.value.replace(/\s+/g, '')
+  toast.success('已压缩文本')
 }
 
 const clearInput = () => {
@@ -261,6 +273,11 @@ const clipboardButtons = [
     text: '清除空格',
     method: removeSpaces,
     class: 'px-3 py-2 bg-amber-500 text-white rounded text-sm',
+  },
+  {
+    text: '压缩',
+    method: compressText,
+    class: 'px-3 py-2 bg-orange-500 text-white rounded text-sm',
   },
   { text: '清空', method: clearInput, class: 'px-3 py-2 bg-gray-600 text-white rounded text-sm' },
 ]
