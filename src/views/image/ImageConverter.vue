@@ -106,32 +106,58 @@
 
         <!-- 尺寸设置 -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">自定义尺寸</label>
-          <div class="flex gap-4">
-            <div class="flex-1">
-              <label class="block text-xs text-gray-500 mb-1">宽度</label>
-              <input
-                type="number"
-                v-model.number="customWidth"
-                min="1"
-                placeholder="原始宽度"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="flex-1">
-              <label class="block text-xs text-gray-500 mb-1">高度</label>
-              <input
-                type="number"
-                v-model.number="customHeight"
-                min="1"
-                placeholder="原始高度"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+          <label class="block text-sm font-medium text-gray-700 mb-2">尺寸设置</label>
+
+          <!-- 自定义尺寸 -->
+          <div class="mb-4">
+            <label class="block text-xs text-gray-500 mb-1">自定义尺寸</label>
+            <div class="flex gap-4">
+              <div class="flex-1">
+                <input
+                  type="number"
+                  v-model.number="customWidth"
+                  min="1"
+                  placeholder="原始宽度"
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div class="flex-1">
+                <input
+                  type="number"
+                  v-model.number="customHeight"
+                  min="1"
+                  placeholder="原始高度"
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
-          <p class="text-xs text-gray-400 mt-2">
-            留空使用原始尺寸: {{ originalWidth }} × {{ originalHeight }}
-          </p>
+
+          <!-- 常见尺寸预设 -->
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">常见尺寸</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="size in commonSizes"
+                :key="size.name"
+                @click="applySizePreset(size.width, size.height)"
+                class="px-3 py-1 text-xs border rounded-md hover:bg-gray-100 transition-colors"
+                :class="{
+                  'bg-blue-100 border-blue-500 text-blue-700':
+                    (size.width === 0 &&
+                      size.height === 0 &&
+                      customWidth === originalWidth &&
+                      customHeight === originalHeight) ||
+                    (size.width !== 0 &&
+                      size.height !== 0 &&
+                      customWidth === size.width &&
+                      customHeight === size.height),
+                }"
+              >
+                {{ size.name }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- 转换按钮 -->
@@ -254,6 +280,24 @@ const customWidth = ref<number>(0)
 const customHeight = ref<number>(0)
 const convertedWidth = ref<number>(0)
 const convertedHeight = ref<number>(0)
+
+// 常见尺寸预设
+const commonSizes = computed(() => [
+  {
+    name:
+      originalWidth.value && originalHeight.value
+        ? `原始尺寸 (${originalWidth.value}×${originalHeight.value})`
+        : '原始尺寸',
+    width: 0,
+    height: 0,
+  },
+  { name: '1920x1080 (Full HD)', width: 1920, height: 1080 },
+  { name: '1280x720 (HD)', width: 1280, height: 720 },
+  { name: '800x600 (VGA)', width: 800, height: 600 },
+  { name: '640x480 (SD)', width: 640, height: 480 },
+  { name: '400x400 (Square)', width: 400, height: 400 },
+  { name: '1080x1920 (Portrait HD)', width: 1080, height: 1920 },
+])
 const isConverting = ref<boolean>(false)
 const formatLoading = ref<Record<string, boolean>>({})
 
@@ -455,6 +499,18 @@ const formatFileSize = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// 应用尺寸预设
+const applySizePreset = (width: number, height: number) => {
+  // 如果是原始尺寸预设（width=0, height=0），则使用实际的原始尺寸
+  if (width === 0 && height === 0) {
+    customWidth.value = originalWidth.value
+    customHeight.value = originalHeight.value
+  } else {
+    customWidth.value = width
+    customHeight.value = height
+  }
 }
 
 // 下载图片
