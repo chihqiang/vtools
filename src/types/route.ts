@@ -13,8 +13,8 @@ export enum HomeGroup {
 export const GroupOrder: Record<HomeGroup, number> = {
   [HomeGroup.JSON_TOOLS]: 99,
   [HomeGroup.STRING_TOOLS]: 88,
-  [HomeGroup.IMAGE_TOOLS]: 77,
-  [HomeGroup.DEVELOPMENT_TOOLS]: 66,
+  [HomeGroup.DEVELOPMENT_TOOLS]: 77,
+  [HomeGroup.IMAGE_TOOLS]: 66,
   [HomeGroup.ENCRYPTION_TOOLS]: 55,
   [HomeGroup.NETWORK_TOOLS]: 44,
   [HomeGroup.UNGROUPED]: -1,
