@@ -52,7 +52,7 @@
               />
             </svg>
             <p class="text-sm text-gray-500 mb-2">点击或拖拽文件到此处上传</p>
-            <p class="text-xs text-gray-400">支持 JPG、PNG、WebP、GIF 格式</p>
+            <p class="text-xs text-gray-400">支持 JPG、PNG、WebP、GIF、SVG 格式</p>
           </div>
           <!-- 上传后的预览 -->
           <div
@@ -66,7 +66,8 @@
               <img :src="originalImage" alt="原始图片" class="max-w-full max-h-48 object-contain" />
             </div>
             <p class="text-xs text-gray-500 mb-2">
-              尺寸: {{ originalWidth }} × {{ originalHeight }}
+              尺寸: {{ originalWidth }} × {{ originalHeight }} | 大小:
+              {{ formatFileSize(originalFileSize) }}
             </p>
             <button
               @click="fileInput?.click()"
@@ -79,7 +80,7 @@
             ref="fileInput"
             type="file"
             class="hidden"
-            accept="image/*"
+            accept="image/*,.svg"
             @change="handleFileUpload"
           />
         </div>
@@ -101,25 +102,6 @@
               </label>
             </div>
           </div>
-        </div>
-
-        <!-- 质量设置（仅适用于 JPEG、JPG 和 WebP） -->
-        <div
-          v-if="
-            targetFormats.some((format) =>
-              [ImageFormat.JPEG, ImageFormat.JPG, ImageFormat.WEBP].includes(format),
-            )
-          "
-          class="mb-6"
-        >
-          <label class="block text-sm font-medium text-gray-700 mb-2"> 质量: {{ quality }}% </label>
-          <input
-            type="range"
-            v-model.number="quality"
-            min="1"
-            max="100"
-            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
         </div>
 
         <!-- 尺寸设置 -->
@@ -155,10 +137,23 @@
         <!-- 转换按钮 -->
         <button
           @click="convertImage"
-          :disabled="!originalImage"
-          class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          :disabled="!originalImage || isConverting"
+          class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors relative overflow-hidden"
         >
-          转换图片
+          <!-- 加载状态 -->
+          <div
+            v-if="isConverting"
+            class="absolute inset-0 flex items-center justify-center bg-blue-600/90 z-10"
+          >
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+              ></div>
+              <span>转换中...</span>
+            </div>
+          </div>
+          <!-- 按钮文本 -->
+          <span :class="{ 'opacity-0': isConverting }">转换图片</span>
         </button>
       </div>
 
@@ -175,7 +170,7 @@
             <div
               v-for="format in convertedFormats"
               :key="format"
-              class="border border-gray-200 rounded-lg p-4"
+              class="border border-gray-200 rounded-lg p-4 relative"
             >
               <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-medium text-gray-700">
@@ -183,20 +178,36 @@
                 </h4>
                 <button
                   @click="downloadImage(format)"
-                  class="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors font-medium"
+                  :disabled="formatLoading[format]"
+                  class="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   下载
                 </button>
               </div>
-              <div class="flex items-center justify-center mb-2">
+              <div class="flex items-center justify-center mb-2 relative min-h-[128px]">
+                <!-- 加载状态 -->
+                <div
+                  v-if="formatLoading[format]"
+                  class="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-lg"
+                >
+                  <div class="flex flex-col items-center">
+                    <div
+                      class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"
+                    ></div>
+                    <span class="text-xs text-gray-600">转换中...</span>
+                  </div>
+                </div>
+                <!-- 转换后的图片 -->
                 <img
+                  v-else
                   :src="convertedImages[format]"
                   :alt="`转换后图片 (${format})`"
                   class="max-w-full max-h-32 object-contain"
                 />
               </div>
               <p class="text-xs text-gray-500">
-                尺寸: {{ convertedWidth }} × {{ convertedHeight }}
+                尺寸: {{ convertedWidth }} × {{ convertedHeight }} | 大小:
+                {{ formatFileSize(convertedFileSizes[format] || 0) }}
               </p>
             </div>
           </div>
@@ -207,7 +218,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 // 图片格式枚举
 enum ImageFormat {
@@ -216,6 +227,7 @@ enum ImageFormat {
   PNG = 'png',
   WEBP = 'webp',
   GIF = 'gif',
+  SVG = 'svg',
 }
 
 // 引用
@@ -224,21 +236,26 @@ const fileInput = ref<HTMLInputElement>()
 // 状态
 const originalImage = ref<string>('')
 const originalFileName = ref<string>('image')
+const originalFileSize = ref<number>(0)
 const convertedImages = ref<Record<string, string>>({})
+const convertedFileSizes = ref<Record<string, number>>({})
 const targetFormats = ref<ImageFormat[]>([
   ImageFormat.JPEG,
   ImageFormat.JPG,
   ImageFormat.PNG,
   ImageFormat.WEBP,
   ImageFormat.GIF,
+  ImageFormat.SVG,
 ])
-const quality = ref<number>(80)
+
 const originalWidth = ref<number>(0)
 const originalHeight = ref<number>(0)
 const customWidth = ref<number>(0)
 const customHeight = ref<number>(0)
 const convertedWidth = ref<number>(0)
 const convertedHeight = ref<number>(0)
+const isConverting = ref<boolean>(false)
+const formatLoading = ref<Record<string, boolean>>({})
 
 // 支持的格式列表
 const supportedFormats = [
@@ -247,6 +264,7 @@ const supportedFormats = [
   { value: ImageFormat.PNG, label: 'PNG', mimeType: 'image/png' },
   { value: ImageFormat.WEBP, label: 'WebP', mimeType: 'image/webp' },
   { value: ImageFormat.GIF, label: 'GIF', mimeType: 'image/gif' },
+  { value: ImageFormat.SVG, label: 'SVG', mimeType: 'image/svg+xml' },
 ]
 
 // 计算属性：获取转换后的图片格式列表
@@ -275,6 +293,8 @@ const processFile = (file: File) => {
   const fileName = file.name
   const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName
   originalFileName.value = nameWithoutExt
+  // 存储原始文件大小
+  originalFileSize.value = file.size
 
   const reader = new FileReader()
 
@@ -303,6 +323,13 @@ const processFile = (file: File) => {
 const convertImage = () => {
   if (!originalImage.value || targetFormats.value.length === 0) return
 
+  isConverting.value = true
+
+  // 为每个目标格式设置加载状态
+  targetFormats.value.forEach((format) => {
+    formatLoading.value[format] = true
+  })
+
   const img = new Image()
 
   img.onload = () => {
@@ -319,35 +346,115 @@ const convertImage = () => {
       const formatInfo = supportedFormats.find((f) => f.value === format)
       const mimeType = formatInfo?.mimeType || 'image/jpeg'
 
-      // 创建临时画布用于转换
-      const tempCanvas = document.createElement('canvas')
-      const tempCtx = tempCanvas.getContext('2d')
+      switch (format) {
+        case ImageFormat.SVG:
+          // 处理 SVG 格式转换
+          // 创建 SVG 元素
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          svg.setAttribute('width', width.toString())
+          svg.setAttribute('height', height.toString())
+          svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 
-      if (tempCtx) {
-        // 设置临时画布尺寸
-        tempCanvas.width = width
-        tempCanvas.height = height
+          // 创建 image 元素，嵌入位图
+          const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
+          image.setAttribute('width', '100%')
+          image.setAttribute('height', '100%')
+          image.setAttribute('href', originalImage.value)
 
-        // 绘制图片到临时画布
-        tempCtx.drawImage(img, 0, 0, width, height)
+          svg.appendChild(image)
 
-        // 导出图片
-        if (format === ImageFormat.PNG) {
-          // PNG 不支持质量参数
-          convertedImages.value[format] = tempCanvas.toDataURL('image/png')
-        } else {
-          // JPEG、JPG 和 WebP 支持质量参数
-          convertedImages.value[format] = tempCanvas.toDataURL(mimeType, quality.value / 100)
-        }
+          // 将 SVG 转换为数据 URL
+          const svgData = new XMLSerializer().serializeToString(svg)
+          const svgBlob = new Blob([svgData], { type: 'image/svg+xml' })
+          const svgUrl = URL.createObjectURL(svgBlob)
+
+          convertedImages.value[format] = svgUrl
+          // 计算 SVG 文件大小
+          convertedFileSizes.value[format] = svgBlob.size
+          break
+
+        case ImageFormat.PNG:
+          // 处理 PNG 格式（不支持质量参数）
+          {
+            const tempCanvas = document.createElement('canvas')
+            const tempCtx = tempCanvas.getContext('2d')
+
+            if (tempCtx) {
+              tempCanvas.width = width
+              tempCanvas.height = height
+              tempCtx.drawImage(img, 0, 0, width, height)
+              const dataUrl = tempCanvas.toDataURL('image/png')
+              convertedImages.value[format] = dataUrl
+              // 计算文件大小
+              convertedFileSizes.value[format] = calculateFileSize(dataUrl)
+            }
+          }
+          break
+
+        default:
+          // 处理其他格式（JPEG、JPG、WebP、GIF）
+          {
+            const tempCanvas = document.createElement('canvas')
+            const tempCtx = tempCanvas.getContext('2d')
+
+            if (tempCtx) {
+              tempCanvas.width = width
+              tempCanvas.height = height
+              tempCtx.drawImage(img, 0, 0, width, height)
+              // 使用固定的高质量值 0.95
+              const dataUrl = tempCanvas.toDataURL(mimeType, 0.95)
+              convertedImages.value[format] = dataUrl
+              // 计算文件大小
+              convertedFileSizes.value[format] = calculateFileSize(dataUrl)
+            }
+          }
+          break
       }
+
+      // 标记该格式转换完成
+      formatLoading.value[format] = false
     })
 
     // 更新转换后图片的尺寸
     convertedWidth.value = width
     convertedHeight.value = height
+
+    // 标记所有转换完成
+    isConverting.value = false
+  }
+
+  img.onerror = () => {
+    // 处理图片加载错误
+    isConverting.value = false
+    targetFormats.value.forEach((format) => {
+      formatLoading.value[format] = false
+    })
   }
 
   img.src = originalImage.value
+}
+
+// 计算数据URL的文件大小（字节）
+const calculateFileSize = (dataUrl: string): number => {
+  // 移除数据URL前缀
+  const base64 = dataUrl.split(',')[1]
+  if (!base64) return 0
+
+  // Base64编码的字符串大小计算公式：(base64.length * 3) / 4 - padding
+  const padding = (base64.match(/=/g) || []).length
+  const sizeInBytes = (base64.length * 3) / 4 - padding
+  return sizeInBytes
+}
+
+// 格式化文件大小显示
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B'
+
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 // 下载图片
@@ -363,6 +470,17 @@ const downloadImage = (format: string) => {
   link.click()
   document.body.removeChild(link)
 }
+
+// 监听参数变化，自动重新转换
+watch(
+  [customWidth, customHeight, targetFormats],
+  () => {
+    if (originalImage.value) {
+      convertImage()
+    }
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped>
