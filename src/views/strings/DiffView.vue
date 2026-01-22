@@ -78,7 +78,7 @@
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-semibold text-gray-700">字符串 1</span>
           <button
-            @click="copyText1"
+            @click="toastCopy(text1)"
             class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
           >
             复制
@@ -106,7 +106,7 @@
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-semibold text-gray-700">字符串 2</span>
           <button
-            @click="copyText2"
+            @click="toastCopy(text2)"
             class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
           >
             复制
@@ -188,23 +188,6 @@ const clearAll = () => {
   text2.value = ''
   diffResult.value = null
   toast.info('已清空全部')
-}
-
-const copyText1 = async () => {
-  if (!text1.value) {
-    toast.warning('字符串 1 为空')
-    return
-  }
-
-  toastCopy(text1.value)
-}
-
-const copyText2 = async () => {
-  if (!text2.value) {
-    toast.warning('字符串 2 为空')
-    return
-  }
-  toastCopy(text2.value)
 }
 
 const compare = () => {

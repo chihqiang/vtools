@@ -21,7 +21,7 @@
                 粘贴
               </button>
               <button
-                @click="copyRegex"
+                @click="toastCopy(regexPattern)"
                 class="px-3 py-2 bg-green-500 text-white rounded text-sm shadow-sm hover:shadow transition-all duration-150"
               >
                 复制
@@ -406,14 +406,6 @@ const pasteRegex = async () => {
   } catch {
     toast.error('粘贴失败')
   }
-}
-
-const copyRegex = async () => {
-  if (!regexPattern.value.trim()) {
-    toast.warning('请先输入或生成内容')
-    return
-  }
-  toastCopy(regexPattern.value)
 }
 
 const clearAll = () => {

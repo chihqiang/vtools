@@ -95,7 +95,7 @@
 
             <div class="flex gap-2">
               <button
-                @click="copyRight"
+                @click="toastCopy(rightContent)"
                 class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
               >
                 复制
@@ -260,10 +260,6 @@ const clearRight = () => {
   toast.warning('已清空输出')
 }
 
-const copyRight = async () => {
-  if (!rightContent.value) return
-  toastCopy(rightContent.value)
-}
 const downloadRight = () => {
   if (!rightContent.value) return
 
