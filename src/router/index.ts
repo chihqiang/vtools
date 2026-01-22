@@ -170,6 +170,19 @@ const router = createRouter({
       } as HomeRouteMeta,
     },
     {
+      path: '/chmod-calculator',
+      name: 'chmod-calculator',
+      component: () => import('@/views/development/ChmodCalculator.vue'),
+      meta: {
+        showOnHome: true,
+        title: 'Chmod 权限计算器',
+        description: 'Linux 文件权限计算工具，支持八进制和符号表示',
+        icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+        color: 'orange',
+        group: HomeGroup.DEVELOPMENT_TOOLS,
+      } as HomeRouteMeta,
+    },
+    {
       path: '/timestamp',
       name: 'timestamp',
       component: () => import('@/views/development/TimestampView.vue'),
