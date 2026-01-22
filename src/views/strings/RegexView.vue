@@ -36,25 +36,46 @@
           </div>
 
           <!-- 正则表达式输入 -->
-          <div class="mb-6">
+          <div class="mb-4">
+            <h4 class="font-medium text-gray-700 mb-2">正则表达式</h4>
             <div class="border border-gray-200 rounded-lg overflow-hidden">
               <input
                 v-model="regexPattern"
                 placeholder="请输入正则表达式，例如: ^[a-zA-Z0-9]+$"
-                class="w-full p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+          </div>
+
+          <!-- 常用正则表达式元字符和模式 -->
+          <div class="mb-6">
+            <h4 class="font-medium text-gray-700 mb-2">常用匹配模式</h4>
+            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="(meta, index) in regexMetaCharacters"
+                  :key="index"
+                  @click="addMetaCharacter(meta.pattern)"
+                  class="px-3 py-1.5 bg-blue-50 text-gray-900 rounded-full text-sm hover:bg-blue-100 hover:text-gray-900 transition-all duration-150 shadow-sm"
+                  :title="meta.description"
+                >
+                  <code class="font-mono">{{ meta.pattern }}</code>
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- 常用正则表达式示例 -->
           <div class="mb-6">
             <h3 class="font-semibold text-gray-700 mb-3">常用正则表达式</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div
+              class="border border-gray-200 rounded-lg p-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2"
+            >
               <button
                 v-for="(example, index) in commonRegexPatterns"
                 :key="index"
                 @click="useExample(example.pattern)"
-                class="px-3 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-all duration-150 shadow-sm hover:shadow"
+                class="px-3 py-1.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
               >
                 {{ example.description }}
               </button>
@@ -310,6 +331,30 @@ const getFlagsString = () => {
   return flags
 }
 
+// 常用正则表达式元字符和模式
+const regexMetaCharacters = ref([
+  { pattern: '.', description: '匹配任意字符' },
+  { pattern: '^', description: '匹配开始位置' },
+  { pattern: '$', description: '匹配结束位置' },
+  { pattern: '*', description: '匹配0次或多次' },
+  { pattern: '+', description: '匹配1次或多次' },
+  { pattern: '?', description: '匹配0次或1次' },
+  { pattern: '{n}', description: '匹配n次' },
+  { pattern: '{n,}', description: '匹配至少n次' },
+  { pattern: '{n,m}', description: '匹配n到m次' },
+  { pattern: '[abc]', description: '匹配a、b或c' },
+  { pattern: '[^abc]', description: '匹配除a、b、c外的字符' },
+  { pattern: '\\d', description: '匹配数字' },
+  { pattern: '\\D', description: '匹配非数字' },
+  { pattern: '\\w', description: '匹配字母、数字、下划线' },
+  { pattern: '\\W', description: '匹配非字母、数字、下划线' },
+  { pattern: '\\s', description: '匹配空白字符' },
+  { pattern: '\\S', description: '匹配非空白字符' },
+  { pattern: '|', description: '或操作符' },
+  { pattern: '(...)', description: '捕获组' },
+  { pattern: '(?:...)', description: '非捕获组' },
+])
+
 // 常用正则表达式示例
 const commonRegexPatterns = ref([
   { pattern: '^[a-zA-Z0-9]+$', description: '字母和数字' },
@@ -324,12 +369,31 @@ const commonRegexPatterns = ref([
   { pattern: '^\\d{6}$', description: '邮政编码' },
   { pattern: '^[A-Za-z0-9]{6,16}$', description: '密码强度' },
   { pattern: '^\\d{3,4}-?\\d{7,8}$', description: '固定电话' },
+  {
+    pattern:
+      '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
+    description: 'IP地址 (IPv4)',
+  },
+  { pattern: '^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}$', description: '域名' },
+  { pattern: '^\\d{4} \\d{4} \\d{4} \\d{4}$|^\\d{16}$', description: '信用卡号' },
+  { pattern: '^[\\u4e00-\\u9fa5]+$', description: '中文字符' },
+  { pattern: '^-?\\d+$', description: '整数' },
+  { pattern: '^-?\\d+\\.\\d+$', description: '小数' },
+  { pattern: '^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$', description: '十六进制颜色码' },
+  { pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$', description: '时间 (HH:MM:SS)' },
+  { pattern: '^[a-zA-Z0-9_-]{3,16}$', description: '用户名' },
+  { pattern: '^\\d{16,19}$', description: '银行卡号' },
 ])
 
 // 使用示例表达式
 const useExample = (pattern: string) => {
   regexPattern.value = pattern
   toast.success('已使用示例表达式')
+}
+
+// 添加正则表达式元字符
+const addMetaCharacter = (pattern: string) => {
+  regexPattern.value += pattern
 }
 
 /* ---------- 剪贴板 ---------- */
