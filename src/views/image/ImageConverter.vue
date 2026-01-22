@@ -249,16 +249,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import ImagePreview from '@/components/ui/ImagePreview.vue'
-
-// 图片格式枚举
-enum ImageFormat {
-  JPEG = 'jpeg',
-  JPG = 'jpg',
-  PNG = 'png',
-  WEBP = 'webp',
-  GIF = 'gif',
-  SVG = 'svg',
-}
+import { ImageFormat, processFile, getImageDimensions, convertImageFormat, downloadImage as downloadImageUtil, calculateFileSize, formatFileSize, handleDragDrop as handleDragDropUtil } from '@/utils/images'
 
 // 引用
 const fileInput = ref<HTMLInputElement>()
@@ -322,22 +313,23 @@ const convertedFormats = computed(() => {
 })
 
 // 处理文件上传
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    processFile(target.files[0])
+    await handleProcessFile(target.files[0])
   }
 }
 
 // 处理拖拽上传
-const handleDragDrop = (event: DragEvent) => {
-  if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-    processFile(event.dataTransfer.files[0])
+const handleDragDrop = async (event: DragEvent) => {
+  const file = handleDragDropUtil(event)
+  if (file) {
+    await handleProcessFile(file)
   }
 }
 
 // 处理文件
-const processFile = (file: File) => {
+const handleProcessFile = async (file: File) => {
   // 提取原始文件名（不包含扩展名）
   const fileName = file.name
   const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName
@@ -345,31 +337,26 @@ const processFile = (file: File) => {
   // 存储原始文件大小
   originalFileSize.value = file.size
 
-  const reader = new FileReader()
-
-  reader.onload = (e) => {
-    const result = e.target?.result as string
+  try {
+    const result = await processFile(file)
     originalImage.value = result
 
     // 获取原始图片尺寸
-    const img = new Image()
-    img.onload = () => {
-      originalWidth.value = img.width
-      originalHeight.value = img.height
-      customWidth.value = img.width
-      customHeight.value = img.height
-      convertedWidth.value = img.width
-      convertedHeight.value = img.height
-    }
-    img.src = result
+    const dimensions = await getImageDimensions(result)
+    originalWidth.value = dimensions.width
+    originalHeight.value = dimensions.height
+    customWidth.value = dimensions.width
+    customHeight.value = dimensions.height
+    convertedWidth.value = dimensions.width
+    convertedHeight.value = dimensions.height
+  } catch (error) {
+    console.error('文件处理失败:', error)
   }
-
-  reader.readAsDataURL(file)
   convertedImages.value = {} // 重置转换结果
 }
 
 // 转换图片
-const convertImage = () => {
+const convertImage = async () => {
   if (!originalImage.value || targetFormats.value.length === 0) return
 
   isConverting.value = true
@@ -379,132 +366,40 @@ const convertImage = () => {
     formatLoading.value[format] = true
   })
 
-  const img = new Image()
-
-  img.onload = () => {
-    // 重置转换结果
-    convertedImages.value = {}
-
+  try {
+    // 获取原始图片尺寸
+    const dimensions = await getImageDimensions(originalImage.value)
     // 确定使用的尺寸（自定义尺寸或原始尺寸）
-    const width = customWidth.value || img.width
-    const height = customHeight.value || img.height
+    const width = customWidth.value || dimensions.width
+    const height = customHeight.value || dimensions.height
 
     // 为每个目标格式转换图片
-    targetFormats.value.forEach((format) => {
-      // 从 supportedFormats 中获取 MIME 类型
-      const formatInfo = supportedFormats.find((f) => f.value === format)
-      const mimeType = formatInfo?.mimeType || 'image/jpeg'
-
-      switch (format) {
-        case ImageFormat.SVG:
-          // 处理 SVG 格式转换
-          // 创建 SVG 元素
-          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-          svg.setAttribute('width', width.toString())
-          svg.setAttribute('height', height.toString())
-          svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-
-          // 创建 image 元素，嵌入位图
-          const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
-          image.setAttribute('width', '100%')
-          image.setAttribute('height', '100%')
-          image.setAttribute('href', originalImage.value)
-
-          svg.appendChild(image)
-
-          // 将 SVG 转换为数据 URL
-          const svgData = new XMLSerializer().serializeToString(svg)
-          const svgBlob = new Blob([svgData], { type: 'image/svg+xml' })
-          const svgUrl = URL.createObjectURL(svgBlob)
-
-          convertedImages.value[format] = svgUrl
-          // 计算 SVG 文件大小
-          convertedFileSizes.value[format] = svgBlob.size
-          break
-
-        case ImageFormat.PNG:
-          // 处理 PNG 格式（不支持质量参数）
-          {
-            const tempCanvas = document.createElement('canvas')
-            const tempCtx = tempCanvas.getContext('2d')
-
-            if (tempCtx) {
-              tempCanvas.width = width
-              tempCanvas.height = height
-              tempCtx.drawImage(img, 0, 0, width, height)
-              const dataUrl = tempCanvas.toDataURL('image/png')
-              convertedImages.value[format] = dataUrl
-              // 计算文件大小
-              convertedFileSizes.value[format] = calculateFileSize(dataUrl)
-            }
-          }
-          break
-
-        default:
-          // 处理其他格式（JPEG、JPG、WebP、GIF）
-          {
-            const tempCanvas = document.createElement('canvas')
-            const tempCtx = tempCanvas.getContext('2d')
-
-            if (tempCtx) {
-              tempCanvas.width = width
-              tempCanvas.height = height
-              tempCtx.drawImage(img, 0, 0, width, height)
-              // 使用固定的高质量值 0.95
-              const dataUrl = tempCanvas.toDataURL(mimeType, 0.95)
-              convertedImages.value[format] = dataUrl
-              // 计算文件大小
-              convertedFileSizes.value[format] = calculateFileSize(dataUrl)
-            }
-          }
-          break
+    for (const format of targetFormats.value) {
+      try {
+        const convertedUrl = await convertImageFormat(originalImage.value, format, width, height)
+        convertedImages.value[format] = convertedUrl
+        // 计算文件大小
+        convertedFileSizes.value[format] = calculateFileSize(convertedUrl)
+      } catch (error) {
+        console.error(`转换 ${format} 格式失败:`, error)
+      } finally {
+        // 标记该格式转换完成
+        formatLoading.value[format] = false
       }
-
-      // 标记该格式转换完成
-      formatLoading.value[format] = false
-    })
+    }
 
     // 更新转换后图片的尺寸
     convertedWidth.value = width
     convertedHeight.value = height
-
+  } catch (error) {
+    console.error('图片转换失败:', error)
+  } finally {
     // 标记所有转换完成
     isConverting.value = false
   }
-
-  img.onerror = () => {
-    // 处理图片加载错误
-    isConverting.value = false
-    targetFormats.value.forEach((format) => {
-      formatLoading.value[format] = false
-    })
-  }
-
-  img.src = originalImage.value
 }
 
-// 计算数据URL的文件大小（字节）
-const calculateFileSize = (dataUrl: string): number => {
-  // 移除数据URL前缀
-  const base64 = dataUrl.split(',')[1]
-  if (!base64) return 0
 
-  // Base64编码的字符串大小计算公式：(base64.length * 3) / 4 - padding
-  const padding = (base64.match(/=/g) || []).length
-  const sizeInBytes = (base64.length * 3) / 4 - padding
-  return sizeInBytes
-}
-
-// 格式化文件大小显示
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B'
-
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
 
 // 应用尺寸预设
 const applySizePreset = (width: number, height: number) => {
@@ -524,17 +419,17 @@ const openPreview = (imageUrl: string) => {
 }
 
 // 下载图片
-const downloadImage = (format: string) => {
+const downloadImage = async (format: string) => {
   if (!convertedImages.value[format]) return
-  const link = document.createElement('a')
-  link.href = convertedImages.value[format]
   // 使用新的文件名规则：{original}-{format}-{width}x{height}
   const width = customWidth.value || originalWidth.value
   const height = customHeight.value || originalHeight.value
-  link.download = `${originalFileName.value}-${format}-${width}x${height}.${format}`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  const filename = `${originalFileName.value}-${format}-${width}x${height}.${format}`
+  try {
+    await downloadImageUtil(convertedImages.value[format], filename)
+  } catch (error) {
+    console.error('下载失败:', error)
+  }
 }
 
 // 监听参数变化，自动重新转换

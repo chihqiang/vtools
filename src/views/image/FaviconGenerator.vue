@@ -264,6 +264,7 @@
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
 import ImagePreview from '@/components/ui/ImagePreview.vue'
+import { processFile as processFileUtil, resizeImage, downloadImage, handleDragDrop as handleDragDropUtil } from '@/utils/images'
 
 const toast = useToast()
 
@@ -298,21 +299,23 @@ const handleFileChange = (event: Event) => {
 }
 
 // 处理拖放
-const handleDrop = (event: DragEvent) => {
-  const files = event.dataTransfer?.files
-  if (files && files[0]) {
-    processFile(files[0])
+const handleDrop = async (event: DragEvent) => {
+  const file = handleDragDropUtil(event)
+  if (file) {
+    await processFile(file)
   }
 }
 
 // 处理文件
-const processFile = (file: File) => {
+const processFile = async (file: File) => {
   imageFile.value = file
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    imagePreview.value = e.target?.result as string
+  try {
+    const result = await processFileUtil(file)
+    imagePreview.value = result
+  } catch (error) {
+    console.error('文件处理失败:', error)
+    toast.error('文件处理失败')
   }
-  reader.readAsDataURL(file)
 }
 
 // 处理选择图片按钮点击
@@ -355,40 +358,24 @@ const generateFavicons = async () => {
     // 模拟生成过程
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    // 使用 Canvas 实际调整图片大小
-    const image = new Image()
-    image.src = imagePreview.value || ''
-
-    await new Promise((resolve, reject) => {
-      image.onload = resolve
-      image.onerror = reject
-    })
-
     for (const size of sizes) {
       for (const format of formats) {
         const { width, height } = size
         const sizeStr = `${width}x${height}`
 
-        // 创建 Canvas 并调整图片大小
-        const canvas = document.createElement('canvas')
-        canvas.width = width as number
-        canvas.height = height as number
+        try {
+          // 使用 resizeImage 函数调整图片大小
+          const imageUrl = await resizeImage(imagePreview.value || '', width, height, format)
 
-        const ctx = canvas.getContext('2d')
-        if (!ctx) continue
-
-        // 绘制调整大小后的图片
-        ctx.drawImage(image, 0, 0, width as number, height as number)
-
-        // 转换为数据 URL
-        const imageUrl = canvas.toDataURL(`image/${format}`)
-
-        generatedFavicons.value.push({
-          url: imageUrl,
-          name: `favicon_${sizeStr}.${format}`,
-          size: sizeStr,
-          format,
-        })
+          generatedFavicons.value.push({
+            url: imageUrl,
+            name: `favicon_${sizeStr}.${format}`,
+            size: sizeStr,
+            format,
+          })
+        } catch (error) {
+          console.error(`生成 ${sizeStr} ${format} 失败:`, error)
+        }
       }
     }
 
@@ -404,16 +391,7 @@ const generateFavicons = async () => {
 // 下载单个 Favicon
 const downloadFavicon = async (favicon: { url: string; name: string }) => {
   try {
-    const response = await fetch(favicon.url)
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = favicon.name
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    await downloadImage(favicon.url, favicon.name)
     toast.success(`${favicon.name} 已下载`)
   } catch (error) {
     console.error(error)
