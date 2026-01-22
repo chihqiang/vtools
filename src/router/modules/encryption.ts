@@ -16,8 +16,8 @@ const encryptionRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/jwt',
-    name: 'jwt',
+    path: '/encryption-jwt',
+    name: 'encryption-jwt',
     component: () => import('@/views/encryption/JwtView.vue'),
     meta: {
       showOnHome: true,
@@ -29,8 +29,8 @@ const encryptionRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/key-pair',
-    name: 'key-pair',
+    path: '/encryption-key-pair',
+    name: 'encryption-key-pair',
     component: () => import('@/views/encryption/KeyPairGenerator.vue'),
     meta: {
       showOnHome: true,

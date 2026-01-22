@@ -42,8 +42,8 @@ const jsonRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/faker',
-    name: 'faker',
+    path: '/json-faker',
+    name: 'json-faker',
     component: () => import('@/views/json/FakerView.vue'),
     meta: {
       showOnHome: true,
