@@ -1,5 +1,7 @@
 <template>
   <div class="h-full p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+    <!-- 图片预览组件 -->
+    <ImagePreview :image-url="previewImage" @close="previewImage = ''" />
     <!-- Header -->
     <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 md:p-6 mb-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -228,7 +230,8 @@
                   v-else
                   :src="convertedImages[format]"
                   :alt="`转换后图片 (${format})`"
-                  class="max-w-full max-h-32 object-contain"
+                  class="max-w-full max-h-32 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                  @click.stop="convertedImages[format] && openPreview(convertedImages[format])"
                 />
               </div>
               <p class="text-xs text-gray-500">
@@ -245,6 +248,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import ImagePreview from '@/components/ui/ImagePreview.vue'
 
 // 图片格式枚举
 enum ImageFormat {
@@ -273,6 +277,7 @@ const targetFormats = ref<ImageFormat[]>([
   ImageFormat.GIF,
   ImageFormat.SVG,
 ])
+const previewImage = ref<string>('')
 
 const originalWidth = ref<number>(0)
 const originalHeight = ref<number>(0)
@@ -511,6 +516,11 @@ const applySizePreset = (width: number, height: number) => {
     customWidth.value = width
     customHeight.value = height
   }
+}
+
+// 打开图片预览
+const openPreview = (imageUrl: string) => {
+  previewImage.value = imageUrl
 }
 
 // 下载图片

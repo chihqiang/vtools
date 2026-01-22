@@ -1,5 +1,7 @@
 <template>
   <div class="h-full p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+    <!-- 图片预览组件 -->
+    <ImagePreview :image-url="previewImage" @close="previewImage = ''" />
     <!-- Header -->
     <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-4 md:p-6 mb-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -228,7 +230,8 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div
-                  class="w-12 h-12 border border-gray-200 rounded flex items-center justify-center bg-white"
+                  class="w-12 h-12 border border-gray-200 rounded flex items-center justify-center bg-white cursor-pointer hover:shadow-md transition-shadow"
+                  @click.stop="openPreview(favicon.url)"
                 >
                   <img
                     :src="favicon.url"
@@ -260,6 +263,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
+import ImagePreview from '@/components/ui/ImagePreview.vue'
 
 const toast = useToast()
 
@@ -271,6 +275,7 @@ const imagePreview = ref<string | null>(null)
 const generatedFavicons = ref<Array<{ url: string; name: string; size: string; format: string }>>(
   [],
 )
+const previewImage = ref<string>('')
 
 // 参数设置
 const selectedSizes = ref<string[]>([
@@ -414,5 +419,10 @@ const downloadFavicon = async (favicon: { url: string; name: string }) => {
     console.error(error)
     toast.error('下载失败')
   }
+}
+
+// 打开图片预览
+const openPreview = (imageUrl: string) => {
+  previewImage.value = imageUrl
 }
 </script>
