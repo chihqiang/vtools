@@ -249,7 +249,16 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import ImagePreview from '@/components/ui/ImagePreview.vue'
-import { ImageFormat, processFile, getImageDimensions, convertImageFormat, downloadImage as downloadImageUtil, calculateFileSize, formatFileSize, handleDragDrop as handleDragDropUtil } from '@/utils/images'
+import {
+  ImageFormat,
+  processFile,
+  getImageDimensions,
+  convertImageFormat,
+  downloadImage as downloadImageUtil,
+  calculateFileSize,
+  formatFileSize,
+  handleDragDrop as handleDragDropUtil,
+} from '@/utils/images'
 
 // 引用
 const fileInput = ref<HTMLInputElement>()
@@ -398,8 +407,6 @@ const convertImage = async () => {
     isConverting.value = false
   }
 }
-
-
 
 // 应用尺寸预设
 const applySizePreset = (width: number, height: number) => {

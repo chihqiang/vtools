@@ -13,7 +13,7 @@ export enum ImageFormat {
   WEBP = 'webp',
   GIF = 'gif',
   SVG = 'svg',
-  ICO = 'ico'
+  ICO = 'ico',
 }
 
 /**
@@ -26,7 +26,7 @@ export const supportedFormats = [
   { value: ImageFormat.WEBP, label: 'WebP', mimeType: 'image/webp' },
   { value: ImageFormat.GIF, label: 'GIF', mimeType: 'image/gif' },
   { value: ImageFormat.SVG, label: 'SVG', mimeType: 'image/svg+xml' },
-  { value: ImageFormat.ICO, label: 'ICO', mimeType: 'image/x-icon' }
+  { value: ImageFormat.ICO, label: 'ICO', mimeType: 'image/x-icon' },
 ]
 
 /**
@@ -53,7 +53,9 @@ export const processFile = (file: File): Promise<string> => {
  * @param {string} imageUrl - 图片的DataURL或URL
  * @returns {Promise<{ width: number; height: number }>} - 图片的宽度和高度
  */
-export const getImageDimensions = (imageUrl: string): Promise<{ width: number; height: number }> => {
+export const getImageDimensions = (
+  imageUrl: string,
+): Promise<{ width: number; height: number }> => {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -75,20 +77,26 @@ export const getImageDimensions = (imageUrl: string): Promise<{ width: number; h
  * @param {number} quality - 图片质量，默认为0.95
  * @returns {string} - 调整大小后的图片DataURL
  */
-export const resizeImage = (imageUrl: string, width: number, height: number, format: string = 'png', quality: number = 0.95): Promise<string> => {
+export const resizeImage = (
+  imageUrl: string,
+  width: number,
+  height: number,
+  format: string = 'png',
+  quality: number = 0.95,
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
       const canvas = document.createElement('canvas')
       canvas.width = width
       canvas.height = height
-      
+
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         reject(new Error('无法创建Canvas上下文'))
         return
       }
-      
+
       ctx.drawImage(img, 0, 0, width, height)
       const dataUrl = canvas.toDataURL(`image/${format}`, quality)
       resolve(dataUrl)
@@ -132,7 +140,7 @@ export const calculateFileSize = (dataUrl: string): number => {
   // 移除数据URL前缀
   const base64 = dataUrl.split(',')[1]
   if (!base64) return 0
-  
+
   // Base64编码的字符串大小计算公式：(base64.length * 3) / 4 - padding
   const padding = (base64.match(/=/g) || []).length
   const sizeInBytes = (base64.length * 3) / 4 - padding
@@ -146,11 +154,11 @@ export const calculateFileSize = (dataUrl: string): number => {
  */
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B'
-  
+
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
@@ -176,22 +184,28 @@ export const handleDragDrop = (event: DragEvent): File | null => {
  * @param {number} quality - 图片质量，默认为0.95
  * @returns {Promise<string>} - 转换后的图片DataURL
  */
-export const convertImageFormat = (imageUrl: string, format: string, width: number, height: number, quality: number = 0.95): Promise<string> => {
+export const convertImageFormat = (
+  imageUrl: string,
+  format: string,
+  width: number,
+  height: number,
+  quality: number = 0.95,
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
       const canvas = document.createElement('canvas')
       canvas.width = width
       canvas.height = height
-      
+
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         reject(new Error('无法创建Canvas上下文'))
         return
       }
-      
+
       ctx.drawImage(img, 0, 0, width, height)
-      
+
       let dataUrl: string
       if (format === 'svg') {
         // 特殊处理SVG格式
@@ -199,23 +213,24 @@ export const convertImageFormat = (imageUrl: string, format: string, width: numb
         svg.setAttribute('width', width.toString())
         svg.setAttribute('height', height.toString())
         svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-        
+
         const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
         image.setAttribute('width', '100%')
         image.setAttribute('height', '100%')
         image.setAttribute('href', imageUrl)
-        
+
         svg.appendChild(image)
-        
+
         const svgData = new XMLSerializer().serializeToString(svg)
         const svgBlob = new Blob([svgData], { type: 'image/svg+xml' })
         dataUrl = URL.createObjectURL(svgBlob)
       } else {
         // 处理其他格式
-        const mimeType = supportedFormats.find(f => f.value === format)?.mimeType || `image/${format}`
+        const mimeType =
+          supportedFormats.find((f) => f.value === format)?.mimeType || `image/${format}`
         dataUrl = canvas.toDataURL(mimeType, quality)
       }
-      
+
       resolve(dataUrl)
     }
     img.onerror = () => {

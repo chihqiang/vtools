@@ -264,7 +264,12 @@
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
 import ImagePreview from '@/components/ui/ImagePreview.vue'
-import { processFile as processFileUtil, resizeImage, downloadImage, handleDragDrop as handleDragDropUtil } from '@/utils/images'
+import {
+  processFile as processFileUtil,
+  resizeImage,
+  downloadImage,
+  handleDragDrop as handleDragDropUtil,
+} from '@/utils/images'
 
 const toast = useToast()
 
