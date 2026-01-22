@@ -233,7 +233,9 @@
           <p class="text-gray-600 mb-4">chmod 命令用于修改文件或目录的权限。</p>
           <div class="mb-6">
             <h3 class="text-md font-medium text-gray-600 mb-2">基本语法</h3>
-            <code class="block p-3 bg-white rounded font-mono text-gray-700 border border-gray-200 shadow-sm">
+            <code
+              class="block p-3 bg-white rounded font-mono text-gray-700 border border-gray-200 shadow-sm"
+            >
               chmod [选项] 权限 文件/目录
             </code>
           </div>
@@ -255,7 +257,10 @@
                 <p class="text-xs text-gray-500">执行权限 (x)</p>
               </div>
             </div>
-            <p class="mt-3 text-sm text-gray-600">组合示例: <code>7</code> = 4+2+1 = rwx, <code>6</code> = 4+2 = rw-, <code>5</code> = 4+1 = r-x</p>
+            <p class="mt-3 text-sm text-gray-600">
+              组合示例: <code>7</code> = 4+2+1 = rwx, <code>6</code> = 4+2 = rw-, <code>5</code> =
+              4+1 = r-x
+            </p>
           </div>
 
           <!-- 符号权限 -->
@@ -428,7 +433,7 @@ const applyPreset = (presetValue: string) => {
   permissions.value.other.execute = (otherValue & 1) === 1
 
   // 查找并显示预设名称
-  const preset = permissionPresets.value.find(p => p.value === presetValue)
+  const preset = permissionPresets.value.find((p) => p.value === presetValue)
   if (preset) {
     toast.success(`已应用预设: ${preset.label}`)
   }

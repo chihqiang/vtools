@@ -11,8 +11,37 @@
       <div class="grid grid-cols-1 gap-8">
         <!-- 上部：输入和操作区域 -->
         <div class="border border-gray-300 rounded-lg p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold text-gray-700">Crontab 表达式</h3>
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
+            <div class="flex items-center gap-4">
+              <h3 class="font-semibold text-gray-700">Crontab 表达式</h3>
+              <!-- 格式选择选项卡 -->
+              <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-l-lg border',
+                    cronFormat === CronFormat.FIVE
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100',
+                  ]"
+                  @click="cronFormat = CronFormat.FIVE"
+                >
+                  5 字段格式
+                </button>
+                <button
+                  type="button"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-r-lg border',
+                    cronFormat === CronFormat.SIX
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100',
+                  ]"
+                  @click="cronFormat = CronFormat.SIX"
+                >
+                  6 字段格式
+                </button>
+              </div>
+            </div>
             <div class="flex space-x-2">
               <button
                 @click="pasteInput"
@@ -39,7 +68,7 @@
             <div class="border border-gray-200 rounded-lg overflow-hidden">
               <input
                 v-model="cronExpression"
-                placeholder="请输入 Crontab 表达式，例如: * * * * *"
+                :placeholder="inputPlaceholder"
                 class="w-full p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -74,7 +103,7 @@
             <h3 class="font-semibold text-gray-700 mb-3">常见Cron表达式</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
               <button
-                v-for="(example, index) in commonCronExpressions"
+                v-for="(example, index) in filteredExpressions"
                 :key="index"
                 @click="useExample(example.expression)"
                 class="px-3 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-all duration-150 shadow-sm hover:shadow"
@@ -140,27 +169,64 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">Crontab 命令详解</h2>
         <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
           <h3 class="text-lg font-semibold text-gray-700 mb-3">Crontab 表达式语法</h3>
-          <p class="text-gray-600 mb-4">Crontab 表达式由 5 个字段组成，分别表示：</p>
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-medium text-gray-700">分钟</p>
-              <p class="text-xs text-gray-500">0-59</p>
+          <p class="text-gray-600 mb-4" v-if="cronFormat === CronFormat.FIVE">
+            当前使用 5 字段格式（传统格式），由以下字段组成：
+          </p>
+          <p class="text-gray-600 mb-4" v-else>当前使用 6 字段格式（包含秒），由以下字段组成：</p>
+
+          <!-- 5 字段格式文档 -->
+          <div v-if="cronFormat === CronFormat.FIVE" class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">分钟</p>
+                <p class="text-xs text-gray-500">0-59</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">小时</p>
+                <p class="text-xs text-gray-500">0-23</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">日期</p>
+                <p class="text-xs text-gray-500">1-31</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">月份</p>
+                <p class="text-xs text-gray-500">1-12</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">星期</p>
+                <p class="text-xs text-gray-500">0-7 (0和7都表示周日)</p>
+              </div>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-medium text-gray-700">小时</p>
-              <p class="text-xs text-gray-500">0-23</p>
-            </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-medium text-gray-700">日期</p>
-              <p class="text-xs text-gray-500">1-31</p>
-            </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-medium text-gray-700">月份</p>
-              <p class="text-xs text-gray-500">1-12</p>
-            </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-medium text-gray-700">星期</p>
-              <p class="text-xs text-gray-500">0-7 (0和7都表示周日)</p>
+          </div>
+
+          <!-- 6 字段格式文档 -->
+          <div v-else class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">秒</p>
+                <p class="text-xs text-gray-500">0-59</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">分钟</p>
+                <p class="text-xs text-gray-500">0-59</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">小时</p>
+                <p class="text-xs text-gray-500">0-23</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">日期</p>
+                <p class="text-xs text-gray-500">1-31</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">月份</p>
+                <p class="text-xs text-gray-500">1-12</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">星期</p>
+                <p class="text-xs text-gray-500">0-7 (0和7都表示周日)</p>
+              </div>
             </div>
           </div>
 
@@ -185,22 +251,50 @@
           </div>
 
           <h3 class="text-lg font-semibold text-gray-700 mb-3">示例</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-mono text-gray-700">* * * * *</p>
-              <p class="text-xs text-gray-500">每分钟执行</p>
+
+          <!-- 5 字段格式示例 -->
+          <div v-if="cronFormat === CronFormat.FIVE" class="mb-4">
+            <h4 class="text-md font-medium text-gray-600 mb-2">5 字段格式示例：</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">* * * * *</p>
+                <p class="text-xs text-gray-500">每分钟执行</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">0 * * * *</p>
+                <p class="text-xs text-gray-500">每小时执行</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">0 0 * * *</p>
+                <p class="text-xs text-gray-500">每天执行</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">0 0 * * 0</p>
+                <p class="text-xs text-gray-500">每周执行</p>
+              </div>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-mono text-gray-700">0 * * * *</p>
-              <p class="text-xs text-gray-500">每小时执行</p>
-            </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-mono text-gray-700">0 0 * * *</p>
-              <p class="text-xs text-gray-500">每天执行</p>
-            </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <p class="text-sm font-mono text-gray-700">0 0 * * 0</p>
-              <p class="text-xs text-gray-500">每周执行</p>
+          </div>
+
+          <!-- 6 字段格式示例 -->
+          <div v-else class="mb-4">
+            <h4 class="text-md font-medium text-gray-600 mb-2">6 字段格式示例：</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">* * * * * *</p>
+                <p class="text-xs text-gray-500">每秒执行</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">0 * * * * *</p>
+                <p class="text-xs text-gray-500">每分钟执行</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">0 0 * * * *</p>
+                <p class="text-xs text-gray-500">每小时执行</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">*/5 * * * * *</p>
+                <p class="text-xs text-gray-500">每5秒执行</p>
+              </div>
             </div>
           </div>
         </div>
@@ -210,31 +304,70 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { CronExpressionParser } from 'cron-parser'
 
+// 定义格式枚举
+enum CronFormat {
+  FIVE = '5',
+  SIX = '6',
+}
+
 const toast = useToast()
 const cronExpression = ref('')
+const cronFormat = ref<CronFormat>(CronFormat.FIVE) // 默认使用 5 字段格式
 const nextRunTime = ref('')
 const nextRunTimes = ref<string[]>([])
 const parseError = ref('')
 
+// 动态占位符
+const inputPlaceholder = computed(() => {
+  return cronFormat.value === CronFormat.SIX
+    ? '请输入 6 字段 Crontab 表达式，例如: * * * * * *'
+    : '请输入 5 字段 Crontab 表达式，例如: * * * * *'
+})
+
 // 常见Cron表达式示例
 const commonCronExpressions = ref([
-  { expression: '* * * * *', description: '每分钟执行' },
-  { expression: '0 * * * *', description: '每小时执行' },
-  { expression: '0 0 * * *', description: '每天执行' },
-  { expression: '0 0 * * 0', description: '每周执行' },
-  { expression: '0 0 1 * *', description: '每月执行' },
-  { expression: '0 0 1 1 *', description: '每年执行' },
-  { expression: '*/5 * * * *', description: '每5分钟执行' },
-  { expression: '0 */2 * * *', description: '每2小时执行' },
-  { expression: '0 9-17 * * *', description: '工作日9点到17点每小时执行' },
-  { expression: '0 0 * * 1-5', description: '工作日每天执行' },
-  { expression: '0 0 * * 6,0', description: '周末每天执行' },
-  { expression: '0 0 15 * *', description: '每月15日执行' },
+  // 6 字段格式示例
+  { expression: '* * * * * *', description: '每秒执行', format: CronFormat.SIX },
+  { expression: '0 * * * * *', description: '每分钟执行', format: CronFormat.SIX },
+  { expression: '0 0 * * * *', description: '每小时执行', format: CronFormat.SIX },
+  { expression: '0 0 0 * * *', description: '每天执行', format: CronFormat.SIX },
+  { expression: '0 0 0 * * 0', description: '每周执行', format: CronFormat.SIX },
+  { expression: '0 0 0 1 * *', description: '每月执行', format: CronFormat.SIX },
+  { expression: '0 0 0 1 1 *', description: '每年执行', format: CronFormat.SIX },
+  { expression: '*/5 * * * * *', description: '每5秒执行', format: CronFormat.SIX },
+  { expression: '0 */5 * * * *', description: '每5分钟执行', format: CronFormat.SIX },
+  { expression: '0 0 */2 * * *', description: '每2小时执行', format: CronFormat.SIX },
+  { expression: '0 0 8 * * *', description: '每天早上8点执行', format: CronFormat.SIX },
+  { expression: '0 0 12 * * 1-5', description: '工作日中午12点执行', format: CronFormat.SIX },
+  { expression: '0 0 0 15 * *', description: '每月15日执行', format: CronFormat.SIX },
+  { expression: '0 0 0 * 1 *', description: '每年1月执行', format: CronFormat.SIX },
+  { expression: '0 0 0 * * 6,0', description: '周末执行', format: CronFormat.SIX },
+  // 5 字段格式示例
+  { expression: '* * * * *', description: '每分钟执行', format: CronFormat.FIVE },
+  { expression: '0 * * * *', description: '每小时执行', format: CronFormat.FIVE },
+  { expression: '0 0 * * *', description: '每天执行', format: CronFormat.FIVE },
+  { expression: '0 0 * * 0', description: '每周执行', format: CronFormat.FIVE },
+  { expression: '0 0 1 * *', description: '每月执行', format: CronFormat.FIVE },
+  { expression: '0 0 1 1 *', description: '每年执行', format: CronFormat.FIVE },
+  { expression: '*/5 * * * *', description: '每5分钟执行', format: CronFormat.FIVE },
+  { expression: '0 12 * * *', description: '每天中午执行', format: CronFormat.FIVE },
+  { expression: '0 0 * * 1', description: '每周一执行', format: CronFormat.FIVE },
+  { expression: '0 0 */2 * *', description: '每2小时执行', format: CronFormat.FIVE },
+  { expression: '0 8 * * *', description: '每天早上8点执行', format: CronFormat.FIVE },
+  { expression: '0 12 * * 1-5', description: '工作日中午12点执行', format: CronFormat.FIVE },
+  { expression: '0 0 15 * *', description: '每月15日执行', format: CronFormat.FIVE },
+  { expression: '0 0 * 1 *', description: '每年1月执行', format: CronFormat.FIVE },
+  { expression: '0 0 * * 6,0', description: '周末执行', format: CronFormat.FIVE },
 ])
+
+// 过滤后的表达式示例
+const filteredExpressions = computed(() => {
+  return commonCronExpressions.value.filter((item) => item.format === cronFormat.value)
+})
 
 // 使用示例表达式
 const useExample = (expression: string) => {
