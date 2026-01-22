@@ -86,6 +86,7 @@
 import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
 import pinyin from 'pinyin'
+import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
 const inputText = ref('')
@@ -222,12 +223,7 @@ const pasteText = async () => {
 
 const copyText = async () => {
   if (!ensureInput()) return
-  try {
-    await navigator.clipboard.writeText(inputText.value)
-    toast.success('已复制')
-  } catch {
-    toast.error('复制失败')
-  }
+  toastCopy(inputText.value)
 }
 
 /* ---------- 文本转换 ---------- */

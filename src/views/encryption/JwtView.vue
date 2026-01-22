@@ -703,6 +703,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { decodeJwt, SignJWT, jwtVerify, importPKCS8, importSPKI } from 'jose'
+import { toastCopy } from '@/utils/clipboard'
 
 interface ParsedData {
   header: Record<string, unknown>
@@ -1072,13 +1073,8 @@ const generateJWT = async () => {
 }
 
 const copyToClipboard = async (data: unknown) => {
-  try {
-    const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
-    await navigator.clipboard.writeText(text)
-    toast.success('已复制到剪贴板')
-  } catch {
-    toast.error('复制失败')
-  }
+  const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
+  toastCopy(text)
 }
 
 const formatValue = (value: unknown) => {

@@ -137,6 +137,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as YAML from 'yaml'
 import { useToast } from '@/composables/useToast'
 import { debounce } from 'lodash'
+import { toastCopy } from '@/utils/clipboard'
 
 /* ================= Toast ================= */
 const toast = useToast()
@@ -261,8 +262,7 @@ const clearRight = () => {
 
 const copyRight = async () => {
   if (!rightContent.value) return
-  await navigator.clipboard.writeText(rightContent.value)
-  toast.success('已复制')
+  toastCopy(rightContent.value)
 }
 const downloadRight = () => {
   if (!rightContent.value) return

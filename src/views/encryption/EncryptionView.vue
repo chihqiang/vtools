@@ -193,6 +193,7 @@ import hmacSha1 from 'crypto-js/hmac-sha1'
 import hmacSha256 from 'crypto-js/hmac-sha256'
 import Base64 from 'crypto-js/enc-base64'
 import Utf8 from 'crypto-js/enc-utf8'
+import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
 const inputText = ref('')
@@ -220,12 +221,7 @@ const pasteInput = async () => {
 
 const copyOutput = async () => {
   if (!ensureInput()) return
-  try {
-    await navigator.clipboard.writeText(inputText.value)
-    toast.success('已复制到剪贴板')
-  } catch {
-    toast.error('复制失败')
-  }
+  toastCopy(inputText.value)
 }
 
 const clearInput = () => {

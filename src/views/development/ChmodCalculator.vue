@@ -336,6 +336,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
+import { copyText } from '@/utils/clipboard'
 
 const toast = useToast()
 
@@ -556,7 +557,7 @@ const copyCommand = async (type: 'file' | 'dir' = 'file') => {
       ? `chmod ${octalPermission.value} filename`
       : `chmod -R ${octalPermission.value} directory`
   try {
-    await navigator.clipboard.writeText(command)
+    await copyText(command)
     toast.success('命令已复制到剪贴板！')
   } catch (err) {
     console.error('复制失败:', err)

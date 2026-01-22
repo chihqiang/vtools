@@ -144,7 +144,7 @@
                 {{ str }}
               </span>
               <button
-                @click="copyToClipboard(str, `字符串 ${index + 1}`)"
+                @click="toastCopy(str, `字符串 ${index + 1}`)"
                 class="p-1.5 bg-gray-200 rounded hover:bg-gray-300"
                 title="复制"
               >
@@ -161,6 +161,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
+import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
 
@@ -224,15 +225,6 @@ const generateRandomStrings = () => {
     toast.error('生成失败')
   } finally {
     generating.value = false
-  }
-}
-
-const copyToClipboard = async (text: string, label: string) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.success(`${label} 已复制`)
-  } catch {
-    toast.error('复制失败')
   }
 }
 </script>

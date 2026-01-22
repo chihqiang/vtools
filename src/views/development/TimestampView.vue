@@ -87,6 +87,35 @@
           </div>
         </div>
 
+        <!-- 农历信息 -->
+        <div class="space-y-2">
+          <div class="flex items-center">
+            <span class="text-sm text-gray-500 min-w-[80px]">农历：</span>
+            <span class="text-sm text-gray-900">{{ currentLunarInfo }}</span>
+          </div>
+          <div class="flex items-center">
+            <span class="text-sm text-gray-500 min-w-[80px]">天干地支：</span>
+            <span class="text-sm text-gray-900">{{ ganZhiInfo }}</span>
+          </div>
+          <div class="flex items-center">
+            <span class="text-sm text-gray-500 min-w-[80px]">生肖：</span>
+            <span class="text-sm text-gray-900">{{ shengxiaoInfo }}</span>
+          </div>
+        </div>
+
+        <!-- 黄历宜忌 -->
+        <div class="mt-4 space-y-2">
+          <h4 class="text-sm font-medium text-gray-700">黄历宜忌</h4>
+          <div class="flex items-start">
+            <span class="text-sm text-gray-500 min-w-[80px]">宜：</span>
+            <span class="text-sm text-green-700">{{ currentAlmanacYi }}</span>
+          </div>
+          <div class="flex items-start">
+            <span class="text-sm text-gray-500 min-w-[80px]">忌：</span>
+            <span class="text-sm text-red-700">{{ currentAlmanacJi }}</span>
+          </div>
+        </div>
+
         <!-- 操作 -->
         <div class="flex flex-row flex-wrap gap-2">
           <!-- 开始/停止按钮 -->
@@ -112,7 +141,7 @@
 
           <!-- 复制按钮 -->
           <button
-            @click="copy(currentTimestamp.value)"
+            @click="toastCopy(currentTimestamp.value)"
             class="px-3 py-1 bg-purple-500 text-white rounded-lg font-medium text-sm hover:bg-purple-600 w-[calc(50%-0.5rem)]"
           >
             复制
@@ -259,336 +288,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { useToast } from '@/composables/useToast'
 import SvgIcon from '@/components/SvgIcon.vue'
 dayjs.extend(utc)
 dayjs.extend(timezone)
+import { toastCopy } from '@/utils/clipboard'
 
-const toast = useToast()
+import { solar2lunar, getGanZhiString, getAlmanac, timezeros } from '@/utils/times'
 
-const timezoneOptions = ref([
-  { value: 'local', label: '本地时区', shortLabel: '本地时区' },
-  {
-    value: 'Etc/GMT+12',
-    label: 'Etc/GMT+12 (UTC-12:00) 国际日期变更线西',
-    shortLabel: 'UTC-12:00',
-  },
-  { value: 'Etc/GMT+11', label: 'Etc/GMT+11 (UTC-11:00) 协调世界时-11', shortLabel: 'UTC-11:00' },
-  {
-    value: 'Pacific/Honolulu',
-    label: 'Pacific/Honolulu (UTC-10:00) 夏威夷',
-    shortLabel: 'UTC-10:00 夏威夷',
-  },
-  {
-    value: 'Pacific/Gambier',
-    label: 'Pacific/Gambier (UTC-09:00) 法属波利尼西亚甘比尔群岛',
-    shortLabel: 'UTC-09:00',
-  },
-  {
-    value: 'America/Santa_Isabel',
-    label: 'America/Santa_Isabel (UTC-08:00) 下加利福尼亚州',
-    shortLabel: 'UTC-08:00',
-  },
-  {
-    value: 'America/Los_Angeles',
-    label: 'America/Los_Angeles (UTC-08:00) 太平洋时间（美国和加拿大）',
-    shortLabel: 'UTC-08:00 洛杉矶',
-  },
-  {
-    value: 'America/Phoenix',
-    label: 'America/Phoenix (UTC-07:00) 亚利桑那',
-    shortLabel: 'UTC-07:00 亚利桑那',
-  },
-  {
-    value: 'America/Denver',
-    label: 'America/Denver (UTC-07:00) 山地时间（美国和加拿大）',
-    shortLabel: 'UTC-07:00 丹佛',
-  },
-  {
-    value: 'America/Guatemala',
-    label: 'America/Guatemala (UTC-06:00) 中美洲',
-    shortLabel: 'UTC-06:00 中美洲',
-  },
-  {
-    value: 'America/Chicago',
-    label: 'America/Chicago (UTC-06:00) 中部时间（美国和加拿大）',
-    shortLabel: 'UTC-06:00 芝加哥',
-  },
-  {
-    value: 'America/Regina',
-    label: 'America/Regina (UTC-06:00) 萨斯喀彻温',
-    shortLabel: 'UTC-06:00',
-  },
-  {
-    value: 'America/Mexico_City',
-    label: 'America/Mexico_City (UTC-06:00) 瓜达拉哈拉,墨西哥城,蒙特雷',
-    shortLabel: 'UTC-06:00 墨西哥城',
-  },
-  {
-    value: 'America/Bogota',
-    label: 'America/Bogota (UTC-05:00) 波哥大,利马,基多',
-    shortLabel: 'UTC-05:00 波哥大',
-  },
-  {
-    value: 'America/Indiana/Indianapolis',
-    label: 'America/Indiana/Indianapolis (UTC-05:00) 印地安那州（东部）',
-    shortLabel: 'UTC-05:00 印第安纳',
-  },
-  {
-    value: 'America/New_York',
-    label: 'America/New_York (UTC-05:00) 东部时间（美国和加拿大）',
-    shortLabel: 'UTC-05:00 纽约',
-  },
-  {
-    value: 'America/Halifax',
-    label: 'America/Halifax (UTC-04:00) 大西洋时间（加拿大）',
-    shortLabel: 'UTC-04:00 哈利法克斯',
-  },
-  {
-    value: 'America/Asuncion',
-    label: 'America/Asuncion (UTC-04:00) 亚松森',
-    shortLabel: 'UTC-04:00 亚松森',
-  },
-  {
-    value: 'America/La_Paz',
-    label: 'America/La_Paz (UTC-04:00) 乔治敦,拉巴斯,马瑙斯,圣胡安',
-    shortLabel: 'UTC-04:00',
-  },
-  { value: 'America/Cuiaba', label: 'America/Cuiaba (UTC-04:00) 库亚巴', shortLabel: 'UTC-04:00' },
-  {
-    value: 'America/St_Johns',
-    label: 'America/St_Johns (UTC-03:30) 纽芬兰',
-    shortLabel: 'UTC-03:30 纽芬兰',
-  },
-  {
-    value: 'America/Sao_Paulo',
-    label: 'America/Sao_Paulo (UTC-03:00) 巴西利亚',
-    shortLabel: 'UTC-03:00 圣保罗',
-  },
-  {
-    value: 'America/Godthab',
-    label: 'America/Godthab (UTC-03:00) 格陵兰',
-    shortLabel: 'UTC-03:00 格陵兰',
-  },
-  {
-    value: 'America/Cayenne',
-    label: 'America/Cayenne (UTC-03:00) 卡宴,福塔雷萨',
-    shortLabel: 'UTC-03:00',
-  },
-  {
-    value: 'America/Argentina/Buenos_Aires',
-    label: 'America/Argentina/Buenos_Aires (UTC-03:00) 布宜诺斯艾利斯',
-    shortLabel: 'UTC-03:00 布宜诺斯艾利斯',
-  },
-  {
-    value: 'America/Montevideo',
-    label: 'America/Montevideo (UTC-03:00) 蒙得维的亚',
-    shortLabel: 'UTC-03:00 蒙得维的亚',
-  },
-  { value: 'Etc/GMT+2', label: 'Etc/GMT+2 (UTC-02:00) 协调世界时-2', shortLabel: 'UTC-02:00' },
-  {
-    value: 'Atlantic/Azores',
-    label: 'Atlantic/Azores (UTC-01:00) 亚速尔群岛',
-    shortLabel: 'UTC-01:00 亚速尔',
-  },
-  {
-    value: 'Africa/Casablanca',
-    label: 'Africa/Casablanca (UTC+00:00) 卡萨布兰卡',
-    shortLabel: 'UTC+00:00 卡萨布兰卡',
-  },
-  {
-    value: 'Atlantic/Reykjavik',
-    label: 'Atlantic/Reykjavik (UTC+00:00) 蒙罗维亚,雷克雅未克',
-    shortLabel: 'UTC+00:00 雷克雅未克',
-  },
-  { value: 'Etc/GMT', label: 'Etc/GMT (UTC+00:00) 协调世界时', shortLabel: 'UTC+00:00 协调世界时' },
-  {
-    value: 'Europe/Berlin',
-    label: 'Europe/Berlin (UTC+01:00) 阿姆斯特丹，柏林，伯尔尼，罗马，斯德哥尔摩，维也纳',
-    shortLabel: 'UTC+01:00 柏林',
-  },
-  {
-    value: 'Europe/Paris',
-    label: 'Europe/Paris (UTC+01:00) 布鲁塞尔，哥本哈根，马德里，巴黎',
-    shortLabel: 'UTC+01:00 巴黎',
-  },
-  {
-    value: 'Africa/Lagos',
-    label: 'Africa/Lagos (UTC+01:00) 中非西部',
-    shortLabel: 'UTC+01:00 拉各斯',
-  },
-  {
-    value: 'Europe/Budapest',
-    label: 'Europe/Budapest (UTC+01:00) 贝尔格莱德，布拉迪斯拉发，布达佩斯，卢布尔雅那，布拉格',
-    shortLabel: 'UTC+01:00 布达佩斯',
-  },
-  {
-    value: 'Europe/Warsaw',
-    label: 'Europe/Warsaw (UTC+01:00) 萨拉热窝，斯科普里，华沙，萨格勒布',
-    shortLabel: 'UTC+01:00 华沙',
-  },
-  {
-    value: 'Europe/Istanbul',
-    label: 'Europe/Istanbul (UTC+02:00) 雅典，布加勒斯特，伊斯坦布尔',
-    shortLabel: 'UTC+02:00 伊斯坦布尔',
-  },
-  { value: 'Africa/Cairo', label: 'Africa/Cairo (UTC+02:00) 开罗', shortLabel: 'UTC+02:00 开罗' },
-  {
-    value: 'Asia/Damascus',
-    label: 'Asia/Damascus (UTC+02:00) 大马士革',
-    shortLabel: 'UTC+02:00 大马士革',
-  },
-  { value: 'Asia/Amman', label: 'Asia/Amman (UTC+02:00) 安曼', shortLabel: 'UTC+02:00 安曼' },
-  {
-    value: 'Africa/Johannesburg',
-    label: 'Africa/Johannesburg (UTC+02:00) 哈拉雷，比勒陀利亚',
-    shortLabel: 'UTC+02:00 约翰内斯堡',
-  },
-  {
-    value: 'Asia/Jerusalem',
-    label: 'Asia/Jerusalem (UTC+02:00) 耶路撒冷',
-    shortLabel: 'UTC+02:00 耶路撒冷',
-  },
-  { value: 'Asia/Beirut', label: 'Asia/Beirut (UTC+02:00) 贝鲁特', shortLabel: 'UTC+02:00 贝鲁特' },
-  {
-    value: 'Asia/Baghdad',
-    label: 'Asia/Baghdad (UTC+03:00) 巴格达',
-    shortLabel: 'UTC+03:00 巴格达',
-  },
-  {
-    value: 'Europe/Minsk',
-    label: 'Europe/Minsk (UTC+03:00) 明斯克',
-    shortLabel: 'UTC+03:00 明斯克',
-  },
-  { value: 'Asia/Riyadh', label: 'Asia/Riyadh (UTC+03:00) 利雅得', shortLabel: 'UTC+03:00 利雅得' },
-  {
-    value: 'Africa/Nairobi',
-    label: 'Africa/Nairobi (UTC+03:00) 内罗毕',
-    shortLabel: 'UTC+03:00 内罗毕',
-  },
-  { value: 'Asia/Tehran', label: 'Asia/Tehran (UTC+03:30) 德黑兰', shortLabel: 'UTC+03:30 德黑兰' },
-  {
-    value: 'Europe/Moscow',
-    label: 'Europe/Moscow (UTC+04:00) 莫斯科，圣彼得堡，伏尔加格勒',
-    shortLabel: 'UTC+04:00 莫斯科',
-  },
-  {
-    value: 'Asia/Tbilisi',
-    label: 'Asia/Tbilisi (UTC+04:00) 第比利斯',
-    shortLabel: 'UTC+04:00 第比利斯',
-  },
-  {
-    value: 'Asia/Yerevan',
-    label: 'Asia/Yerevan (UTC+04:00) 埃里温',
-    shortLabel: 'UTC+04:00 埃里温',
-  },
-  {
-    value: 'Asia/Dubai',
-    label: 'Asia/Dubai (UTC+04:00) 阿布扎比，马斯喀特',
-    shortLabel: 'UTC+04:00 迪拜',
-  },
-  { value: 'Asia/Baku', label: 'Asia/Baku (UTC+04:00) 巴库', shortLabel: 'UTC+04:00 巴库' },
-  {
-    value: 'Indian/Mauritius',
-    label: 'Indian/Mauritius (UTC+04:00) 路易港',
-    shortLabel: 'UTC+04:00 路易港',
-  },
-  { value: 'Asia/Kabul', label: 'Asia/Kabul (UTC+04:30) 喀布尔', shortLabel: 'UTC+04:30 喀布尔' },
-  {
-    value: 'Asia/Karachi',
-    label: 'Asia/Karachi (UTC+05:00) 伊斯兰堡，卡拉奇',
-    shortLabel: 'UTC+05:00 卡拉奇',
-  },
-  {
-    value: 'Asia/Colombo',
-    label: 'Asia/Colombo (UTC+05:30) 斯里加亚渥登普拉',
-    shortLabel: 'UTC+05:30 科伦坡',
-  },
-  {
-    value: 'Asia/Kolkata',
-    label: 'Asia/Kolkata (UTC+05:30) 钦奈，加尔各答，新德里',
-    shortLabel: 'UTC+05:30 新德里',
-  },
-  {
-    value: 'Asia/Almaty',
-    label: 'Asia/Almaty (UTC+06:00) 阿斯塔纳',
-    shortLabel: 'UTC+06:00 阿拉木图',
-  },
-  { value: 'Asia/Dhaka', label: 'Asia/Dhaka (UTC+06:00) 达卡', shortLabel: 'UTC+06:00 达卡' },
-  {
-    value: 'Asia/Bangkok',
-    label: 'Asia/Bangkok (UTC+07:00) 曼谷，河内，雅加达',
-    shortLabel: 'UTC+07:00 曼谷',
-  },
-  {
-    value: 'Asia/Novosibirsk',
-    label: 'Asia/Novosibirsk (UTC+07:00) 新西伯利亚',
-    shortLabel: 'UTC+07:00 新西伯利亚',
-  },
-  {
-    value: 'Asia/Shanghai',
-    label: 'Asia/Shanghai (UTC+08:00) 北京，重庆，中国香港，乌鲁木齐',
-    shortLabel: 'UTC+08:00 上海',
-  },
-  {
-    value: 'Australia/Perth',
-    label: 'Australia/Perth (UTC+08:00) 佩思',
-    shortLabel: 'UTC+08:00 珀斯',
-  },
-  { value: 'Asia/Taipei', label: 'Asia/Taipei (UTC+08:00) 台北', shortLabel: 'UTC+08:00 台北' },
-  { value: 'Asia/Seoul', label: 'Asia/Seoul (UTC+09:00) 首尔', shortLabel: 'UTC+09:00 首尔' },
-  {
-    value: 'Asia/Tokyo',
-    label: 'Asia/Tokyo (UTC+09:00) 大阪，札幌，东京',
-    shortLabel: 'UTC+09:00 东京',
-  },
-  {
-    value: 'Australia/Darwin',
-    label: 'Australia/Darwin (UTC+09:30) 达尔文',
-    shortLabel: 'UTC+09:30 达尔文',
-  },
-  {
-    value: 'Australia/Adelaide',
-    label: 'Australia/Adelaide (UTC+09:30) 阿德莱德',
-    shortLabel: 'UTC+09:30 阿德莱德',
-  },
-  {
-    value: 'Australia/Brisbane',
-    label: 'Australia/Brisbane (UTC+10:00) 布里斯班',
-    shortLabel: 'UTC+10:00 布里斯班',
-  },
-  {
-    value: 'Pacific/Port_Moresby',
-    label: 'Pacific/Port_Moresby (UTC+10:00) 关岛，莫尔兹比港',
-    shortLabel: 'UTC+10:00 莫尔兹比港',
-  },
-  {
-    value: 'Australia/Sydney',
-    label: 'Australia/Sydney (UTC+10:00) 堪培拉，墨尔本，悉尼',
-    shortLabel: 'UTC+10:00 悉尼',
-  },
-  {
-    value: 'Pacific/Guadalcanal',
-    label: 'Pacific/Guadalcanal (UTC+11:00) 所罗门群岛，新喀里多尼亚',
-    shortLabel: 'UTC+11:00',
-  },
-  { value: 'Etc/GMT-12', label: 'Etc/GMT-12 (UTC+12:00) 协调世界时+12', shortLabel: 'UTC+12:00' },
-  {
-    value: 'Pacific/Fiji',
-    label: 'Pacific/Fiji (UTC+12:00) 斐济，马绍尔群岛',
-    shortLabel: 'UTC+12:00 斐济',
-  },
-  {
-    value: 'Pacific/Auckland',
-    label: 'Pacific/Auckland (UTC+12:00) 奥克兰，惠灵顿',
-    shortLabel: 'UTC+12:00 奥克兰',
-  },
-  {
-    value: 'Pacific/Tongatapu',
-    label: 'Pacific/Tongatapu (UTC+13:00) 努库阿洛法',
-    shortLabel: 'UTC+13:00 努库阿洛法',
-  },
-])
+const timezoneOptions = ref(timezeros)
 
 /* ================= 当前时间 ================= */
 
@@ -613,6 +320,39 @@ const currentDate = computed(() => {
   return {
     value: now.value.format('YYYY-MM-DD'),
   }
+})
+
+// 农历信息
+const currentLunarInfo = computed(() => {
+  const date = now.value.toDate()
+  const lunar = solar2lunar(date.getFullYear(), date.getMonth() + 1, date.getDate())
+  return `${lunar.lunarMonthStr}${lunar.lunarDayStr}`
+})
+
+// 天干地支信息
+const ganZhiInfo = computed(() => {
+  const date = now.value.toDate()
+  return getGanZhiString(date)
+})
+
+// 生肖信息
+const shengxiaoInfo = computed(() => {
+  const date = now.value.toDate()
+  const lunar = solar2lunar(date.getFullYear(), date.getMonth() + 1, date.getDate())
+  return lunar.shengxiao
+})
+
+// 黄历宜忌信息
+const currentAlmanacYi = computed(() => {
+  const date = now.value.toDate()
+  const almanac = getAlmanac(date)
+  return almanac.yi
+})
+
+const currentAlmanacJi = computed(() => {
+  const date = now.value.toDate()
+  const almanac = getAlmanac(date)
+  return almanac.ji
 })
 
 let timer: number | null = null
@@ -703,18 +443,6 @@ const setCurrentTimestamp = () => {
   // 填充日期时间输入框
   dateInput.value = currentTime.format('YYYY-MM-DD HH:mm:ss')
   convertDateToTimestamp()
-}
-
-/* ================= 工具 ================= */
-
-const copy = async (text: string) => {
-  if (!text) return
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.success('已复制')
-  } catch {
-    toast.error('复制失败')
-  }
 }
 
 onMounted(() => startTimer())

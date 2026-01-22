@@ -305,6 +305,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
+import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
 const regexPattern = ref('')
@@ -412,12 +413,7 @@ const copyRegex = async () => {
     toast.warning('请先输入或生成内容')
     return
   }
-  try {
-    await navigator.clipboard.writeText(regexPattern.value)
-    toast.success('已复制到剪贴板')
-  } catch {
-    toast.error('复制失败')
-  }
+  toastCopy(regexPattern.value)
 }
 
 const clearAll = () => {

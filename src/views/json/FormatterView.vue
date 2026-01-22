@@ -131,6 +131,7 @@ import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
 import debounce from 'lodash/debounce'
+import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
 const inputJson = ref('')
@@ -224,12 +225,7 @@ const clearInput = () => {
 // 复制 / 下载
 const copyOutput = () => {
   if (!parsedJson.value) return toast.error('没有可复制的内容')
-  try {
-    navigator.clipboard.writeText(JSON.stringify(parsedJson.value, null, 2))
-    toast.success('已复制')
-  } catch {
-    toast.error('复制失败')
-  }
+  toastCopy(JSON.stringify(parsedJson.value, null, 2))
 }
 const downloadJson = () => {
   if (!parsedJson.value) return toast.error('没有可下载的内容')

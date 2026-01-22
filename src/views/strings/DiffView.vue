@@ -143,6 +143,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
+import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
 
@@ -195,12 +196,7 @@ const copyText1 = async () => {
     return
   }
 
-  try {
-    await navigator.clipboard.writeText(text1.value)
-    toast.success('复制成功')
-  } catch {
-    toast.error('复制失败')
-  }
+  toastCopy(text1.value)
 }
 
 const copyText2 = async () => {
@@ -208,13 +204,7 @@ const copyText2 = async () => {
     toast.warning('字符串 2 为空')
     return
   }
-
-  try {
-    await navigator.clipboard.writeText(text2.value)
-    toast.success('复制成功')
-  } catch {
-    toast.error('复制失败')
-  }
+  toastCopy(text2.value)
 }
 
 const compare = () => {

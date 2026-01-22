@@ -307,6 +307,7 @@
 import { ref, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { CronExpressionParser } from 'cron-parser'
+import { copyText } from '@/utils/clipboard'
 
 // 定义格式枚举
 enum CronFormat {
@@ -392,7 +393,7 @@ const copyOutput = async () => {
     return
   }
   try {
-    await navigator.clipboard.writeText(cronExpression.value)
+    await copyText(cronExpression.value)
     toast.success('已复制到剪贴板')
   } catch {
     toast.error('复制失败')
