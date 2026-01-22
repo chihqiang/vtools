@@ -4,41 +4,44 @@
 
 ## 功能模块
 
-### 检测工具 (Detect)
-
-- **Axios请求**: 模拟和测试Axios请求
-- **浏览器信息**: 查看当前浏览器详细信息
-- **网络视图**: 网络请求分析和监控
-
 ### 开发工具 (Development)
 
-- **Crontab生成器**: 可视化生成和验证Crontab表达式
-- **时间戳转换**: 时间戳与日期时间互转，实时钟表显示
+- **Crontab工具**: Crontab 表达式解析、验证和执行时间生成工具
+- **Chmod 权限计算器**: Linux 文件权限计算工具，支持八进制和符号表示
+- **时间戳工具**: 时间戳转换工具，支持秒级和毫秒级时间戳转换
 
 ### 加密工具 (Encryption)
 
-- **加密工具**: 各种加密算法实现和测试
-- **JWT工具**: JWT令牌生成和解析
-- **密钥对生成器**: 生成和管理密钥对
+- **加密解密工具**: 支持Base64、URL编码解码和MD5加密
+- **JWT 解析工具**: JWT Token 解析工具，支持解码 Header、Payload 和验证签名
+- **密钥对生成器**: 生成 RSA 密钥对，支持公钥和私钥格式
 
 ### 图片工具 (Image)
 
-- **Favicon生成器**: 生成网站图标
-- **二维码生成器**: 生成各种二维码
-- **二维码扫描器**: 扫描和解析二维码
+- **Favicon 生成器**: 生成各种尺寸和格式的 Favicon 图标，支持上传图片和自定义配置
+- **二维码生成**: 生成自定义二维码
+- **二维码识别**: 识别图片或摄像头中的二维码
+- **图片格式转换**: 图片格式转换工具,支持 JPG、PNG、WebP、GIF 格式互相转换
 
 ### JSON工具 (JSON)
 
-- **数据伪造器**: 使用faker生成测试数据
-- **格式化工具**: JSON、XML等数据格式化
-- **表格视图**: 数据表格化展示
-- **YAML转换**: YAML与其他格式互转
+- **JSON 格式化**: JSON 格式化工具，支持格式化、压缩、高亮显示等功能
+- **JSON 转表格**: 将 JSON 数据转换为表格格式，并支持下载 CSV 文件
+- **JSON YAML 转换**: JSON 和 YAML 格式之间的转换工具，支持双向转换
+- **Mock数据生成器**: 使用faker-js/faker生成mock数据，支持自定义JSON结构
+
+### 网络工具 (Network)
+
+- **网络工具**: HTTP Ping、端口检测、DNS解析、网速测试
+- **浏览器信息**: 检测浏览器详细信息，包括系统、硬件、网络等
+- **API 接口调试工具**: 构建并发送 HTTP 请求，支持多种请求方法与参数格式，便于接口调试与测试
 
 ### 字符串工具 (Strings)
 
-- **转换器**: 各种单位和格式转换
-- **差异比较**: 文本差异对比
-- **随机生成器**: 生成随机字符串、数字等
+- **字符串转换**: 字符串转换工具，支持多种转换方式
+- **随机字符串生成器**: 生成安全的随机字符串，支持自定义长度和字符类型
+- **字符串对比**: 比较两个字符串的差异，高亮显示不同的部分
+- **正则表达式工具**: 测试、验证和生成正则表达式
 
 ## 技术栈
 
@@ -107,7 +110,7 @@ pnpm run check
 ## 推荐IDE设置
 
 - **VS Code**: [下载](https://code.visualstudio.com/)
-- **插件**: 
+- **插件**:
   - [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (并禁用Vetur)
   - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
   - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
@@ -133,11 +136,12 @@ src/
 ├── router/          # 路由配置
 ├── types/           # 类型定义
 ├── views/           # 页面视图
-│   ├── detect/      # 检测工具
 │   ├── development/ # 开发工具
 │   ├── encryption/  # 加密工具
+│   ├── game/        # 游戏工具
 │   ├── image/       # 图片工具
 │   ├── json/        # JSON工具
+│   ├── network/     # 网络工具
 │   ├── strings/     # 字符串工具
 │   └── HomeView.vue # 首页
 ├── App.vue          # 根组件
