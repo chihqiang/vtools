@@ -55,7 +55,13 @@
             <p class="text-xs text-gray-400">支持 JPG、PNG、WebP、GIF 格式</p>
           </div>
           <!-- 上传后的预览 -->
-          <div v-else class="border-2 border-solid border-blue-500 rounded-lg p-4 text-center">
+          <div
+            v-else
+            class="border-2 border-solid border-blue-500 rounded-lg p-4 text-center cursor-pointer"
+            @dragover.prevent
+            @dragleave.prevent
+            @drop.prevent="handleDragDrop"
+          >
             <div class="flex items-center justify-center mb-4">
               <img :src="originalImage" alt="原始图片" class="max-w-full max-h-48 object-contain" />
             </div>
@@ -114,6 +120,36 @@
             max="100"
             class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
+        </div>
+
+        <!-- 尺寸设置 -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">自定义尺寸</label>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-xs text-gray-500 mb-1">宽度</label>
+              <input
+                type="number"
+                v-model.number="customWidth"
+                min="1"
+                placeholder="原始宽度"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs text-gray-500 mb-1">高度</label>
+              <input
+                type="number"
+                v-model.number="customHeight"
+                min="1"
+                placeholder="原始高度"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-2">
+            留空使用原始尺寸: {{ originalWidth }} × {{ originalHeight }}
+          </p>
         </div>
 
         <!-- 转换按钮 -->
@@ -187,6 +223,7 @@ const fileInput = ref<HTMLInputElement>()
 
 // 状态
 const originalImage = ref<string>('')
+const originalFileName = ref<string>('image')
 const convertedImages = ref<Record<string, string>>({})
 const targetFormats = ref<ImageFormat[]>([
   ImageFormat.JPEG,
@@ -198,6 +235,8 @@ const targetFormats = ref<ImageFormat[]>([
 const quality = ref<number>(80)
 const originalWidth = ref<number>(0)
 const originalHeight = ref<number>(0)
+const customWidth = ref<number>(0)
+const customHeight = ref<number>(0)
 const convertedWidth = ref<number>(0)
 const convertedHeight = ref<number>(0)
 
@@ -232,6 +271,11 @@ const handleDragDrop = (event: DragEvent) => {
 
 // 处理文件
 const processFile = (file: File) => {
+  // 提取原始文件名（不包含扩展名）
+  const fileName = file.name
+  const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName
+  originalFileName.value = nameWithoutExt
+
   const reader = new FileReader()
 
   reader.onload = (e) => {
@@ -243,6 +287,8 @@ const processFile = (file: File) => {
     img.onload = () => {
       originalWidth.value = img.width
       originalHeight.value = img.height
+      customWidth.value = img.width
+      customHeight.value = img.height
       convertedWidth.value = img.width
       convertedHeight.value = img.height
     }
@@ -257,39 +303,48 @@ const processFile = (file: File) => {
 const convertImage = () => {
   if (!originalImage.value || targetFormats.value.length === 0) return
 
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
   const img = new Image()
 
   img.onload = () => {
-    // 设置画布尺寸
-    canvas.width = img.width
-    canvas.height = img.height
-
-    // 绘制图片到画布
-    ctx?.drawImage(img, 0, 0)
-
     // 重置转换结果
     convertedImages.value = {}
+
+    // 确定使用的尺寸（自定义尺寸或原始尺寸）
+    const width = customWidth.value || img.width
+    const height = customHeight.value || img.height
 
     // 为每个目标格式转换图片
     targetFormats.value.forEach((format) => {
       // 从 supportedFormats 中获取 MIME 类型
       const formatInfo = supportedFormats.find((f) => f.value === format)
       const mimeType = formatInfo?.mimeType || 'image/jpeg'
-      // 导出图片
-      if (format === ImageFormat.PNG) {
-        // PNG 不支持质量参数
-        convertedImages.value[format] = canvas.toDataURL('image/png')
-      } else {
-        // JPEG、JPG 和 WebP 支持质量参数
-        convertedImages.value[format] = canvas.toDataURL(mimeType, quality.value / 100)
+
+      // 创建临时画布用于转换
+      const tempCanvas = document.createElement('canvas')
+      const tempCtx = tempCanvas.getContext('2d')
+
+      if (tempCtx) {
+        // 设置临时画布尺寸
+        tempCanvas.width = width
+        tempCanvas.height = height
+
+        // 绘制图片到临时画布
+        tempCtx.drawImage(img, 0, 0, width, height)
+
+        // 导出图片
+        if (format === ImageFormat.PNG) {
+          // PNG 不支持质量参数
+          convertedImages.value[format] = tempCanvas.toDataURL('image/png')
+        } else {
+          // JPEG、JPG 和 WebP 支持质量参数
+          convertedImages.value[format] = tempCanvas.toDataURL(mimeType, quality.value / 100)
+        }
       }
     })
 
     // 更新转换后图片的尺寸
-    convertedWidth.value = img.width
-    convertedHeight.value = img.height
+    convertedWidth.value = width
+    convertedHeight.value = height
   }
 
   img.src = originalImage.value
@@ -300,7 +355,10 @@ const downloadImage = (format: string) => {
   if (!convertedImages.value[format]) return
   const link = document.createElement('a')
   link.href = convertedImages.value[format]
-  link.download = `converted-image.${format}`
+  // 使用新的文件名规则：{original}-{format}-{width}x{height}
+  const width = customWidth.value || originalWidth.value
+  const height = customHeight.value || originalHeight.value
+  link.download = `${originalFileName.value}-${format}-${width}x${height}.${format}`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
