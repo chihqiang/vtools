@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen bg-white py-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
       <!-- 页面标题 -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Chmod 权限计算器</h1>
-        <p class="text-gray-600 max-w-2xl mx-auto">Linux 文件权限计算工具，支持八进制和符号表示</p>
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Chmod 权限计算器</h1>
+        <p class="text-gray-600">Linux 文件权限计算工具，支持八进制和符号表示</p>
       </div>
 
       <!-- 权限设置 -->
-      <div class="border border-gray-200 rounded-lg p-6 mb-8">
+      <div class="border border-gray-300 rounded-lg p-6 mb-8">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">权限设置</h2>
 
         <!-- 权限输入 -->
@@ -29,7 +29,7 @@
                 />
                 <button
                   @click="clearPermissionInput"
-                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                  class="px-4 py-2 bg-gray-600 text-white rounded-md shadow-sm hover:shadow transition-all duration-150"
                 >
                   清除
                 </button>
@@ -50,7 +50,7 @@
                 />
                 <button
                   @click="clearSymbolicInput"
-                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                  class="px-4 py-2 bg-gray-600 text-white rounded-md shadow-sm hover:shadow transition-all duration-150"
                 >
                   清除
                 </button>
@@ -60,9 +60,9 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- 用户权限 -->
-          <div class="border border-gray-200 rounded-lg p-4">
+          <div class="border border-gray-300 rounded-lg p-4 shadow-sm">
             <h3 class="font-medium text-center text-gray-700 mb-3">用户 (u)</h3>
             <div class="space-y-2">
               <label class="flex items-center gap-2">
@@ -93,7 +93,7 @@
           </div>
 
           <!-- 组权限 -->
-          <div class="border border-gray-200 rounded-lg p-4">
+          <div class="border border-gray-300 rounded-lg p-4 shadow-sm">
             <h3 class="font-medium text-center text-gray-700 mb-3">组 (g)</h3>
             <div class="space-y-2">
               <label class="flex items-center gap-2">
@@ -124,7 +124,7 @@
           </div>
 
           <!-- 其他权限 -->
-          <div class="border border-gray-200 rounded-lg p-4">
+          <div class="border border-gray-300 rounded-lg p-4 shadow-sm">
             <h3 class="font-medium text-center text-gray-700 mb-3">其他 (o)</h3>
             <div class="space-y-2">
               <label class="flex items-center gap-2">
@@ -157,14 +157,14 @@
       </div>
 
       <!-- 权限预设 -->
-      <div class="mb-8">
+      <div class="border border-gray-300 rounded-lg p-6 mb-8">
         <h2 class="text-lg font-semibold text-gray-700 mb-3">常见权限预设</h2>
         <div class="flex flex-wrap gap-2">
           <button
             v-for="preset in permissionPresets"
             :key="preset.value"
             @click="applyPreset(preset.value)"
-            class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-md transition-colors"
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-all duration-150 shadow-sm hover:shadow"
           >
             {{ preset.label }} ({{ preset.value }})
           </button>
@@ -172,9 +172,9 @@
       </div>
 
       <!-- 权限显示 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <!-- 八进制表示 -->
-        <div class="border border-gray-200 rounded-lg p-5">
+        <div class="border border-gray-300 rounded-lg p-5 shadow-sm">
           <h2 class="text-md font-medium text-gray-600 mb-3">八进制表示</h2>
           <div class="text-3xl font-mono font-bold text-center p-4 bg-gray-50 rounded">
             {{ octalPermission }}
@@ -182,7 +182,7 @@
         </div>
 
         <!-- 符号表示 -->
-        <div class="border border-gray-200 rounded-lg p-5">
+        <div class="border border-gray-300 rounded-lg p-5 shadow-sm">
           <h2 class="text-md font-medium text-gray-600 mb-3">符号表示</h2>
           <div class="text-3xl font-mono font-bold text-center p-4 bg-gray-50 rounded">
             {{ symbolicPermission }}
@@ -191,9 +191,9 @@
       </div>
 
       <!-- 命令生成 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <!-- 文件命令 -->
-        <div class="border border-gray-200 rounded-lg p-5">
+        <div class="border border-gray-300 rounded-lg p-5 shadow-sm">
           <h2 class="text-md font-medium text-gray-600 mb-3">文件命令</h2>
           <div class="flex flex-col gap-2">
             <code class="flex-1 p-3 bg-gray-50 rounded font-mono text-gray-700">
@@ -201,7 +201,7 @@
             </code>
             <button
               @click="copyCommand('file')"
-              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              class="px-4 py-2 bg-green-500 text-white rounded-md shadow-sm hover:shadow transition-all duration-150"
             >
               复制命令
             </button>
@@ -209,7 +209,7 @@
         </div>
 
         <!-- 目录命令 -->
-        <div class="border border-gray-200 rounded-lg p-5">
+        <div class="border border-gray-300 rounded-lg p-5 shadow-sm">
           <h2 class="text-md font-medium text-gray-600 mb-3">目录命令</h2>
           <div class="flex flex-col gap-2">
             <code class="flex-1 p-3 bg-gray-50 rounded font-mono text-gray-700">
@@ -217,7 +217,7 @@
             </code>
             <button
               @click="copyCommand('dir')"
-              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              class="px-4 py-2 bg-green-500 text-white rounded-md shadow-sm hover:shadow transition-all duration-150"
             >
               复制命令
             </button>
@@ -226,64 +226,101 @@
       </div>
 
       <!-- chmod 命令详解 -->
-      <div class="border border-gray-200 rounded-lg p-6 mb-8">
-        <h2 class="text-lg font-semibold text-gray-700 mb-4">chmod 命令详解</h2>
-        <div class="space-y-4">
-          <!-- 基本语法 -->
-          <div>
+      <div class="mt-12">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">chmod 命令详解</h2>
+        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-700 mb-3">chmod 命令语法</h3>
+          <p class="text-gray-600 mb-4">chmod 命令用于修改文件或目录的权限。</p>
+          <div class="mb-6">
             <h3 class="text-md font-medium text-gray-600 mb-2">基本语法</h3>
-            <code class="block p-3 bg-gray-50 rounded font-mono text-gray-700">
+            <code class="block p-3 bg-white rounded font-mono text-gray-700 border border-gray-200 shadow-sm">
               chmod [选项] 权限 文件/目录
             </code>
           </div>
 
           <!-- 八进制权限 -->
-          <div>
+          <div class="mb-6">
             <h3 class="text-md font-medium text-gray-600 mb-2">八进制权限表示</h3>
-            <ul class="list-disc pl-5 space-y-1 text-gray-600">
-              <li><code>4</code> - 读权限 (r)</li>
-              <li><code>2</code> - 写权限 (w)</li>
-              <li><code>1</code> - 执行权限 (x)</li>
-              <li>
-                组合示例: <code>7</code> = 4+2+1 = rwx, <code>6</code> = 4+2 = rw-, <code>5</code> =
-                4+1 = r-x
-              </li>
-            </ul>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">4</p>
+                <p class="text-xs text-gray-500">读权限 (r)</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">2</p>
+                <p class="text-xs text-gray-500">写权限 (w)</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">1</p>
+                <p class="text-xs text-gray-500">执行权限 (x)</p>
+              </div>
+            </div>
+            <p class="mt-3 text-sm text-gray-600">组合示例: <code>7</code> = 4+2+1 = rwx, <code>6</code> = 4+2 = rw-, <code>5</code> = 4+1 = r-x</p>
           </div>
 
           <!-- 符号权限 -->
-          <div>
+          <div class="mb-6">
             <h3 class="text-md font-medium text-gray-600 mb-2">符号权限表示</h3>
-            <ul class="list-disc pl-5 space-y-1 text-gray-600">
-              <li><code>u</code> - 用户（文件所有者）</li>
-              <li><code>g</code> - 组（文件所属组）</li>
-              <li><code>o</code> - 其他用户</li>
-              <li><code>a</code> - 所有用户（u+g+o）</li>
-              <li>
-                <code>+</code> - 添加权限, <code>-</code> - 移除权限, <code>=</code> - 设置权限
-              </li>
-            </ul>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">u</p>
+                <p class="text-xs text-gray-500">用户（文件所有者）</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">g</p>
+                <p class="text-xs text-gray-500">组（文件所属组）</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">o</p>
+                <p class="text-xs text-gray-500">其他用户</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">a</p>
+                <p class="text-xs text-gray-500">所有用户（u+g+o）</p>
+              </div>
+            </div>
           </div>
 
           <!-- 常用选项 -->
-          <div>
+          <div class="mb-6">
             <h3 class="text-md font-medium text-gray-600 mb-2">常用选项</h3>
-            <ul class="list-disc pl-5 space-y-1 text-gray-600">
-              <li><code>-R</code> - 递归应用权限到目录及其所有子内容</li>
-              <li><code>-v</code> - 显示详细信息</li>
-              <li><code>-c</code> - 只显示权限变更的文件</li>
-            </ul>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">-R</p>
+                <p class="text-xs text-gray-500">递归应用权限到目录及其所有子内容</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">-v</p>
+                <p class="text-xs text-gray-500">显示详细信息</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-medium text-gray-700">-c</p>
+                <p class="text-xs text-gray-500">只显示权限变更的文件</p>
+              </div>
+            </div>
           </div>
 
           <!-- 示例 -->
           <div>
             <h3 class="text-md font-medium text-gray-600 mb-2">示例</h3>
-            <ul class="list-disc pl-5 space-y-1 text-gray-600">
-              <li><code>chmod 755 file</code> - 设置文件权限为 rwxr-xr-x</li>
-              <li><code>chmod -R 755 dir</code> - 递归设置目录权限为 rwxr-xr-x</li>
-              <li><code>chmod u+x file</code> - 为文件所有者添加执行权限</li>
-              <li><code>chmod go-w file</code> - 移除组和其他用户的写权限</li>
-            </ul>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">chmod 755 file</p>
+                <p class="text-xs text-gray-500">设置文件权限为 rwxr-xr-x</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">chmod -R 755 dir</p>
+                <p class="text-xs text-gray-500">递归设置目录权限为 rwxr-xr-x</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">chmod u+x file</p>
+                <p class="text-xs text-gray-500">为文件所有者添加执行权限</p>
+              </div>
+              <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-sm font-mono text-gray-700">chmod go-w file</p>
+                <p class="text-xs text-gray-500">移除组和其他用户的写权限</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -293,6 +330,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 // 权限接口
 interface Permission {
@@ -386,6 +426,12 @@ const applyPreset = (presetValue: string) => {
   permissions.value.other.read = (otherValue & 4) === 4
   permissions.value.other.write = (otherValue & 2) === 2
   permissions.value.other.execute = (otherValue & 1) === 1
+
+  // 查找并显示预设名称
+  const preset = permissionPresets.value.find(p => p.value === presetValue)
+  if (preset) {
+    toast.success(`已应用预设: ${preset.label}`)
+  }
 }
 
 // 权限输入处理
@@ -488,28 +534,29 @@ const parseSymbolicInput = () => {
 const clearPermissionInput = () => {
   permissionInput.value = ''
   permissionError.value = ''
+  toast.success('已清空八进制输入')
 }
 
 // 清除符号输入
 const clearSymbolicInput = () => {
   symbolicInput.value = ''
   symbolicError.value = ''
+  toast.success('已清空符号输入')
 }
 
 // 复制命令到剪贴板
-const copyCommand = (type: 'file' | 'dir' = 'file') => {
+const copyCommand = async (type: 'file' | 'dir' = 'file') => {
   const command =
     type === 'file'
       ? `chmod ${octalPermission.value} filename`
       : `chmod -R ${octalPermission.value} directory`
-  navigator.clipboard
-    .writeText(command)
-    .then(() => {
-      alert('命令已复制到剪贴板！')
-    })
-    .catch((err) => {
-      console.error('复制失败:', err)
-    })
+  try {
+    await navigator.clipboard.writeText(command)
+    toast.success('命令已复制到剪贴板！')
+  } catch (err) {
+    console.error('复制失败:', err)
+    toast.error('复制失败，请手动复制')
+  }
 }
 </script>
 
