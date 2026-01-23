@@ -44,7 +44,7 @@ const jsonRoutes: RouteRecordRaw[] = [
   {
     path: '/json-diff',
     name: 'json-diff',
-    component: () => import('@/views/json/DiffView.vue'),
+    component: () => import('@/views/json/JDiffView.vue'),
     meta: {
       showOnHome: true,
       title: 'JSON 对比',

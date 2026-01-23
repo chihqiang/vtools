@@ -31,7 +31,7 @@ const stringsRoutes: RouteRecordRaw[] = [
   {
     path: '/string-diff',
     name: 'string-diff',
-    component: () => import('@/views/strings/DiffView.vue'),
+    component: () => import('@/views/strings/SDiffView.vue'),
     meta: {
       showOnHome: true,
       title: '字符串对比',
