@@ -11,6 +11,8 @@ export interface downloaderOptions {
   filename: string
   /** MIME类型 */
   mimeType?: string
+  /** 加载状态回调函数 */
+  onLoading?: (loading: boolean) => void
 }
 
 /**
@@ -53,13 +55,24 @@ export const downloader = {
    * file.url('https://example.com/image.jpg', { filename: 'image.jpg' })
    */
   url: (url: string, options: downloaderOptions): void => {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = options.filename
-    link.style.display = 'none'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    try {
+      // 显示加载状态
+      options.onLoading?.(true)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = options.filename
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('下载失败:', error)
+    } finally {
+      // 隐藏加载状态（延迟一下，确保用户能看到加载效果）
+      setTimeout(() => {
+        options.onLoading?.(false)
+      }, 500)
+    }
   },
 
   /**

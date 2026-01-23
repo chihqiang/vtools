@@ -1,5 +1,8 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full">
+    <!-- 加载状态 -->
+    <LoadingSpinner v-if="loading" :loading="loading" :message="loadingMessage" :overlay="true" />
+    
     <!-- 输入区和统计区（左右布局） -->
     <div class="flex flex-col md:flex-row gap-4 mb-6">
       <!-- 左侧：文本内容 -->
@@ -12,6 +15,7 @@
               :key="btn.text"
               @click="btn.method"
               :class="btn.class"
+              :disabled="loading"
             >
               {{ btn.text }}
             </button>
@@ -24,6 +28,7 @@
             placeholder="请输入文本，然后选择转换方式..."
             class="w-full min-h-[400px] p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             spellcheck="false"
+            :disabled="loading"
           ></textarea>
         </div>
       </div>
@@ -99,9 +104,12 @@ import {
   type CaseType,
   type NamingType,
 } from '@/utils/strings'
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const toast = useToast()
 const inputText = ref('')
+const loading = ref(false)
+const loadingMessage = ref('')
 
 /* ---------- 文本统计 ---------- */
 const textStats = computed(() => {
@@ -255,16 +263,26 @@ const clearInput = () => {
 
 const pasteText = async () => {
   try {
+    loading.value = true
+    loadingMessage.value = '粘贴中...'
     inputText.value = await navigator.clipboard.readText()
     toast.success('已粘贴')
   } catch {
     toast.error('粘贴失败')
+  } finally {
+    loading.value = false
+    loadingMessage.value = ''
   }
 }
 
 const copyText = async () => {
   if (!ensureInput()) return
-  toastCopy(inputText.value)
+  toastCopy(inputText.value, '', {
+    onLoading: (isLoading) => {
+      loading.value = isLoading
+      loadingMessage.value = isLoading ? '复制中...' : ''
+    }
+  })
 }
 
 /* ---------- 文本转换 ---------- */

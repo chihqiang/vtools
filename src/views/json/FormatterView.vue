@@ -1,5 +1,8 @@
 <template>
   <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+    <!-- 加载状态 -->
+    <LoadingSpinner v-if="loading" :loading="loading" :message="loadingMessage" :overlay="true" />
+    
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
       <!-- 左侧输入区 -->
       <div class="flex flex-col h-full min-h-0">
@@ -12,18 +15,21 @@
             <button
               @click="formatJson"
               class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+              :disabled="loading"
             >
               格式化
             </button>
             <button
               @click="minifyJson"
               class="px-3 py-2 bg-slate-500 text-white rounded-md text-sm hover:bg-slate-600"
+              :disabled="loading"
             >
               压缩
             </button>
             <button
               @click="clearInput"
               class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+              :disabled="loading"
             >
               清空
             </button>
@@ -134,11 +140,14 @@ import { useToast } from '@/composables/useToast'
 import debounce from 'lodash/debounce'
 import { toastCopy } from '@/utils/clipboard'
 import { getCurrentDateTime } from '@/utils/times'
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const toast = useToast()
 const inputJson = ref('')
 const parsedJson = ref<unknown>(null)
 const errorMessage = ref('')
+const loading = ref(false)
+const loadingMessage = ref('')
 
 // 展开层级
 const defaultExpandDepth = 1
@@ -227,17 +236,28 @@ const clearInput = () => {
 // 复制 / 下载
 const copyOutput = () => {
   if (!parsedJson.value) return toast.error('没有可复制的内容')
-  toastCopy(JSON.stringify(parsedJson.value, null, 2))
+  toastCopy(JSON.stringify(parsedJson.value, null, 2), '', {
+    onLoading: (isLoading) => {
+      loading.value = isLoading
+      loadingMessage.value = isLoading ? '复制中...' : ''
+    }
+  })
 }
 const downloadJson = () => {
   if (!parsedJson.value) return toast.error('没有可下载的内容')
   try {
     downloader.json(parsedJson.value, {
       filename: `formatted-${getCurrentDateTime()}.json`,
+      onLoading: (isLoading) => {
+        loading.value = isLoading
+        loadingMessage.value = isLoading ? '下载中...' : ''
+      }
     })
     toast.success('下载成功')
   } catch {
     toast.error('下载失败')
+    loading.value = false
+    loadingMessage.value = ''
   }
 }
 </script>
