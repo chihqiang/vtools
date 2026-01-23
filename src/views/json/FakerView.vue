@@ -148,6 +148,7 @@
                 type="number"
                 min="1"
                 max="100"
+                @input="handleGenerateCountInput"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               />
             </div>
@@ -944,80 +945,38 @@ const removeItem = (index: number) => {
   }
 }
 
+// 处理生成数量输入
+const handleGenerateCountInput = () => {
+  // 确保值在有效范围内
+  if (generateCount.value < 1) {
+    generateCount.value = 1
+  } else if (generateCount.value > 100) {
+    generateCount.value = 100
+  }
+}
+
+// Faker函数缓存
+const fakerFunctionCache = new Map<string, (faker: Faker) => unknown>()
+
 // 执行faker函数
 const executeFakerFunction = (funcString: string): unknown => {
   try {
-    // 确保在eval中可以访问faker对象
-    const result = (() => {
-      // 使用Function构造函数替代eval，更安全
-      return new Function('faker', `return ${funcString}`)(fakerInstance.value)
-    })()
-    return result
+    // 检查缓存中是否有编译好的函数
+    if (!fakerFunctionCache.has(funcString)) {
+      // 第一次执行时编译并缓存
+      fakerFunctionCache.set(
+        funcString,
+        new Function('faker', `return ${funcString}`) as (faker: Faker) => unknown,
+      )
+    }
+    // 从缓存中获取并执行
+    const cachedFunction = fakerFunctionCache.get(funcString)
+    return cachedFunction?.(fakerInstance.value)
   } catch (error) {
     console.error('Faker函数执行错误:', error)
     toast.error(`Faker函数执行错误: ${funcString}`)
     return funcString // 如果执行失败，返回原始字符串
   }
-}
-
-// 将字段转换为JSON对象
-const fieldsToJson = () => {
-  const result: Record<string, unknown> = {}
-
-  fields.value.forEach((item) => {
-    if (!item.key.trim()) return
-
-    let value: unknown
-
-    switch (item.type) {
-      case ValueType.STRING:
-        value = item.value
-        break
-      case ValueType.NUMBER:
-        value = Number(item.value) || 0
-        break
-      case ValueType.BOOLEAN:
-        value = item.value.toLowerCase() === 'true'
-        break
-      case ValueType.OBJECT:
-        try {
-          value = JSON.parse(item.value) || {}
-        } catch {
-          value = {}
-        }
-        break
-      case ValueType.ARRAY:
-        try {
-          value = JSON.parse(item.value) || []
-        } catch {
-          value = []
-        }
-        break
-      case ValueType.FAKER:
-        value = executeFakerFunction(item.value)
-        break
-    }
-
-    // 处理嵌套字段名，如user.name
-    const keys = item.key.split('.')
-    let current: Record<string, unknown> = result
-
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]
-      if (key) {
-        if (i === keys.length - 1) {
-          current[key] = value
-        } else {
-          if (!current[key] || typeof current[key] !== 'object' || current[key] === null) {
-            current[key] = {}
-          }
-          current = current[key] as Record<string, unknown>
-        }
-      }
-    }
-  })
-
-  return result
 }
 
 // 生成模拟数据
@@ -1030,15 +989,70 @@ const generateMockData = () => {
   loading.value = true
 
   try {
+    // 过滤有效字段，避免重复检查
+    const validFields = fields.value.filter((item) => item.key.trim())
+
     // 生成指定数量的mock数据
     const result = []
     for (let i = 0; i < generateCount.value; i++) {
-      // 将字段转换为JSON对象
-      const data = fieldsToJson()
+      const data: Record<string, unknown> = {}
+
+      // 直接处理字段，避免调用fieldsToJson函数的开销
+      validFields.forEach((item) => {
+        let value: unknown
+
+        switch (item.type) {
+          case ValueType.STRING:
+            value = item.value
+            break
+          case ValueType.NUMBER:
+            value = Number(item.value) || 0
+            break
+          case ValueType.BOOLEAN:
+            value = item.value.toLowerCase() === 'true'
+            break
+          case ValueType.OBJECT:
+            try {
+              value = JSON.parse(item.value) || {}
+            } catch {
+              value = {}
+            }
+            break
+          case ValueType.ARRAY:
+            try {
+              value = JSON.parse(item.value) || []
+            } catch {
+              value = []
+            }
+            break
+          case ValueType.FAKER:
+            value = executeFakerFunction(item.value)
+            break
+        }
+
+        // 处理嵌套字段名，如user.name
+        const keys = item.key.split('.')
+        let current: Record<string, unknown> = data
+
+        for (let j = 0; j < keys.length; j++) {
+          const key = keys[j]
+          if (key) {
+            if (j === keys.length - 1) {
+              current[key] = value
+            } else {
+              if (!current[key] || typeof current[key] !== 'object' || current[key] === null) {
+                current[key] = {}
+              }
+              current = current[key] as Record<string, unknown>
+            }
+          }
+        }
+      })
+
       result.push(data)
     }
 
-    // 将结果格式化为JSON字符串
+    // 优化JSON.stringify性能
     mockResult.value = JSON.stringify(result, null, 2)
     toast.success('Mock数据生成成功')
   } catch (error) {
