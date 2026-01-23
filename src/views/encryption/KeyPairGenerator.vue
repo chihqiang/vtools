@@ -402,46 +402,18 @@ openssl pkey -in public_ed25519.pem -pubin -text -noout</pre
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import * as forge from 'node-forge'
 import { useToast } from '@/composables/useToast'
-
-// 算法枚举
-enum Algorithm {
-  RSA = 'RSA',
-  ED25519 = 'ED25519',
-}
-
-// 密钥长度枚举
-enum KeySize {
-  SIZE_1024 = '1024',
-  SIZE_2048 = '2048',
-  SIZE_4096 = '4096',
-}
-
-// 公钥指数枚举
-enum PublicExponent {
-  F4 = '65537',
-  F0 = '3',
-}
-
-// 格式枚举
-enum Format {
-  PEM = 'PEM',
-  DER = 'DER',
-}
-
-// 加密方案枚举
-enum EncryptionScheme {
-  OAEP = 'OAEP',
-  PKCS1v15 = 'PKCS1v15',
-}
-
-// 哈希算法枚举
-enum HashAlgorithm {
-  SHA1 = 'SHA1',
-  SHA256 = 'SHA256',
-  SHA512 = 'SHA512',
-}
+import {
+  rsa,
+  EncryptionScheme,
+  HashAlgorithm,
+  Algorithm,
+  KeySize,
+  PublicExponent,
+  Format,
+  type RsaEncryptOptions,
+  type RsaDecryptOptions,
+} from '@/utils/encryption'
 
 // 算法选项
 const ALGORITHM_OPTIONS = [
@@ -506,61 +478,26 @@ const config = ref({
   format: Format.PEM,
 })
 
-// 工具：ASN1 → DER Base64
-const toDerBase64 = (asn1: forge.asn1.Asn1) =>
-  forge.util.encode64(forge.asn1.toDer(asn1).getBytes())
-
-// 工具：PKCS8 私钥 → ASN1
-const toPkcs8 = (privateKey: forge.pki.PrivateKey) => forge.pki.privateKeyToAsn1(privateKey)
-
-// 工具：PKCS8 公钥 → ASN1
-const publicKeyToPkcs8 = (publicKey: forge.pki.PublicKey) => forge.pki.publicKeyToAsn1(publicKey)
-
-// 工具：私钥 → SSH
-const privateKeyToSsh = (privateKey: forge.pki.PrivateKey, passphrase?: string) => {
-  const rsaPrivateKey = privateKey as forge.pki.rsa.PrivateKey
-  const sshPrivateKey = forge.ssh.privateKeyToOpenSSH(rsaPrivateKey, passphrase)
-  return sshPrivateKey
-}
-
 // 生成密钥对
 const generateKeyPair = async () => {
   try {
     loading.value = true
 
-    if (config.value.algorithm === 'RSA') {
-      // RSA 密钥生成
-      const rsa = forge.pki.rsa
-      const { privateKey: privKey, publicKey: pubKey } = await rsa.generateKeyPair({
-        bits: parseInt(config.value.keySize),
-        e: parseInt(config.value.publicExponent),
+    // 使用统一的 RSA 密钥生成方法
+    const { privateKey: generatedPrivateKey, publicKey: generatedPublicKey } =
+      await rsa.generateKeyPair({
+        algorithm: config.value.algorithm as Algorithm,
+        keySize: config.value.keySize as KeySize,
+        publicExponent: config.value.publicExponent as PublicExponent,
+        format: config.value.format as Format,
+        passphrase: sshPassphrase.value || undefined,
       })
 
-      if (config.value.format === 'PEM') {
-        // PEM 格式
-        privateKey.value = sshPassphrase.value
-          ? privateKeyToSsh(privKey, sshPassphrase.value)
-          : forge.pki.privateKeyToPem(privKey)
-        publicKey.value = forge.pki.publicKeyToPem(pubKey)
-      } else {
-        // DER Base64 格式
-        const pkcs8 = toPkcs8(privKey)
-        const derPrivateKey = toDerBase64(pkcs8)
-        privateKey.value = derPrivateKey
+    privateKey.value = generatedPrivateKey
+    publicKey.value = generatedPublicKey
 
-        const publicKeyAsn1 = publicKeyToPkcs8(pubKey)
-        const derPublicKey = toDerBase64(publicKeyAsn1)
-        publicKey.value = derPublicKey
-      }
-    } else if (config.value.algorithm === 'ED25519') {
-      // ED25519 密钥生成
-      // 注意：node-forge 对 ED25519 的支持有限，这里使用简化的实现
+    if (config.value.algorithm === 'ED25519') {
       toast.warning('ED25519 密钥生成功能暂未完全实现')
-      // 生成一个示例密钥对作为占位符
-      privateKey.value =
-        '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIL0y/5rQ9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9\n-----END PRIVATE KEY-----'
-      publicKey.value =
-        '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAZ6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g=\n-----END PUBLIC KEY-----'
     }
 
     toast.success('密钥对生成成功')
@@ -586,69 +523,13 @@ const encrypt = () => {
       return
     }
 
-    let rsaPublicKey: forge.pki.rsa.PublicKey
-
-    // 解析公钥
-    try {
-      if (publicKey.value.includes('-----BEGIN PUBLIC KEY-----')) {
-        // PEM 格式
-        const pubKey = forge.pki.publicKeyFromPem(publicKey.value)
-        // 确保是 RSA 公钥
-        if (pubKey.n && pubKey.e) {
-          rsaPublicKey = pubKey as forge.pki.rsa.PublicKey
-        } else {
-          throw new Error('不是有效的 RSA 公钥')
-        }
-      } else {
-        // DER Base64 格式
-        const derBytes = forge.util.decode64(publicKey.value)
-        const derAsn1 = forge.asn1.fromDer(derBytes)
-        const pubKey = forge.pki.publicKeyFromAsn1(derAsn1)
-        // 确保是 RSA 公钥
-        if (pubKey.n && pubKey.e) {
-          rsaPublicKey = pubKey as forge.pki.rsa.PublicKey
-        } else {
-          throw new Error('不是有效的 RSA 公钥')
-        }
-      }
-    } catch {
-      toast.error('公钥格式错误，请重新生成 RSA 密钥对')
-      return
+    // 使用统一的 RSA 加密方法
+    const options: RsaEncryptOptions = {
+      encryptionScheme: cryptoConfig.value.encryptionScheme,
+      hashAlgorithm: cryptoConfig.value.hashAlgorithm,
     }
 
-    // 加密
-    let md: forge.md.MessageDigest
-    switch (cryptoConfig.value.hashAlgorithm) {
-      case HashAlgorithm.SHA1:
-        md = forge.md.sha1.create()
-        break
-      case HashAlgorithm.SHA256:
-        md = forge.md.sha256.create()
-        break
-      case HashAlgorithm.SHA512:
-        md = forge.md.sha512.create()
-        break
-      default:
-        md = forge.md.sha256.create()
-    }
-
-    if (cryptoConfig.value.encryptionScheme === EncryptionScheme.OAEP) {
-      // OAEP 加密
-      cipherText.value = forge.util.encode64(
-        rsaPublicKey.encrypt(plainText.value, 'RSA-OAEP', {
-          md: md,
-          mgf1: {
-            md: md,
-          },
-        }),
-      )
-    } else {
-      // PKCS#1 v1.5 加密
-      cipherText.value = forge.util.encode64(
-        rsaPublicKey.encrypt(plainText.value, 'RSAES-PKCS1-V1_5'),
-      )
-    }
-
+    cipherText.value = rsa.encrypt(plainText.value, publicKey.value, options)
     toast.success('加密成功')
   } catch (error) {
     console.error('加密失败:', error)
@@ -670,71 +551,13 @@ const decrypt = () => {
       return
     }
 
-    let rsaPrivateKey: forge.pki.rsa.PrivateKey
-
-    // 解析私钥
-    try {
-      if (
-        privateKey.value.includes('-----BEGIN RSA PRIVATE KEY-----') ||
-        privateKey.value.includes('-----BEGIN PRIVATE KEY-----') ||
-        privateKey.value.includes('-----BEGIN OPENSSH PRIVATE KEY-----')
-      ) {
-        // PEM 格式
-        const privKey = forge.pki.privateKeyFromPem(privateKey.value)
-        // 确保是 RSA 私钥
-        if ((privKey as forge.pki.rsa.PrivateKey).n && (privKey as forge.pki.rsa.PrivateKey).e) {
-          rsaPrivateKey = privKey as forge.pki.rsa.PrivateKey
-        } else {
-          throw new Error('不是有效的 RSA 私钥')
-        }
-      } else {
-        // DER Base64 格式
-        const derBytes = forge.util.decode64(privateKey.value)
-        const derAsn1 = forge.asn1.fromDer(derBytes)
-        const privKey = forge.pki.privateKeyFromAsn1(derAsn1)
-        // 确保是 RSA 私钥
-        if ((privKey as forge.pki.rsa.PrivateKey).n && (privKey as forge.pki.rsa.PrivateKey).e) {
-          rsaPrivateKey = privKey as forge.pki.rsa.PrivateKey
-        } else {
-          throw new Error('不是有效的 RSA 私钥')
-        }
-      }
-    } catch {
-      toast.error('私钥格式错误，请重新生成 RSA 密钥对')
-      return
+    // 使用统一的 RSA 解密方法
+    const options: RsaDecryptOptions = {
+      encryptionScheme: cryptoConfig.value.encryptionScheme,
+      hashAlgorithm: cryptoConfig.value.hashAlgorithm,
     }
 
-    // 解密
-    const encryptedBytes = forge.util.decode64(cipherText.value)
-
-    let md: forge.md.MessageDigest
-    switch (cryptoConfig.value.hashAlgorithm) {
-      case HashAlgorithm.SHA1:
-        md = forge.md.sha1.create()
-        break
-      case HashAlgorithm.SHA256:
-        md = forge.md.sha256.create()
-        break
-      case HashAlgorithm.SHA512:
-        md = forge.md.sha512.create()
-        break
-      default:
-        md = forge.md.sha256.create()
-    }
-
-    if (cryptoConfig.value.encryptionScheme === EncryptionScheme.OAEP) {
-      // OAEP 解密
-      decryptedText.value = rsaPrivateKey.decrypt(encryptedBytes, 'RSA-OAEP', {
-        md: md,
-        mgf1: {
-          md: md,
-        },
-      })
-    } else {
-      // PKCS#1 v1.5 解密
-      decryptedText.value = rsaPrivateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5')
-    }
-
+    decryptedText.value = rsa.decrypt(cipherText.value, privateKey.value, options)
     toast.success('解密成功')
   } catch (error) {
     console.error('解密失败:', error)

@@ -24,6 +24,7 @@ import hmacSha256 from 'crypto-js/hmac-sha256'
 import Base64 from 'crypto-js/enc-base64'
 import Utf8 from 'crypto-js/enc-utf8'
 import { decodeJwt, SignJWT, jwtVerify, importPKCS8, importSPKI } from 'jose'
+import * as forge from 'node-forge'
 
 const DEFAULT_HMAC_KEY = 'vtools-secret-key'
 
@@ -474,6 +475,344 @@ export const jwt = {
 }
 
 /**
+ * 算法枚举
+ */
+export enum Algorithm {
+  RSA = 'RSA',
+  ED25519 = 'ED25519',
+}
+
+/**
+ * 密钥长度枚举
+ */
+export enum KeySize {
+  SIZE_1024 = '1024',
+  SIZE_2048 = '2048',
+  SIZE_4096 = '4096',
+}
+
+/**
+ * 公钥指数枚举
+ */
+export enum PublicExponent {
+  F4 = '65537',
+  F0 = '3',
+}
+
+/**
+ * 格式枚举
+ */
+export enum Format {
+  PEM = 'PEM',
+  DER = 'DER',
+}
+
+/**
+ * RSA 加密方案枚举
+ */
+export enum EncryptionScheme {
+  OAEP = 'OAEP',
+  PKCS1v15 = 'PKCS1v15',
+}
+
+/**
+ * RSA 哈希算法枚举
+ */
+export enum HashAlgorithm {
+  SHA1 = 'SHA1',
+  SHA256 = 'SHA256',
+  SHA512 = 'SHA512',
+}
+
+/**
+ * RSA 加密选项接口
+ */
+export interface RsaEncryptOptions {
+  encryptionScheme: EncryptionScheme
+  hashAlgorithm: HashAlgorithm
+}
+
+/**
+ * RSA 解密选项接口
+ */
+export interface RsaDecryptOptions {
+  encryptionScheme: EncryptionScheme
+  hashAlgorithm: HashAlgorithm
+}
+
+/**
+ * 密钥生成选项接口
+ */
+export interface KeyGenerateOptions {
+  algorithm: Algorithm
+  keySize: KeySize
+  publicExponent: PublicExponent
+  format: Format
+  passphrase?: string
+}
+
+/**
+ * 生成的密钥对接口
+ */
+export interface GeneratedKeyPair {
+  privateKey: string
+  publicKey: string
+}
+
+/**
+ * RSA 加解密模块
+ */
+export const rsa = {
+  /**
+   * 工具：ASN1 → DER Base64
+   * @param {forge.asn1.Asn1} asn1 - ASN1 对象
+   * @returns {string} DER Base64 编码的字符串
+   * @private
+   */
+  toDerBase64: (asn1: forge.asn1.Asn1): string => {
+    return forge.util.encode64(forge.asn1.toDer(asn1).getBytes())
+  },
+
+  /**
+   * 工具：PKCS8 私钥 → ASN1
+   * @param {forge.pki.PrivateKey} privateKey - 私钥对象
+   * @returns {forge.asn1.Asn1} ASN1 对象
+   * @private
+   */
+  toPkcs8: (privateKey: forge.pki.PrivateKey): forge.asn1.Asn1 => {
+    return forge.pki.privateKeyToAsn1(privateKey)
+  },
+
+  /**
+   * 工具：PKCS8 公钥 → ASN1
+   * @param {forge.pki.PublicKey} publicKey - 公钥对象
+   * @returns {forge.asn1.Asn1} ASN1 对象
+   * @private
+   */
+  publicKeyToPkcs8: (publicKey: forge.pki.PublicKey): forge.asn1.Asn1 => {
+    return forge.pki.publicKeyToAsn1(publicKey)
+  },
+
+  /**
+   * 工具：私钥 → SSH
+   * @param {forge.pki.PrivateKey} privateKey - 私钥对象
+   * @param {string} [passphrase] - 密码短语（可选）
+   * @returns {string} SSH 格式的私钥字符串
+   * @private
+   */
+  privateKeyToSsh: (privateKey: forge.pki.PrivateKey, passphrase?: string): string => {
+    const rsaPrivateKey = privateKey as forge.pki.rsa.PrivateKey
+    return forge.ssh.privateKeyToOpenSSH(rsaPrivateKey, passphrase)
+  },
+
+  /**
+   * 生成密钥对
+   * @param {KeyGenerateOptions} options - 生成选项
+   * @returns {Promise<GeneratedKeyPair>} 生成的密钥对
+   * @throws {Error} 当密钥生成失败时抛出错误
+   * @example
+   * rsa.generateKeyPair({
+   *   algorithm: Algorithm.RSA,
+   *   keySize: KeySize.SIZE_2048,
+   *   publicExponent: PublicExponent.F4,
+   *   format: Format.PEM
+   * })
+   */
+  generateKeyPair: async (options: KeyGenerateOptions): Promise<GeneratedKeyPair> => {
+    if (options.algorithm === Algorithm.RSA) {
+      // RSA 密钥生成
+      const forgeRsa = forge.pki.rsa
+      const { privateKey: privKey, publicKey: pubKey } = await forgeRsa.generateKeyPair({
+        bits: parseInt(options.keySize),
+        e: parseInt(options.publicExponent),
+      })
+
+      if (options.format === Format.PEM) {
+        // PEM 格式
+        const privateKey = options.passphrase
+          ? rsa.privateKeyToSsh(privKey, options.passphrase)
+          : forge.pki.privateKeyToPem(privKey)
+        const publicKey = forge.pki.publicKeyToPem(pubKey)
+
+        return {
+          privateKey,
+          publicKey,
+        }
+      } else {
+        // DER Base64 格式
+        const pkcs8 = rsa.toPkcs8(privKey)
+        const derPrivateKey = rsa.toDerBase64(pkcs8)
+
+        const publicKeyAsn1 = rsa.publicKeyToPkcs8(pubKey)
+        const derPublicKey = rsa.toDerBase64(publicKeyAsn1)
+
+        return {
+          privateKey: derPrivateKey,
+          publicKey: derPublicKey,
+        }
+      }
+    } else if (options.algorithm === Algorithm.ED25519) {
+      // ED25519 密钥生成
+      // 注意：node-forge 对 ED25519 的支持有限，这里使用示例密钥对
+      return {
+        privateKey:
+          '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIL0y/5rQ9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9\n-----END PRIVATE KEY-----',
+        publicKey:
+          '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAZ6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g9Z6g=\n-----END PUBLIC KEY-----',
+      }
+    } else {
+      throw new Error('不支持的算法类型')
+    }
+  },
+
+  /**
+   * 使用 RSA 公钥加密文本
+   * @param {string} plainText - 要加密的明文
+   * @param {string} publicKey - RSA 公钥（PEM 格式或 DER Base64 格式）
+   * @param {RsaEncryptOptions} options - 加密选项
+   * @returns {string} 加密后的密文（Base64 编码）
+   * @throws {Error} 当公钥格式错误或加密失败时抛出错误
+   * @example
+   * rsa.encrypt('hello', publicKey, {
+   *   encryptionScheme: EncryptionScheme.OAEP,
+   *   hashAlgorithm: HashAlgorithm.SHA256
+   * })
+   */
+  encrypt: (plainText: string, publicKey: string, options: RsaEncryptOptions): string => {
+    let rsaPublicKey: forge.pki.rsa.PublicKey
+
+    // 解析公钥
+    if (publicKey.includes('-----BEGIN PUBLIC KEY-----')) {
+      // PEM 格式
+      const pubKey = forge.pki.publicKeyFromPem(publicKey)
+      // 确保是 RSA 公钥
+      if (pubKey.n && pubKey.e) {
+        rsaPublicKey = pubKey as forge.pki.rsa.PublicKey
+      } else {
+        throw new Error('不是有效的 RSA 公钥')
+      }
+    } else {
+      // DER Base64 格式
+      const derBytes = forge.util.decode64(publicKey)
+      const derAsn1 = forge.asn1.fromDer(derBytes)
+      const pubKey = forge.pki.publicKeyFromAsn1(derAsn1)
+      // 确保是 RSA 公钥
+      if (pubKey.n && pubKey.e) {
+        rsaPublicKey = pubKey as forge.pki.rsa.PublicKey
+      } else {
+        throw new Error('不是有效的 RSA 公钥')
+      }
+    }
+
+    // 加密
+    let md: forge.md.MessageDigest
+    switch (options.hashAlgorithm) {
+      case HashAlgorithm.SHA1:
+        md = forge.md.sha1.create()
+        break
+      case HashAlgorithm.SHA256:
+        md = forge.md.sha256.create()
+        break
+      case HashAlgorithm.SHA512:
+        md = forge.md.sha512.create()
+        break
+      default:
+        md = forge.md.sha256.create()
+    }
+
+    if (options.encryptionScheme === EncryptionScheme.OAEP) {
+      // OAEP 加密
+      return forge.util.encode64(
+        rsaPublicKey.encrypt(plainText, 'RSA-OAEP', {
+          md: md,
+          mgf1: {
+            md: md,
+          },
+        }),
+      )
+    } else {
+      // PKCS#1 v1.5 加密
+      return forge.util.encode64(rsaPublicKey.encrypt(plainText, 'RSAES-PKCS1-V1_5'))
+    }
+  },
+
+  /**
+   * 使用 RSA 私钥解密文本
+   * @param {string} cipherText - 要解密的密文（Base64 编码）
+   * @param {string} privateKey - RSA 私钥（PEM 格式或 DER Base64 格式）
+   * @param {RsaDecryptOptions} options - 解密选项
+   * @returns {string} 解密后的明文
+   * @throws {Error} 当私钥格式错误或解密失败时抛出错误
+   * @example
+   * rsa.decrypt(cipherText, privateKey, {
+   *   encryptionScheme: EncryptionScheme.OAEP,
+   *   hashAlgorithm: HashAlgorithm.SHA256
+   * })
+   */
+  decrypt: (cipherText: string, privateKey: string, options: RsaDecryptOptions): string => {
+    let rsaPrivateKey: forge.pki.rsa.PrivateKey
+
+    // 解析私钥
+    if (
+      privateKey.includes('-----BEGIN RSA PRIVATE KEY-----') ||
+      privateKey.includes('-----BEGIN PRIVATE KEY-----') ||
+      privateKey.includes('-----BEGIN OPENSSH PRIVATE KEY-----')
+    ) {
+      // PEM 格式
+      const privKey = forge.pki.privateKeyFromPem(privateKey)
+      // 确保是 RSA 私钥
+      if ((privKey as forge.pki.rsa.PrivateKey).n && (privKey as forge.pki.rsa.PrivateKey).e) {
+        rsaPrivateKey = privKey as forge.pki.rsa.PrivateKey
+      } else {
+        throw new Error('不是有效的 RSA 私钥')
+      }
+    } else {
+      // DER Base64 格式
+      const derBytes = forge.util.decode64(privateKey)
+      const derAsn1 = forge.asn1.fromDer(derBytes)
+      const privKey = forge.pki.privateKeyFromAsn1(derAsn1)
+      // 确保是 RSA 私钥
+      if ((privKey as forge.pki.rsa.PrivateKey).n && (privKey as forge.pki.rsa.PrivateKey).e) {
+        rsaPrivateKey = privKey as forge.pki.rsa.PrivateKey
+      } else {
+        throw new Error('不是有效的 RSA 私钥')
+      }
+    }
+
+    // 解密
+    const encryptedBytes = forge.util.decode64(cipherText)
+
+    let md: forge.md.MessageDigest
+    switch (options.hashAlgorithm) {
+      case HashAlgorithm.SHA1:
+        md = forge.md.sha1.create()
+        break
+      case HashAlgorithm.SHA256:
+        md = forge.md.sha256.create()
+        break
+      case HashAlgorithm.SHA512:
+        md = forge.md.sha512.create()
+        break
+      default:
+        md = forge.md.sha256.create()
+    }
+
+    if (options.encryptionScheme === EncryptionScheme.OAEP) {
+      // OAEP 解密
+      return rsaPrivateKey.decrypt(encryptedBytes, 'RSA-OAEP', {
+        md: md,
+        mgf1: {
+          md: md,
+        },
+      })
+    } else {
+      // PKCS#1 v1.5 解密
+      return rsaPrivateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5')
+    }
+  },
+}
+
+/**
  * 加密工具默认导出
  */
 export default {
@@ -484,4 +823,5 @@ export default {
   ripemd,
   hmac,
   jwt,
+  rsa,
 }
