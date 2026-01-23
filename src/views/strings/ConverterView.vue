@@ -207,6 +207,16 @@ const compressText = () => {
   toast.success('已压缩文本')
 }
 
+// 去除重复行
+const removeDuplicateLines = () => {
+  if (!ensureInput()) return
+  // 将文本按换行符分割，去除重复行，然后重新连接
+  const lines = inputText.value.split('\n')
+  const uniqueLines = [...new Set(lines)]
+  inputText.value = uniqueLines.join('\n')
+  toast.success('已去除重复行')
+}
+
 const clearInput = () => {
   inputText.value = ''
   toast.success('已清空')
@@ -346,6 +356,11 @@ const clipboardButtons = [
     text: '压缩',
     method: compressText,
     class: 'px-3 py-2 bg-orange-500 text-white rounded text-sm',
+  },
+  {
+    text: '去除重复行',
+    method: removeDuplicateLines,
+    class: 'px-3 py-2 bg-indigo-500 text-white rounded text-sm',
   },
   { text: '清空', method: clearInput, class: 'px-3 py-2 bg-gray-600 text-white rounded text-sm' },
 ]
