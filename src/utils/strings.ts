@@ -181,3 +181,71 @@ export const convertNaming = (text: string, type: NamingType): string => {
       return text
   }
 }
+
+/**
+ * 文本统计结果接口
+ */
+export interface TextStats {
+  charCount: number
+  byteCount: number
+  lineCount: number
+  wordCount: number
+  totalLengthNoNewline: number
+  totalLengthNoNewlineNoWidth: number
+  chineseCount: number
+  letterCount: number
+  numberCount: number
+  spaceCount: number
+  halfWidthCount: number
+  fullWidthCount: number
+  newlineCount: number
+}
+
+/**
+ * 计算文本统计信息
+ * @param text 输入文本
+ * @returns 文本统计结果
+ * @example
+ * calculateTextStats('Hello World\n你好世界')
+ * // 返回包含各种统计信息的对象
+ */
+export const calculateTextStats = (text: string): TextStats => {
+  // 基本统计 - 只计算一次
+  const charCount = text.length
+  const byteCount = new Blob([text]).size
+  const lines = text.split('\n')
+  const lineCount = lines.length
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0
+
+  // 文本处理 - 只处理一次
+  const textNoNewline = text.replace(/\n/g, '')
+  const totalLengthNoNewline = textNoNewline.length
+  const totalLengthNoNewlineNoWidth = totalLengthNoNewline // 复用结果
+
+  // 正则匹配 - 只执行一次
+  const chineseCount = (text.match(/[\u4e00-\u9fa5\u3000-\u303f]/g) || []).length
+  const letterCount = (text.match(/[a-zA-Z]/g) || []).length
+  const numberCount = (text.match(/[0-9]/g) || []).length
+  const spaceCount = (text.match(/[ \u00A0]/g) || []).length
+  const halfWidthCount = (text.match(/[\x00-\x7F]/g) || []).length
+  const newlineCount = (text.match(/\n/g) || []).length
+
+  // 推导计算 - 基于已有结果
+  const fullWidthCount = charCount - halfWidthCount
+
+  return {
+    charCount,
+    byteCount,
+    lineCount,
+    wordCount,
+    totalLengthNoNewline,
+    totalLengthNoNewlineNoWidth,
+    chineseCount,
+    letterCount,
+    numberCount,
+    spaceCount,
+    halfWidthCount,
+    fullWidthCount,
+    newlineCount,
+  }
+}

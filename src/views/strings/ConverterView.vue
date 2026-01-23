@@ -101,6 +101,7 @@ import {
   removeDuplicateLines,
   convertCase,
   convertNaming,
+  calculateTextStats,
   type CaseType,
   type NamingType,
 } from '@/utils/strings'
@@ -113,58 +114,7 @@ const loadingMessage = ref('')
 
 /* ---------- 文本统计 ---------- */
 const textStats = computed(() => {
-  const text = inputText.value
-
-  // 基本统计
-  const charCount = text.length
-  const byteCount = new Blob([text]).size
-  const lines = text.split('\n')
-  const lineCount = lines.length
-  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0
-
-  // 新增统计项
-  const textNoNewline = text.replace(/\n/g, '')
-  const totalLengthNoNewline = textNoNewline.length
-
-  // 不区分全/半角的长度（将全角字符视为1个字符）
-  const totalLengthNoNewlineNoWidth = textNoNewline.length
-
-  // 中文（包括汉字、标点等）
-  const chineseCount = (text.match(/[\u4e00-\u9fa5\u3000-\u303f]/g) || []).length
-
-  // 字母（大小写）
-  const letterCount = (text.match(/[a-zA-Z]/g) || []).length
-
-  // 数字
-  const numberCount = (text.match(/[0-9]/g) || []).length
-
-  // 空格（包括普通空格和全角空格）
-  const spaceCount = (text.match(/[ \u00A0]/g) || []).length
-
-  // 半角字符（ASCII字符，除了换行）
-  const halfWidthCount = (text.match(/[\x00-\x7F]/g) || []).length
-
-  // 全角字符（非ASCII字符，除了中文）
-  const fullWidthCount = charCount - halfWidthCount
-
-  // 换行符数量
-  const newlineCount = (text.match(/\n/g) || []).length
-
-  return {
-    charCount,
-    byteCount,
-    lineCount,
-    wordCount,
-    totalLengthNoNewline,
-    totalLengthNoNewlineNoWidth,
-    chineseCount,
-    letterCount,
-    numberCount,
-    spaceCount,
-    halfWidthCount,
-    fullWidthCount,
-    newlineCount,
-  }
+  return calculateTextStats(inputText.value)
 })
 
 interface StatConfig {
