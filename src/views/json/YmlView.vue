@@ -133,11 +133,13 @@
 </template>
 
 <script setup lang="ts">
+import { downloader } from '@/utils/file'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as YAML from 'yaml'
 import { useToast } from '@/composables/useToast'
 import { debounce } from 'lodash'
 import { toastCopy } from '@/utils/clipboard'
+import { getCurrentDateTime } from '@/utils/times'
 
 /* ================= Toast ================= */
 const toast = useToast()
@@ -262,17 +264,11 @@ const clearRight = () => {
 
 const downloadRight = () => {
   if (!rightContent.value) return
-
-  const blob = new Blob([rightContent.value], { type: 'text/plain;charset=utf-8' })
-  const filename = `data.${rightType.value}`
-
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  toast.success(`已下载 ${filename}`)
+  downloader.text(rightContent.value, {
+    filename: `data-${getCurrentDateTime()}.${rightType.value}`,
+    mimeType: 'text/plain;charset=utf-8',
+  })
+  toast.success(`下载成功`)
 }
 const swapContent = () => {
   if (!rightContent.value) return

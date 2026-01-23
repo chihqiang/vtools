@@ -337,9 +337,11 @@
 </template>
 
 <script setup lang="ts">
+import { downloader } from '@/utils/file'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { Faker, en, zh_CN } from '@faker-js/faker'
+import { getCurrentDateTime } from '@/utils/times'
 
 const toast = useToast()
 
@@ -1082,15 +1084,10 @@ const downloadResult = () => {
   if (!mockResult.value) return
 
   try {
-    const blob = new Blob([mockResult.value], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `mock-data-${Date.now()}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    downloader.text(mockResult.value, {
+      filename: `mock-data-${getCurrentDateTime()}.json`,
+      mimeType: 'application/json',
+    })
     toast.success('下载成功')
   } catch {
     toast.error('下载失败，请手动复制')

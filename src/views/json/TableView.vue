@@ -113,9 +113,11 @@
 </template>
 
 <script setup lang="ts">
+import { downloader } from '@/utils/file'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from '@/composables/useToast'
 import debounce from 'lodash/debounce'
+import { getCurrentDateTime } from '@/utils/times'
 
 const toast = useToast()
 
@@ -240,15 +242,10 @@ const downloadCsv = () => {
         .join(',') + '\n'
   })
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-  a.download = `json-to-table-${timestamp}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
-
+  downloader.text(csv, {
+    filename: `table-${getCurrentDateTime()}.csv`,
+    mimeType: 'text/csv;charset=utf-8;',
+  })
   toast.success('CSV 下载成功')
 }
 </script>

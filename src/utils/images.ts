@@ -3,6 +3,8 @@
  * 提供图片上传、处理、转换和下载等功能
  */
 
+import { downloader } from '@/utils/file'
+
 /**
  * 图片格式类型
  */
@@ -117,14 +119,7 @@ export const downloadImage = async (imageUrl: string, filename: string): Promise
   try {
     const response = await fetch(imageUrl)
     const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    downloader.blob(blob, { filename })
   } catch (error) {
     console.error('下载失败:', error)
     throw new Error('图片下载失败')

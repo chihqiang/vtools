@@ -1,4 +1,21 @@
 /**
+ * 获取当前时间，格式为年月日时分秒
+ * @returns {string} 格式化后的当前时间字符串，如 "20231231235959"
+ * @example
+ * getCurrentDateTime() // "20231231235959"
+ */
+export const getCurrentDateTime = (): string => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hour = String(now.getHours()).padStart(2, '0')
+  const minute = String(now.getMinutes()).padStart(2, '0')
+  const second = String(now.getSeconds()).padStart(2, '0')
+  return `${year}${month}${day}${hour}${minute}${second}`
+}
+
+/**
  * 将秒数格式化为可读的持续时间字符串
  * @param {number} seconds - 秒数
  * @returns {string} 格式化后的持续时间字符串，如 "1天 2小时 3分钟 4秒"

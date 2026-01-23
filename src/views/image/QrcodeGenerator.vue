@@ -578,9 +578,11 @@
 </template>
 
 <script setup lang="ts">
+import { downloader } from '@/utils/file'
 import { ref, watch } from 'vue'
 import QRCode from 'qrcode'
 import { useToast } from '@/composables/useToast'
+import { getCurrentDateTime } from '@/utils/times'
 
 const toast = useToast()
 
@@ -932,13 +934,9 @@ const addLogoToQrCode = async (
 // 下载二维码
 const downloadQrCode = () => {
   if (!generatedQrCode.value) return
-
-  const link = document.createElement('a')
-  link.href = generatedQrCode.value
-  link.download = `qrcode_${Date.now()}.png`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  downloader.url(generatedQrCode.value, {
+    filename: `qrcode_${getCurrentDateTime()}.png`,
+  })
   toast.success('二维码下载成功')
 }
 

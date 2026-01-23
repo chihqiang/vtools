@@ -126,12 +126,14 @@
 </template>
 
 <script setup lang="ts">
+import { downloader } from '@/utils/file'
 import { ref } from 'vue'
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
 import debounce from 'lodash/debounce'
 import { toastCopy } from '@/utils/clipboard'
+import { getCurrentDateTime } from '@/utils/times'
 
 const toast = useToast()
 const inputJson = ref('')
@@ -230,13 +232,9 @@ const copyOutput = () => {
 const downloadJson = () => {
   if (!parsedJson.value) return toast.error('没有可下载的内容')
   try {
-    const blob = new Blob([JSON.stringify(parsedJson.value, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'formatted.json'
-    link.click()
-    URL.revokeObjectURL(url)
+    downloader.json(parsedJson.value, {
+      filename: `formatted-${getCurrentDateTime()}.json`,
+    })
     toast.success('下载成功')
   } catch {
     toast.error('下载失败')
