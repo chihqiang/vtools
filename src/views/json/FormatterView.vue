@@ -2,7 +2,7 @@
   <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
     <!-- 加载状态 -->
     <LoadingSpinner v-if="loading" :loading="loading" :message="loadingMessage" :overlay="true" />
-    
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
       <!-- 左侧输入区 -->
       <div class="flex flex-col h-full min-h-0">
@@ -240,7 +240,7 @@ const copyOutput = () => {
     onLoading: (isLoading) => {
       loading.value = isLoading
       loadingMessage.value = isLoading ? '复制中...' : ''
-    }
+    },
   })
 }
 const downloadJson = () => {
@@ -251,7 +251,7 @@ const downloadJson = () => {
       onLoading: (isLoading) => {
         loading.value = isLoading
         loadingMessage.value = isLoading ? '下载中...' : ''
-      }
+      },
     })
     toast.success('下载成功')
   } catch {

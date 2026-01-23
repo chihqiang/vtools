@@ -2,7 +2,7 @@
   <div class="bg-white rounded-lg shadow-md p-6 h-full">
     <!-- 加载状态 -->
     <LoadingSpinner v-if="loading" :loading="loading" :message="loadingMessage" :overlay="true" />
-    
+
     <!-- 输入区和统计区（左右布局） -->
     <div class="flex flex-col md:flex-row gap-4 mb-6">
       <!-- 左侧：文本内容 -->
@@ -231,7 +231,7 @@ const copyText = async () => {
     onLoading: (isLoading) => {
       loading.value = isLoading
       loadingMessage.value = isLoading ? '复制中...' : ''
-    }
+    },
   })
 }
 

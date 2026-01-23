@@ -18,7 +18,11 @@ const toast = useToast()
  * 当提供了displayText时，提示信息会使用displayText而不是text
  * 当提供了onLoading回调时，会在复制操作前后调用该回调
  */
-export const toastCopy = async (text: string, displayText: string = '', options: { onLoading?: (loading: boolean) => void } = {}) => {
+export const toastCopy = async (
+  text: string,
+  displayText: string = '',
+  options: { onLoading?: (loading: boolean) => void } = {},
+) => {
   if (!text) return
   try {
     // 显示加载状态

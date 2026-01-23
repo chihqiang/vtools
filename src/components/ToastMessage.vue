@@ -8,7 +8,10 @@
       leave-from-class="transform translate-y-0 opacity-100 scale-100"
       leave-to-class="transform -translate-y-4 opacity-0 scale-95"
     >
-      <div v-if="visible" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full sm:max-w-md">
+      <div
+        v-if="visible"
+        class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full sm:max-w-md"
+      >
         <div
           :class="[
             'rounded-lg shadow-xl p-4 flex items-center space-x-3 backdrop-blur-sm',
@@ -22,7 +25,9 @@
           :style="customStyle"
         >
           <!-- 图标 -->
-          <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
+          <div
+            class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/20"
+          >
             <svg
               v-if="type === 'success'"
               class="w-5 h-5"
@@ -80,13 +85,13 @@
               ></path>
             </svg>
           </div>
-          
+
           <!-- 消息内容 -->
           <span class="flex-1 font-medium text-sm leading-relaxed">{{ message }}</span>
-          
+
           <!-- 关闭按钮 -->
-          <button 
-            @click="close" 
+          <button
+            @click="close"
             class="flex-shrink-0 hover:bg-white/20 rounded-full p-1 transition-all duration-200 hover:scale-110"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

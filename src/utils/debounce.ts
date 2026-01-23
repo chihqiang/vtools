@@ -34,7 +34,7 @@ export type ThrottledFunction<T extends (...args: unknown[]) => unknown> = (
 export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   wait: number = 300,
-  options: Parameters<typeof lodashDebounce>[2] = {}
+  options: Parameters<typeof lodashDebounce>[2] = {},
 ): DebouncedFunction<T> {
   return lodashDebounce(fn, wait, options)
 }
@@ -53,7 +53,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 export function throttle<T extends (...args: unknown[]) => unknown>(
   fn: T,
   wait: number = 300,
-  options: Parameters<typeof lodashThrottle>[2] = {}
+  options: Parameters<typeof lodashThrottle>[2] = {},
 ): ThrottledFunction<T> {
   return lodashThrottle(fn, wait, options)
 }
@@ -73,15 +73,15 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
 export function useDebouncedRef<T>(
   value: { value: T },
   callback: (value: T) => void,
-  wait: number = 300
+  wait: number = 300,
 ): { value: T } {
   const debouncedCallback = debounce((...args: unknown[]) => {
     callback(args[0] as T)
   }, wait)
-  
+
   // 监听值变化
   let currentValue = value.value
-  
+
   // 返回一个类似ref的对象
   return {
     get value() {
@@ -90,7 +90,7 @@ export function useDebouncedRef<T>(
     set value(newValue: T) {
       currentValue = newValue
       debouncedCallback(newValue)
-    }
+    },
   }
 }
 
@@ -106,7 +106,7 @@ export function useDebouncedRef<T>(
  */
 export function useDebounce<T extends (...args: unknown[]) => unknown>(
   callback: T,
-  wait: number = 300
+  wait: number = 300,
 ): DebouncedFunction<T> {
   return debounce(callback, wait)
 }
@@ -123,7 +123,7 @@ export function useDebounce<T extends (...args: unknown[]) => unknown>(
  */
 export function useThrottle<T extends (...args: unknown[]) => unknown>(
   callback: T,
-  wait: number = 300
+  wait: number = 300,
 ): ThrottledFunction<T> {
   return throttle(callback, wait)
 }

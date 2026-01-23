@@ -59,19 +59,39 @@ export function useToast() {
     processQueue()
   }
 
-  const success = (message: string, duration?: number, customClass?: string, customStyle?: Record<string, string | number>) => {
+  const success = (
+    message: string,
+    duration?: number,
+    customClass?: string,
+    customStyle?: Record<string, string | number>,
+  ) => {
     show({ message, type: 'success', duration, customClass, customStyle })
   }
 
-  const error = (message: string, duration?: number, customClass?: string, customStyle?: Record<string, string | number>) => {
+  const error = (
+    message: string,
+    duration?: number,
+    customClass?: string,
+    customStyle?: Record<string, string | number>,
+  ) => {
     show({ message, type: 'error', duration, customClass, customStyle })
   }
 
-  const warning = (message: string, duration?: number, customClass?: string, customStyle?: Record<string, string | number>) => {
+  const warning = (
+    message: string,
+    duration?: number,
+    customClass?: string,
+    customStyle?: Record<string, string | number>,
+  ) => {
     show({ message, type: 'warning', duration, customClass, customStyle })
   }
 
-  const info = (message: string, duration?: number, customClass?: string, customStyle?: Record<string, string | number>) => {
+  const info = (
+    message: string,
+    duration?: number,
+    customClass?: string,
+    customStyle?: Record<string, string | number>,
+  ) => {
     show({ message, type: 'info', duration, customClass, customStyle })
   }
 
