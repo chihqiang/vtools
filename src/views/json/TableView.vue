@@ -116,7 +116,7 @@
 import { downloader } from '@/utils/file'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from '@/composables/useToast'
-import debounce from 'lodash/debounce'
+import { debounce } from '@/utils/debounce'
 import { getCurrentDateTime } from '@/utils/times'
 
 const toast = useToast()

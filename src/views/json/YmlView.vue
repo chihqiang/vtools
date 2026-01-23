@@ -137,7 +137,7 @@ import { downloader } from '@/utils/file'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as YAML from 'yaml'
 import { useToast } from '@/composables/useToast'
-import { debounce } from 'lodash'
+import { debounce } from '@/utils/debounce'
 import { toastCopy } from '@/utils/clipboard'
 import { getCurrentDateTime } from '@/utils/times'
 
