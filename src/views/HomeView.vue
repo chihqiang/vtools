@@ -152,7 +152,7 @@ import SvgIcon from '@/components/SvgIcon.vue'
 import { GroupOrder } from '@/types/route'
 
 // 定义工具类型
-interface Tool {
+interface orderRouteMeta {
   name: string
   path: string
   title: string
@@ -166,9 +166,10 @@ interface Tool {
 const searchQuery = ref('')
 
 // 获取需要在首页显示的工具并按分组排序
-const tools = computed<Tool[]>(() => {
+const tools = computed<orderRouteMeta[]>(() => {
+  // 保持路由配置的原始顺序
   const routes = router.getRoutes().filter((route) => route.meta?.showOnHome)
-  let mappedTools: Tool[] = routes.map((route) => {
+  let mappedTools: orderRouteMeta[] = routes.map((route) => {
     const meta = route.meta || {}
     return {
       name: route.name as string,
@@ -191,22 +192,23 @@ const tools = computed<Tool[]>(() => {
     )
   }
 
-  // 排序 - 分组顺序从大到小
+  // 排序 - 分组顺序从大到小，分组内保持原始顺序
   mappedTools.sort((a, b) => {
-    // 先按分组顺序排序（从大到小），再按工具名称排序
+    // 先按分组顺序排序（从大到小）
     if (a.group !== b.group) {
       const orderA = GroupOrder[a.group as keyof typeof GroupOrder] || 999
       const orderB = GroupOrder[b.group as keyof typeof GroupOrder] || 999
       return orderB - orderA // 从大到小排序
     }
-    return a.title.localeCompare(b.title)
+    // 同一分组内保持原始顺序（按路由配置顺序）
+    return 0
   })
 
   return mappedTools
 })
 
 // 将工具按分组分组，并确保分组顺序
-const toolsByGroup = computed<Record<string, Tool[]>>(() => {
+const toolsByGroup = computed<Record<string, orderRouteMeta[]>>(() => {
   // 1. 先按GroupOrder对工具进行分组
   const grouped = tools.value.reduce(
     (acc, tool) => {
@@ -217,7 +219,7 @@ const toolsByGroup = computed<Record<string, Tool[]>>(() => {
       acc[groupName].push(tool)
       return acc
     },
-    {} as Record<string, Tool[]>,
+    {} as Record<string, orderRouteMeta[]>,
   )
 
   // 2. 获取所有分组名称并按GroupOrder排序（从大到小）
@@ -228,10 +230,10 @@ const toolsByGroup = computed<Record<string, Tool[]>>(() => {
   })
 
   // 3. 按照排序后的分组名称创建有序的分组对象
-  const orderedGroups: Record<string, Tool[]> = {}
+  const orderedGroups: Record<string, orderRouteMeta[]> = {}
   for (const groupName of sortedGroupNames) {
     // 由于sortedGroupNames是从grouped的键中获取的，所以grouped[groupName]一定存在
-    orderedGroups[groupName] = grouped[groupName] as Tool[]
+    orderedGroups[groupName] = grouped[groupName] as orderRouteMeta[]
   }
 
   return orderedGroups

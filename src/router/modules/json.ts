@@ -42,6 +42,19 @@ const jsonRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
+    path: '/json-diff',
+    name: 'json-diff',
+    component: () => import('@/views/json/DiffView.vue'),
+    meta: {
+      showOnHome: true,
+      title: 'JSON 对比',
+      description: '比较两个 JSON 的差异，高亮显示不同的部分',
+      icon: 'M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z',
+      color: 'blue',
+      group: HomeGroup.JSON_TOOLS,
+    } as HomeRouteMeta,
+  },
+  {
     path: '/json-faker',
     name: 'json-faker',
     component: () => import('@/views/json/FakerView.vue'),
