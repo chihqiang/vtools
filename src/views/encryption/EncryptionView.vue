@@ -180,19 +180,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
-import md5 from 'crypto-js/md5'
-import sha1 from 'crypto-js/sha1'
-import sha224 from 'crypto-js/sha224'
-import sha256 from 'crypto-js/sha256'
-import sha384 from 'crypto-js/sha384'
-import sha512 from 'crypto-js/sha512'
-import sha3 from 'crypto-js/sha3'
-import ripemd160 from 'crypto-js/ripemd160'
-import hmacMd5 from 'crypto-js/hmac-md5'
-import hmacSha1 from 'crypto-js/hmac-sha1'
-import hmacSha256 from 'crypto-js/hmac-sha256'
-import Base64 from 'crypto-js/enc-base64'
-import Utf8 from 'crypto-js/enc-utf8'
+import { base64, url, md5Hash, sha, ripemd, hmac } from '@/utils/encryption'
 import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()
@@ -260,7 +248,7 @@ const toggleCase = () => {
 const encryptBase64 = () => {
   if (!ensureInput()) return
   try {
-    inputText.value = Base64.stringify(Utf8.parse(inputText.value))
+    inputText.value = base64.encrypt(inputText.value)
     toast.success('Base64 加密成功')
   } catch {
     toast.error('Base64 加密失败')
@@ -270,7 +258,7 @@ const encryptBase64 = () => {
 const decryptBase64 = () => {
   if (!ensureInput()) return
   try {
-    inputText.value = Utf8.stringify(Base64.parse(inputText.value))
+    inputText.value = base64.decrypt(inputText.value)
     toast.success('Base64 解密成功')
   } catch {
     toast.error('Base64 解密失败，请确认输入内容')
@@ -282,7 +270,7 @@ const decryptBase64 = () => {
 const encodeUrl = () => {
   if (!ensureInput()) return
   try {
-    inputText.value = encodeURIComponent(inputText.value)
+    inputText.value = url.encode(inputText.value)
     toast.success('URL 编码成功')
   } catch {
     toast.error('URL 编码失败')
@@ -292,7 +280,7 @@ const encodeUrl = () => {
 const decodeUrl = () => {
   if (!ensureInput()) return
   try {
-    inputText.value = decodeURIComponent(inputText.value)
+    inputText.value = url.decode(inputText.value)
     toast.success('URL 解码成功')
   } catch {
     toast.error('URL 解码失败，请确认格式')
@@ -303,13 +291,13 @@ const decodeUrl = () => {
 
 const md5_32_lower = () => {
   if (!ensureInput()) return
-  inputText.value = md5(inputText.value).toString().toLowerCase()
+  inputText.value = md5Hash[32](inputText.value)
   toast.success('MD5 32位生成成功')
 }
 
 const md5_16_lower = () => {
   if (!ensureInput()) return
-  inputText.value = md5(inputText.value).toString().substring(8, 24).toLowerCase()
+  inputText.value = md5Hash[16](inputText.value)
   toast.success('MD5 16位生成成功')
 }
 
@@ -317,19 +305,19 @@ const md5_16_lower = () => {
 
 const sha1Hash = () => {
   if (!ensureInput()) return
-  inputText.value = sha1(inputText.value).toString().toLowerCase()
+  inputText.value = sha.sha1(inputText.value)
   toast.success('SHA1生成成功')
 }
 
 const sha256Hash = () => {
   if (!ensureInput()) return
-  inputText.value = sha256(inputText.value).toString().toLowerCase()
+  inputText.value = sha.sha256(inputText.value)
   toast.success('SHA256生成成功')
 }
 
 const sha512Hash = () => {
   if (!ensureInput()) return
-  inputText.value = sha512(inputText.value).toString().toLowerCase()
+  inputText.value = sha.sha512(inputText.value)
   toast.success('SHA512生成成功')
 }
 
@@ -337,13 +325,13 @@ const sha512Hash = () => {
 
 const sha3Hash = () => {
   if (!ensureInput()) return
-  inputText.value = sha3(inputText.value).toString().toLowerCase()
+  inputText.value = sha.sha3(inputText.value)
   toast.success('SHA3生成成功')
 }
 
 const ripemd160Hash = () => {
   if (!ensureInput()) return
-  inputText.value = ripemd160(inputText.value).toString().toLowerCase()
+  inputText.value = ripemd.ripemd160(inputText.value)
   toast.success('RIPEMD160生成成功')
 }
 
@@ -351,36 +339,33 @@ const ripemd160Hash = () => {
 
 const sha224Hash = () => {
   if (!ensureInput()) return
-  inputText.value = sha224(inputText.value).toString().toLowerCase()
+  inputText.value = sha.sha224(inputText.value)
   toast.success('SHA224生成成功')
 }
 
 const sha384Hash = () => {
   if (!ensureInput()) return
-  inputText.value = sha384(inputText.value).toString().toLowerCase()
+  inputText.value = sha.sha384(inputText.value)
   toast.success('SHA384生成成功')
 }
 
 /* ---------- HMAC系列 ---------- */
 
-// 默认密钥（实际使用中应该让用户输入密钥）
-const defaultHmacKey = 'vtools-secret-key'
-
 const hmacMd5Hash = () => {
   if (!ensureInput()) return
-  inputText.value = hmacMd5(inputText.value, defaultHmacKey).toString().toLowerCase()
+  inputText.value = hmac.md5(inputText.value)
   toast.success('HMAC-MD5生成成功')
 }
 
 const hmacSha1Hash = () => {
   if (!ensureInput()) return
-  inputText.value = hmacSha1(inputText.value, defaultHmacKey).toString().toLowerCase()
+  inputText.value = hmac.sha1(inputText.value)
   toast.success('HMAC-SHA1生成成功')
 }
 
 const hmacSha256Hash = () => {
   if (!ensureInput()) return
-  inputText.value = hmacSha256(inputText.value, defaultHmacKey).toString().toLowerCase()
+  inputText.value = hmac.sha256(inputText.value)
   toast.success('HMAC-SHA256生成成功')
 }
 </script>

@@ -334,11 +334,13 @@
                         class="border-b border-gray-200"
                       >
                         <td class="py-2 px-3 font-medium text-gray-700 bg-gray-100 w-1/3">
-                          {{ formatFieldName(key) }}
+                          {{ jwt.formatFieldName(key) }}
                         </td>
                         <td class="py-2 px-3 text-gray-800 font-mono">
                           {{
-                            showFormattedTime && isTimestampField(key) && typeof value === 'number'
+                            showFormattedTime &&
+                            jwt.isTimestampField(key) &&
+                            typeof value === 'number'
                               ? formatTimestamp(value)
                               : formatValue(value)
                           }}
@@ -403,11 +405,13 @@
                         class="border-b border-gray-200"
                       >
                         <td class="py-2 px-3 font-medium text-gray-700 bg-gray-100 w-1/3">
-                          {{ formatFieldName(key) }}
+                          {{ jwt.formatFieldName(key) }}
                         </td>
                         <td class="py-2 px-3 text-gray-800 font-mono">
                           {{
-                            showFormattedTime && isTimestampField(key) && typeof value === 'number'
+                            showFormattedTime &&
+                            jwt.isTimestampField(key) &&
+                            typeof value === 'number'
                               ? formatTimestamp(value)
                               : formatValue(value)
                           }}
@@ -702,19 +706,9 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
 import { useToast } from '@/composables/useToast'
-import { decodeJwt, SignJWT, jwtVerify, importPKCS8, importSPKI } from 'jose'
+import { jwt } from '@/utils/encryption'
 import { toastCopy } from '@/utils/clipboard'
-
-interface ParsedData {
-  header: Record<string, unknown>
-  payload: Record<string, unknown>
-  signature: string
-}
-
-interface VerifyResult {
-  valid: boolean
-  message: string
-}
+import { formatDuration, formatTimestamp } from '@/utils/times'
 
 interface TokenStatus {
   isExpired: boolean
@@ -736,9 +730,13 @@ interface AlgorithmGroup {
 
 const toast = useToast()
 const inputToken = ref('')
-const parsedData = ref<ParsedData | null>(null)
+const parsedData = ref<{
+  header: Record<string, unknown>
+  payload: Record<string, unknown>
+  signature: string
+} | null>(null)
 const error = ref('')
-const verifyResult = ref<VerifyResult | null>(null)
+const verifyResult = ref<{ valid: boolean; message: string } | null>(null)
 const generatedToken = ref('')
 const activeTab = ref<'header' | 'payload' | 'signature'>('header')
 const editablePayload = ref('')
@@ -831,32 +829,15 @@ const parseJWT = () => {
   tokenStatus.value = null
 
   try {
-    const parts = inputToken.value.split('.')
-    if (parts.length !== 3) {
-      throw new Error('JWT Token 格式不正确，应该包含 Header、Payload 和 Signature 三部分')
-    }
+    const result = jwt.parse(inputToken.value)
+    parsedData.value = result
 
-    const [headerB64, , signature] = parts
+    editablePayload.value = JSON.stringify(result.payload, null, 2)
 
-    if (!headerB64 || !signature) {
-      throw new Error('JWT Token 格式不正确')
-    }
+    calculateTokenStatus(result.payload)
 
-    const header = JSON.parse(atob(headerB64))
-    const payload = decodeJwt(inputToken.value)
-
-    parsedData.value = {
-      header,
-      payload: payload as Record<string, unknown>,
-      signature,
-    }
-
-    editablePayload.value = JSON.stringify(payload, null, 2)
-
-    calculateTokenStatus(payload as Record<string, unknown>)
-
-    if (header.alg) {
-      generateConfig.value.algorithm = header.alg
+    if (result.header.alg) {
+      generateConfig.value.algorithm = result.header.alg as string
     }
 
     toast.success('JWT 解析成功')
@@ -953,51 +934,17 @@ const verifyJWT = async () => {
   verifyResult.value = null
 
   try {
-    const parts = inputToken.value.split('.')
-    if (parts.length !== 3) {
-      throw new Error('JWT Token 格式不正确')
-    }
+    const result = await jwt.verify(inputToken.value, {
+      algorithm: generateConfig.value.algorithm,
+      secret: generateConfig.value.secret,
+      publicKey: generateConfig.value.publicKey,
+    })
 
-    const headerB64 = parts[0]
-    if (!headerB64) {
-      throw new Error('JWT Token 格式不正确')
-    }
+    verifyResult.value = result
 
-    const header = JSON.parse(atob(headerB64))
-    const algorithm = header.alg
-
-    if (algorithm === 'none') {
-      verifyResult.value = {
-        valid: false,
-        message: 'None 算法不安全，无法验证',
-      }
-      toast.warning('None 算法不安全')
-      return
-    }
-
-    let key: Uint8Array | CryptoKey
-
-    if (algorithm.startsWith('HS')) {
-      key = new TextEncoder().encode(generateConfig.value.secret)
-    } else {
-      if (!generateConfig.value.publicKey) {
-        throw new Error('请提供公钥以验证非对称加密算法')
-      }
-      key = await importSPKI(generateConfig.value.publicKey, algorithm)
-    }
-
-    try {
-      await jwtVerify(inputToken.value, key)
-      verifyResult.value = {
-        valid: true,
-        message: '签名验证通过，Token 有效',
-      }
+    if (result.valid) {
       toast.success('JWT 验证通过')
-    } catch {
-      verifyResult.value = {
-        valid: false,
-        message: '签名验证失败，请检查密钥或 Token 是否被篡改',
-      }
+    } else {
       toast.error('JWT 验证失败')
     }
   } catch (err) {
@@ -1021,49 +968,13 @@ const generateJWT = async () => {
       payload = parsedData.value.payload as Record<string, unknown>
     }
 
-    let key: Uint8Array | CryptoKey
-
-    if (isSymmetricAlgorithm.value) {
-      if (!generateConfig.value.secret) {
-        throw new Error('请提供签名密钥')
-      }
-      key = new TextEncoder().encode(generateConfig.value.secret)
-    } else {
-      if (!generateConfig.value.privateKey) {
-        throw new Error('请提供私钥以生成非对称加密算法的 JWT')
-      }
-      key = await importPKCS8(generateConfig.value.privateKey, generateConfig.value.algorithm)
-    }
-
-    const cleanPayload = JSON.parse(JSON.stringify(payload))
-
-    const headerWithoutAlg = { ...parsedData.value.header }
-    delete headerWithoutAlg.alg
-    let jwt = new SignJWT(cleanPayload).setProtectedHeader({
-      alg: generateConfig.value.algorithm,
-      ...headerWithoutAlg,
+    const token = await jwt.generate(payload, {
+      algorithm: generateConfig.value.algorithm,
+      secret: generateConfig.value.secret,
+      privateKey: generateConfig.value.privateKey,
+      header: parsedData.value.header,
     })
 
-    if (typeof cleanPayload.exp === 'number') {
-      jwt = jwt.setExpirationTime(cleanPayload.exp)
-    }
-    if (typeof cleanPayload.iat === 'number') {
-      jwt = jwt.setIssuedAt(cleanPayload.iat)
-    }
-    if (typeof cleanPayload.nbf === 'number') {
-      jwt = jwt.setNotBefore(cleanPayload.nbf)
-    }
-    if (typeof cleanPayload.iss === 'string') {
-      jwt = jwt.setIssuer(cleanPayload.iss)
-    }
-    if (typeof cleanPayload.sub === 'string') {
-      jwt = jwt.setSubject(cleanPayload.sub)
-    }
-    if (typeof cleanPayload.aud === 'string' || Array.isArray(cleanPayload.aud)) {
-      jwt = jwt.setAudience(cleanPayload.aud)
-    }
-
-    const token = await jwt.sign(key)
     generatedToken.value = token
     toast.success('JWT 生成成功')
   } catch (err) {
@@ -1099,63 +1010,6 @@ const formatValue = (value: unknown) => {
   return String(value)
 }
 
-const isTimestampField = (key: string) => {
-  return ['exp', 'iat', 'nbf'].includes(key)
-}
-
-const formatFieldName = (key: string) => {
-  const fieldMap: Record<string, string> = {
-    alg: '算法 (alg)',
-    typ: '类型 (typ)',
-    cty: '内容类型 (cty)',
-    kid: '密钥 ID (kid)',
-    jku: 'JWK Set URL (jku)',
-    x5u: 'X.509 URL (x5u)',
-    x5c: 'X.509 证书链 (x5c)',
-    x5t: 'X.509 证书指纹 (x5t)',
-    'x5t#S256': 'X.509 证书指纹 SHA256 (x5t#S256)',
-    sub: '主题 (sub)',
-    iss: '签发者 (iss)',
-    aud: '受众 (aud)',
-    exp: '过期时间 (exp)',
-    iat: '签发时间 (iat)',
-    nbf: '生效时间 (nbf)',
-    jti: 'JWT ID (jti)',
-    azp: '授权方 (azp)',
-    nonce: '随机数 (nonce)',
-    auth_time: '认证时间 (auth_time)',
-    at_hash: '访问令牌哈希 (at_hash)',
-    c_hash: '代码哈希 (c_hash)',
-    acr: '认证上下文引用 (acr)',
-    amr: '认证方法引用 (amr)',
-    scopes: '作用域 (scopes)',
-    client_id: '客户端 ID (client_id)',
-    preferred_username: '首选用户名 (preferred_username)',
-    email: '邮箱 (email)',
-    email_verified: '邮箱已验证 (email_verified)',
-    name: '姓名 (name)',
-    given_name: '名 (given_name)',
-    family_name: '姓 (family_name)',
-    picture: '头像 (picture)',
-    locale: '地区 (locale)',
-    updated_at: '更新时间 (updated_at)',
-  }
-  return fieldMap[key] || key
-}
-
-const formatTimestamp = (timestamp: number) => {
-  const date = new Date(timestamp * 1000)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  })
-}
-
 const formatToken = (token: string) => {
   const parts = token.split('.')
   if (parts.length !== 3) return token
@@ -1167,21 +1021,6 @@ const formatToken = (token: string) => {
 const getFormattedToken = () => {
   if (!formatTokenDisplay.value || !inputToken.value) return inputToken.value
   return formatToken(inputToken.value)
-}
-
-const formatDuration = (seconds: number) => {
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-
-  const parts = []
-  if (days > 0) parts.push(`${days}天`)
-  if (hours > 0) parts.push(`${hours}小时`)
-  if (minutes > 0) parts.push(`${minutes}分钟`)
-  if (secs > 0 || parts.length === 0) parts.push(`${secs}秒`)
-
-  return parts.join(' ')
 }
 </script>
 

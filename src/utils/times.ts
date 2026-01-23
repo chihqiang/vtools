@@ -1,3 +1,49 @@
+/**
+ * 将秒数格式化为可读的持续时间字符串
+ * @param {number} seconds - 秒数
+ * @returns {string} 格式化后的持续时间字符串，如 "1天 2小时 3分钟 4秒"
+ * @example
+ * formatDuration(86400) // "1天"
+ * formatDuration(3661)  // "1小时 1分钟 1秒"
+ * formatDuration(60)    // "1分钟"
+ * formatDuration(0)     // "0秒"
+ */
+export const formatDuration = (seconds: number) => {
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  const parts = []
+  if (days > 0) parts.push(`${days}天`)
+  if (hours > 0) parts.push(`${hours}小时`)
+  if (minutes > 0) parts.push(`${minutes}分钟`)
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}秒`)
+
+  return parts.join(' ')
+}
+
+/**
+ * 将时间戳格式化为可读的日期时间字符串
+ * @param {number} timestamp - Unix时间戳（秒）
+ * @returns {string} 格式化后的日期时间字符串，如 "2023-12-31 23:59:59"
+ * @example
+ * formatTimestamp(1704067199) // "2023-12-31 23:59:59"
+ * formatTimestamp(0)           // "1970-01-01 08:00:00" (UTC+8时区)
+ */
+export const formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
+
 // ==================== 农历转换模块 ====================
 // 农历数据 1900-2100年
 // 每个元素是16进制数：前4位表示闰月月份(0无闰月)，后12位每位表示农历月份的大小月(0小月29天，1大月30天)
