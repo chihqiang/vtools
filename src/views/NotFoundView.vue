@@ -55,7 +55,7 @@
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
         <RouterLink
           to="/"
-          class="group inline-flex items-center gap-3 px-12 py-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold text-xl rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 transform"
+          class="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 transform"
         >
           <svg
             class="w-6 h-6 group-hover:-translate-x-1 transition-transform"
@@ -75,7 +75,7 @@
 
         <button
           @click="goBack"
-          class="group inline-flex items-center gap-3 px-10 py-5 bg-white text-gray-700 font-bold text-lg rounded-2xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-xl hover:scale-105 transition-all duration-300 transform"
+          class="group inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-700 font-bold text-lg rounded-2xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-xl hover:scale-105 transition-all duration-300 transform"
         >
           <svg
             class="w-6 h-6 group-hover:rotate-180 transition-transform duration-300"
