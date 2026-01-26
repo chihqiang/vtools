@@ -115,7 +115,10 @@
               sort
             />
           </div>
-          <div v-else class="flex flex-col items-center justify-center text-gray-400 gap-2 min-h-0 p-4">
+          <div
+            v-else
+            class="flex flex-col items-center justify-center text-gray-400 gap-2 min-h-0 p-4"
+          >
             <svg
               class="w-8 sm:w-10 h-8 sm:h-10 opacity-40"
               fill="none"

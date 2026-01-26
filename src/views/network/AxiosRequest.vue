@@ -142,63 +142,63 @@
             <!-- 请求体参数内容 -->
             <div class="p-4 border-b border-gray-200">
               <!-- form-data -->
-            <div v-if="activeParamTab === ParamTabType.FORM_DATA" class="space-y-3 sm:space-y-4">
-              <div
-                v-for="(item, index) in formDataParams"
-                :key="index"
-                class="flex flex-col sm:flex-row gap-2 sm:gap-2 flex-wrap"
-              >
-                <input
-                  v-model="item.key"
-                  placeholder="键"
-                  class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-                />
-                <select
-                  v-model="item.type"
-                  class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+              <div v-if="activeParamTab === ParamTabType.FORM_DATA" class="space-y-3 sm:space-y-4">
+                <div
+                  v-for="(item, index) in formDataParams"
+                  :key="index"
+                  class="flex flex-col sm:flex-row gap-2 sm:gap-2 flex-wrap"
                 >
-                  <option
-                    v-for="type in paramTypes"
-                    :key="type"
-                    :value="type"
-                    :disabled="isUrlEncodedMode && type === ParamType.FILE"
-                  >
-                    {{ type }}
-                  </option>
-                </select>
-                <div class="flex-1 flex gap-2">
                   <input
-                    v-if="item.type !== ParamType.FILE"
-                    v-model="item.value"
-                    placeholder="值"
-                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                    v-model="item.key"
+                    placeholder="键"
+                    class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                   />
-                  <div v-if="item.type === ParamType.FILE" class="flex-1 relative">
-                    <input
-                      type="file"
-                      @change="handleFileChange($event, index)"
-                      class="absolute inset-0 opacity-0 cursor-pointer"
-                      aria-hidden="true"
-                    />
-                    <div
-                      class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm focus-within:ring-2 focus-within:ring-indigo-500"
+                  <select
+                    v-model="item.type"
+                    class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option
+                      v-for="type in paramTypes"
+                      :key="type"
+                      :value="type"
+                      :disabled="isUrlEncodedMode && type === ParamType.FILE"
                     >
-                      <span class="text-gray-500 truncate">
-                        {{ item.file ? item.file.name : '选择文件' }}
-                      </span>
-                      <span class="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded">
-                        浏览
-                      </span>
+                      {{ type }}
+                    </option>
+                  </select>
+                  <div class="flex-1 flex gap-2">
+                    <input
+                      v-if="item.type !== ParamType.FILE"
+                      v-model="item.value"
+                      placeholder="值"
+                      class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <div v-if="item.type === ParamType.FILE" class="flex-1 relative">
+                      <input
+                        type="file"
+                        @change="handleFileChange($event, index)"
+                        class="absolute inset-0 opacity-0 cursor-pointer"
+                        aria-hidden="true"
+                      />
+                      <div
+                        class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm focus-within:ring-2 focus-within:ring-indigo-500"
+                      >
+                        <span class="text-gray-500 truncate">
+                          {{ item.file ? item.file.name : '选择文件' }}
+                        </span>
+                        <span class="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded">
+                          浏览
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <button
+                    @click="removeFormDataParam(index)"
+                    class="w-full sm:w-auto px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition whitespace-nowrap"
+                  >
+                    删除
+                  </button>
                 </div>
-                <button
-                  @click="removeFormDataParam(index)"
-                  class="w-full sm:w-auto px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition whitespace-nowrap"
-                >
-                  删除
-                </button>
-              </div>
                 <button
                   @click="addFormDataParam"
                   class="px-4 py-2 bg-green-100 text-green-600 rounded-md text-sm hover:bg-green-200 transition"
@@ -208,7 +208,10 @@
               </div>
 
               <!-- x-www-form-urlencoded -->
-              <div v-else-if="activeParamTab === ParamTabType.URL_ENCODED" class="space-y-3 sm:space-y-4">
+              <div
+                v-else-if="activeParamTab === ParamTabType.URL_ENCODED"
+                class="space-y-3 sm:space-y-4"
+              >
                 <div
                   v-for="(item, index) in urlEncodedParams"
                   :key="index"
@@ -262,8 +265,15 @@
               </div>
 
               <!-- Query Params -->
-              <div v-else-if="activeParamTab === ParamTabType.QUERY_PARAMS" class="space-y-3 sm:space-y-4">
-                <div v-for="(item, index) in queryParams" :key="index" class="flex flex-col sm:flex-row gap-2 sm:gap-2">
+              <div
+                v-else-if="activeParamTab === ParamTabType.QUERY_PARAMS"
+                class="space-y-3 sm:space-y-4"
+              >
+                <div
+                  v-for="(item, index) in queryParams"
+                  :key="index"
+                  class="flex flex-col sm:flex-row gap-2 sm:gap-2"
+                >
                   <input
                     v-model="item.key"
                     placeholder="键"
@@ -295,7 +305,11 @@
           <div v-else-if="activeContentTab === 'header'">
             <div class="p-3 sm:p-4 border-b border-gray-200">
               <div class="space-y-3 sm:space-y-4">
-                <div v-for="(item, index) in requestHeaders" :key="index" class="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                <div
+                  v-for="(item, index) in requestHeaders"
+                  :key="index"
+                  class="flex flex-col sm:flex-row gap-2 sm:gap-2"
+                >
                   <input
                     v-model="item.key"
                     placeholder="键"
