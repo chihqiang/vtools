@@ -41,6 +41,19 @@ const networkRoutes: RouteRecordRaw[] = [
       group: HomeGroup.NETWORK_TOOLS,
     } as HomeRouteMeta,
   },
+  {
+    path: '/websocket-test',
+    name: 'websocket-test',
+    component: () => import('@/views/network/WebSocket.vue'),
+    meta: {
+      showOnHome: true,
+      title: 'WebSocket 测试工具',
+      description: '连接并测试 WebSocket 服务，支持发送和接收消息，查看连接状态和历史记录',
+      icon: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+      color: 'purple',
+      group: HomeGroup.NETWORK_TOOLS,
+    } as HomeRouteMeta,
+  },
 ]
 
 export default networkRoutes
