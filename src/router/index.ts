@@ -28,6 +28,16 @@ const router = createRouter({
     ...developmentRoutes,
     ...encryptionRoutes,
     ...networkRoutes,
+    // 404 页面
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
+      meta: {
+        title: '404 - 页面未找到',
+        description: '您访问的页面不存在',
+      } as HomeRouteMeta,
+    },
   ],
 })
 
