@@ -1,34 +1,34 @@
 <template>
-  <div class="h-screen p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
+  <div class="min-h-screen p-4 sm:p-6 flex flex-col bg-gray-50 border border-gray-200 rounded-xl">
     <!-- 加载状态 -->
     <LoadingSpinner v-if="loading" :loading="loading" :message="loadingMessage" :overlay="true" />
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1 min-h-0">
       <!-- 左侧输入区 -->
       <div class="flex flex-col h-full min-h-0">
         <!-- 输入区标题与操作 -->
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
           <h3 class="font-semibold text-gray-800 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-blue-500"></span> 输入 JSON
           </h3>
-          <div class="flex space-x-2">
+          <div class="flex flex-wrap gap-2">
             <button
               @click="formatJson"
-              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 whitespace-nowrap"
               :disabled="loading"
             >
               格式化
             </button>
             <button
               @click="minifyJson"
-              class="px-3 py-2 bg-slate-500 text-white rounded-md text-sm hover:bg-slate-600"
+              class="px-3 py-2 bg-slate-500 text-white rounded-md text-sm hover:bg-slate-600 whitespace-nowrap"
               :disabled="loading"
             >
               压缩
             </button>
             <button
               @click="clearInput"
-              class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+              class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 whitespace-nowrap"
               :disabled="loading"
             >
               清空
@@ -42,7 +42,7 @@
             v-model="inputJson"
             @input="handleInput"
             placeholder="请输入或粘贴 JSON 字符串..."
-            class="w-full h-full p-4 font-mono text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none overflow-auto"
+            class="w-full h-full p-3 sm:p-4 font-mono text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none overflow-auto"
             spellcheck="false"
           ></textarea>
         </div>
@@ -55,19 +55,19 @@
       <!-- 右侧输出区 -->
       <div class="flex flex-col h-full min-h-0">
         <!-- 输出区操作栏 -->
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
           <h3 class="font-semibold text-gray-800 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-green-500"></span> 输出结果
           </h3>
-          <div class="flex items-center space-x-2">
-            <div class="flex items-center gap-3 bg-gray-100 px-2 py-1 rounded-md">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
               <label for="expandDepth" class="text-xs text-gray-600 whitespace-nowrap"
                 >展开深度:</label
               >
               <div class="flex items-center gap-0.5">
                 <button
                   @click="decreaseDepth"
-                  class="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 transition-colors font-medium shadow-sm"
+                  class="px-2 sm:px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 transition-colors font-medium shadow-sm"
                 >
                   -
                 </button>
@@ -76,35 +76,37 @@
                   v-model.number="userExpandDepth"
                   type="number"
                   min="0"
-                  class="w-16 text-sm text-center border border-blue-200 rounded p-1.5 bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500 text-blue-700"
+                  class="w-12 sm:w-16 text-sm text-center border border-blue-200 rounded p-1.5 bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500 text-blue-700"
                   @change="updateExpandDepth"
                 />
                 <button
                   @click="increaseDepth"
-                  class="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 transition-colors font-medium shadow-sm"
+                  class="px-2 sm:px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 transition-colors font-medium shadow-sm"
                 >
                   +
                 </button>
               </div>
             </div>
-            <button
-              @click="copyOutput"
-              class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
-            >
-              复制
-            </button>
-            <button
-              @click="downloadJson"
-              class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700"
-            >
-              下载
-            </button>
+            <div class="flex gap-2">
+              <button
+                @click="copyOutput"
+                class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 whitespace-nowrap"
+              >
+                复制
+              </button>
+              <button
+                @click="downloadJson"
+                class="px-3 py-2 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 whitespace-nowrap"
+              >
+                下载
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- 输出结果滚动区域 -->
         <div class="border border-gray-300 rounded-lg flex-1 min-h-0 overflow-auto bg-white">
-          <div v-if="parsedJson !== null" class="p-4 min-h-0 overflow-auto">
+          <div v-if="parsedJson !== null" class="p-3 sm:p-4 min-h-0 overflow-auto">
             <json-viewer
               :key="currentExpandDepth"
               :value="parsedJson"
@@ -113,9 +115,9 @@
               sort
             />
           </div>
-          <div v-else class="flex flex-col items-center justify-center text-gray-400 gap-2 min-h-0">
+          <div v-else class="flex flex-col items-center justify-center text-gray-400 gap-2 min-h-0 p-4">
             <svg
-              class="w-10 h-10 opacity-40"
+              class="w-8 sm:w-10 h-8 sm:h-10 opacity-40"
               fill="none"
               stroke="currentColor"
               stroke-width="1.5"

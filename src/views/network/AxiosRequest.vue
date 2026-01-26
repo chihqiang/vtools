@@ -1,13 +1,13 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">HTTP 请求构建器（基于 Axios）</h1>
+  <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4 sm:mb-6">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-800">HTTP 请求构建器（基于 Axios）</h1>
     </div>
 
-    <div class="flex gap-6">
+    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6">
       <!-- 左侧：请求历史记录 -->
       <div
-        class="w-1/4 min-w-[250px] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col"
+        class="w-full lg:w-1/4 min-w-[250px] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col mb-4 lg:mb-0"
       >
         <div class="p-3 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-sm font-medium text-gray-700">请求历史</h3>
@@ -64,11 +64,11 @@
       <!-- 右侧：请求构建器 -->
       <div class="flex-1 bg-white rounded-lg shadow-sm border border-gray-200">
         <!-- 请求方式和地址 -->
-        <div class="p-4 border-b border-gray-200">
+        <div class="p-3 sm:p-4 border-b border-gray-200">
           <div class="flex flex-wrap gap-2 items-center">
             <select
               v-model="request.method"
-              class="px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 min-w-[100px]"
+              class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 min-w-[80px] sm:min-w-[100px]"
             >
               <option v-for="method in httpMethods" :key="method" :value="method">
                 {{ method }}
@@ -77,21 +77,23 @@
             <input
               v-model="request.url"
               placeholder="输入请求地址"
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 min-w-[200px]"
+              class="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 min-w-[150px] sm:min-w-[200px]"
             />
-            <button
-              @click="sendRequest"
-              :disabled="isLoading"
-              class="px-6 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 transition disabled:bg-indigo-400 disabled:cursor-not-allowed"
-            >
-              {{ isLoading ? '发送中...' : '发送请求' }}
-            </button>
-            <button
-              @click="clearAll"
-              class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition"
-            >
-              清空
-            </button>
+            <div class="flex gap-2 w-full sm:w-auto">
+              <button
+                @click="sendRequest"
+                :disabled="isLoading"
+                class="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 transition disabled:bg-indigo-400 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {{ isLoading ? '发送中...' : '发送请求' }}
+              </button>
+              <button
+                @click="clearAll"
+                class="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition whitespace-nowrap"
+              >
+                清空
+              </button>
+            </div>
           </div>
         </div>
 
@@ -140,63 +142,63 @@
             <!-- 请求体参数内容 -->
             <div class="p-4 border-b border-gray-200">
               <!-- form-data -->
-              <div v-if="activeParamTab === ParamTabType.FORM_DATA" class="space-y-4">
-                <div
-                  v-for="(item, index) in formDataParams"
-                  :key="index"
-                  class="flex gap-2 flex-wrap"
+            <div v-if="activeParamTab === ParamTabType.FORM_DATA" class="space-y-3 sm:space-y-4">
+              <div
+                v-for="(item, index) in formDataParams"
+                :key="index"
+                class="flex flex-col sm:flex-row gap-2 sm:gap-2 flex-wrap"
+              >
+                <input
+                  v-model="item.key"
+                  placeholder="键"
+                  class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                />
+                <select
+                  v-model="item.type"
+                  class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                 >
-                  <input
-                    v-model="item.key"
-                    placeholder="键"
-                    class="w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <select
-                    v-model="item.type"
-                    class="w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                  <option
+                    v-for="type in paramTypes"
+                    :key="type"
+                    :value="type"
+                    :disabled="isUrlEncodedMode && type === ParamType.FILE"
                   >
-                    <option
-                      v-for="type in paramTypes"
-                      :key="type"
-                      :value="type"
-                      :disabled="isUrlEncodedMode && type === ParamType.FILE"
-                    >
-                      {{ type }}
-                    </option>
-                  </select>
-                  <div class="flex-1 flex gap-2">
+                    {{ type }}
+                  </option>
+                </select>
+                <div class="flex-1 flex gap-2">
+                  <input
+                    v-if="item.type !== ParamType.FILE"
+                    v-model="item.value"
+                    placeholder="值"
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <div v-if="item.type === ParamType.FILE" class="flex-1 relative">
                     <input
-                      v-if="item.type !== ParamType.FILE"
-                      v-model="item.value"
-                      placeholder="值"
-                      class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                      type="file"
+                      @change="handleFileChange($event, index)"
+                      class="absolute inset-0 opacity-0 cursor-pointer"
+                      aria-hidden="true"
                     />
-                    <div v-if="item.type === ParamType.FILE" class="flex-1 relative">
-                      <input
-                        type="file"
-                        @change="handleFileChange($event, index)"
-                        class="absolute inset-0 opacity-0 cursor-pointer"
-                        aria-hidden="true"
-                      />
-                      <div
-                        class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm focus-within:ring-2 focus-within:ring-indigo-500"
-                      >
-                        <span class="text-gray-500">
-                          {{ item.file ? item.file.name : '选择文件' }}
-                        </span>
-                        <span class="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded">
-                          浏览
-                        </span>
-                      </div>
+                    <div
+                      class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm focus-within:ring-2 focus-within:ring-indigo-500"
+                    >
+                      <span class="text-gray-500 truncate">
+                        {{ item.file ? item.file.name : '选择文件' }}
+                      </span>
+                      <span class="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded">
+                        浏览
+                      </span>
                     </div>
                   </div>
-                  <button
-                    @click="removeFormDataParam(index)"
-                    class="px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
-                  >
-                    删除
-                  </button>
                 </div>
+                <button
+                  @click="removeFormDataParam(index)"
+                  class="w-full sm:w-auto px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition whitespace-nowrap"
+                >
+                  删除
+                </button>
+              </div>
                 <button
                   @click="addFormDataParam"
                   class="px-4 py-2 bg-green-100 text-green-600 rounded-md text-sm hover:bg-green-200 transition"
@@ -206,20 +208,20 @@
               </div>
 
               <!-- x-www-form-urlencoded -->
-              <div v-else-if="activeParamTab === ParamTabType.URL_ENCODED" class="space-y-4">
+              <div v-else-if="activeParamTab === ParamTabType.URL_ENCODED" class="space-y-3 sm:space-y-4">
                 <div
                   v-for="(item, index) in urlEncodedParams"
                   :key="index"
-                  class="flex gap-2 flex-wrap"
+                  class="flex flex-col sm:flex-row gap-2 sm:gap-2 flex-wrap"
                 >
                   <input
                     v-model="item.key"
                     placeholder="键"
-                    class="w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                    class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                   />
                   <select
                     v-model="item.type"
-                    class="w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                    class="w-full sm:w-1/6 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                   >
                     <option
                       v-for="type in paramTypes"
@@ -237,7 +239,7 @@
                   />
                   <button
                     @click="removeUrlEncodedParam(index)"
-                    class="px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
+                    class="w-full sm:w-auto px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition whitespace-nowrap"
                   >
                     删除
                   </button>
@@ -251,21 +253,21 @@
               </div>
 
               <!-- json -->
-              <div v-else-if="activeParamTab === ParamTabType.JSON" class="space-y-4">
+              <div v-else-if="activeParamTab === ParamTabType.JSON" class="space-y-3 sm:space-y-4">
                 <textarea
                   v-model="jsonParams"
                   placeholder="输入JSON格式的参数"
-                  class="w-full h-64 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                  class="w-full h-48 sm:h-64 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-indigo-500"
                 ></textarea>
               </div>
 
               <!-- Query Params -->
-              <div v-else-if="activeParamTab === ParamTabType.QUERY_PARAMS" class="space-y-4">
-                <div v-for="(item, index) in queryParams" :key="index" class="flex gap-2">
+              <div v-else-if="activeParamTab === ParamTabType.QUERY_PARAMS" class="space-y-3 sm:space-y-4">
+                <div v-for="(item, index) in queryParams" :key="index" class="flex flex-col sm:flex-row gap-2 sm:gap-2">
                   <input
                     v-model="item.key"
                     placeholder="键"
-                    class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                    class="w-full sm:w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                   />
                   <input
                     v-model="item.value"
@@ -274,7 +276,7 @@
                   />
                   <button
                     @click="removeQueryParam(index)"
-                    class="px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
+                    class="w-full sm:w-auto px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition whitespace-nowrap"
                   >
                     删除
                   </button>
@@ -291,13 +293,13 @@
 
           <!-- Header选项卡 -->
           <div v-else-if="activeContentTab === 'header'">
-            <div class="p-4 border-b border-gray-200">
-              <div class="space-y-4">
-                <div v-for="(item, index) in requestHeaders" :key="index" class="flex gap-2">
+            <div class="p-3 sm:p-4 border-b border-gray-200">
+              <div class="space-y-3 sm:space-y-4">
+                <div v-for="(item, index) in requestHeaders" :key="index" class="flex flex-col sm:flex-row gap-2 sm:gap-2">
                   <input
                     v-model="item.key"
                     placeholder="键"
-                    class="w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                    class="w-full sm:w-1/4 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                   />
                   <input
                     v-model="item.value"
@@ -306,7 +308,7 @@
                   />
                   <button
                     @click="removeRequestHeader(index)"
-                    class="px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition"
+                    class="w-full sm:w-auto px-3 py-2 bg-red-100 text-red-600 rounded-md text-sm hover:bg-red-200 transition whitespace-nowrap"
                   >
                     删除
                   </button>
@@ -325,7 +327,7 @@
                     v-for="(preset, index) in presetHeaders"
                     :key="index"
                     @click="addPresetHeader(preset)"
-                    class="px-3 py-2 bg-blue-100 text-blue-600 rounded-md text-xs hover:bg-blue-200 transition whitespace-nowrap"
+                    class="px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-100 text-blue-600 rounded-md text-xs hover:bg-blue-200 transition whitespace-nowrap"
                   >
                     {{ preset.key }}: {{ preset.value }}
                   </button>
@@ -336,10 +338,10 @@
         </div>
 
         <!-- 响应结果 -->
-        <div class="p-4">
+        <div class="p-3 sm:p-4">
           <h3 class="text-sm font-medium text-gray-700 mb-3">响应结果</h3>
-          <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-3 sm:space-y-4">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <p class="text-xs text-gray-500 mb-1">状态码</p>
                 <p class="text-sm font-medium">{{ response.statusCode }}</p>
@@ -361,14 +363,14 @@
               </div>
               <pre
                 v-if="isHeadersExpanded"
-                class="text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded overflow-x-auto"
+                class="text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded overflow-x-auto max-h-48"
                 >{{ JSON.stringify(response.headers, null, 2) }}</pre
               >
             </div>
             <div>
               <p class="text-xs text-gray-500 mb-1">响应体</p>
               <pre
-                class="text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded overflow-x-auto"
+                class="text-xs font-mono p-2 bg-gray-50 border border-gray-200 rounded overflow-x-auto max-h-64"
                 >{{ formatResponseBody(response.body, response.headers['content-type']) }}</pre
               >
             </div>
