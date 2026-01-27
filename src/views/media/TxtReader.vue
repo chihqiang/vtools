@@ -228,7 +228,7 @@
               <button
                 id="playBtn"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
-                :disabled="!currentFile"
+                :disabled="!currentFile || isPlaying"
                 @click="startReading"
               >
                 <i class="fas fa-play"></i>
@@ -274,7 +274,6 @@
                   id="voiceSelect"
                   class="border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 text-sm font-medium min-w-[120px] max-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   v-model="selectedVoice"
-                  @change="saveVoiceSelection"
                 >
                   <optgroup
                     v-for="(group, groupName) in voiceGroups"
@@ -944,6 +943,9 @@ function startReading() {
       showError('您的浏览器不支持语音合成功能')
       return
     }
+
+    // 保存语音选择
+    saveVoiceSelection()
 
     // 停止之前的朗读
     speechSynthesis.cancel()
