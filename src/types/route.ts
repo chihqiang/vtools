@@ -6,6 +6,7 @@ export enum HomeGroup {
   IMAGE_TOOLS = '图片工具',
   ENCRYPTION_TOOLS = '加密解密工具',
   NETWORK_TOOLS = '网络工具',
+  MEDIA_TOOLS = '媒体工具',
   UNGROUPED = '未分组',
 }
 

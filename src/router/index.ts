@@ -8,6 +8,7 @@ import imageRoutes from '@/router/modules/image'
 import developmentRoutes from '@/router/modules/development'
 import encryptionRoutes from '@/router/modules/encryption'
 import networkRoutes from '@/router/modules/network'
+import mediaRoutes from '@/router/modules/media'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,7 @@ const router = createRouter({
     ...developmentRoutes,
     ...encryptionRoutes,
     ...networkRoutes,
+    ...mediaRoutes,
     // 404 页面
     {
       path: '/:pathMatch(.*)*',
