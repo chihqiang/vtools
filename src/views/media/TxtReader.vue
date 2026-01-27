@@ -1,34 +1,65 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden min-h-screen">
+      <!-- 头部 -->
       <header
-        class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-6 px-8 text-center shadow-md"
+        class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 md:py-6 px-4 md:px-8 text-center shadow-md relative"
       >
-        <h1 class="text-2xl md:text-3xl font-bold flex items-center justify-center gap-4">
-          <i class="fas fa-book-reader text-xl md:text-2xl"></i>
-          TXT在线阅读器
-        </h1>
-        <p class="mt-2 opacity-90 text-sm md:text-base">
+        <div class="flex items-center justify-between">
+          <!-- 左侧菜单按钮 -->
+          <button
+            @click="toggleLeftSidebar"
+            class="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+
+          <!-- 标题 -->
+          <div class="flex-1 flex items-center justify-center gap-2 md:gap-4">
+            <i class="fas fa-book-reader text-lg md:text-2xl"></i>
+            <h1 class="text-lg md:text-2xl font-bold">TXT在线阅读器</h1>
+          </div>
+
+          <!-- 右侧菜单按钮 -->
+          <button
+            @click="toggleRightSidebar"
+            class="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <i class="fas fa-list text-xl"></i>
+          </button>
+        </div>
+        <p class="mt-2 opacity-90 text-xs md:text-base">
           智能编码检测，解决中文乱码问题 | 文字转语音与自动滚动阅读
         </p>
       </header>
 
       <!-- 主内容区域 - 响应式布局 -->
-      <div class="flex flex-1 overflow-hidden">
-        <!-- 左侧边栏 - 响应式宽度 -->
+      <div class="flex flex-1 overflow-hidden relative">
+        <!-- 左侧边栏 - 移动端可折叠 -->
         <div
-          class="w-64 md:w-72 bg-gray-50 border-r border-gray-200 p-4 md:p-6 overflow-y-auto transition-all duration-300 ease-in-out"
+          :class="[
+            'fixed inset-y-0 left-0 z-40 w-72 bg-gray-50 border-r border-gray-200 p-4 md:p-6 overflow-y-auto transition-transform duration-300 ease-in-out md:static md:translate-x-0',
+            'md:w-64 lg:w-72',
+            leftSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          ]"
         >
+          <!-- 关闭按钮（仅移动端） -->
+          <button
+            @click="toggleLeftSidebar"
+            class="md:hidden absolute top-4 right-4 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 transition-colors"
+          >
+            <i class="fas fa-times text-gray-600"></i>
+          </button>
           <!-- 文件上传区域 -->
-          <div class="mb-8">
+          <div class="mb-6 md:mb-8">
             <div class="flex items-center gap-3 mb-4">
               <i class="fas fa-file-import text-blue-500 w-5 text-center"></i>
-              <h2 class="text-lg font-semibold text-gray-700">导入TXT文件</h2>
+              <h2 class="text-base md:text-lg font-semibold text-gray-700">导入TXT文件</h2>
             </div>
 
             <!-- 文件上传拖拽区域 -->
             <div
-              class="border-2 border-dashed border-gray-300 rounded-lg p-5 md:p-6 text-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50 hover:shadow-sm mb-4 group"
+              class="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50 hover:shadow-sm mb-4 group"
               id="fileInputArea"
               @click="fileInput?.click()"
               @dragover.prevent="handleDragOver"
@@ -36,10 +67,12 @@
               @drop.prevent="handleDrop"
             >
               <i
-                class="fas fa-file-alt text-4xl text-gray-400 mb-4 group-hover:text-blue-500 transition-colors duration-300"
+                class="fas fa-file-alt text-3xl md:text-4xl text-gray-400 mb-3 md:mb-4 group-hover:text-blue-500 transition-colors duration-300"
               ></i>
-              <h3 class="text-lg font-medium text-gray-700 mb-2">点击或拖拽TXT文件到此处</h3>
-              <p class="text-sm text-gray-500">支持任何纯文本格式文件(.txt, .md, .json等)</p>
+              <h3 class="text-sm md:text-lg font-medium text-gray-700 mb-1 md:mb-2">
+                点击或拖拽TXT文件到此处
+              </h3>
+              <p class="text-xs md:text-sm text-gray-500">支持任何纯文本格式文件</p>
               <input
                 type="file"
                 ref="fileInput"
@@ -51,30 +84,32 @@
             </div>
 
             <!-- 当前文件信息 -->
-            <div class="bg-white rounded-lg p-4 shadow-sm mb-4 border border-gray-100">
-              <h4 class="font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <i class="fas fa-file-alt text-sm text-gray-500"></i>
+            <div class="bg-white rounded-lg p-3 md:p-4 shadow-sm mb-4 border border-gray-100">
+              <h4
+                class="font-medium text-gray-700 mb-2 flex items-center gap-2 text-sm md:text-base"
+              >
+                <i class="fas fa-file-alt text-xs md:text-sm text-gray-500"></i>
                 当前文件:
               </h4>
-              <p id="currentFileName" class="text-sm text-gray-600 truncate">
+              <p id="currentFileName" class="text-xs md:text-sm text-gray-600 truncate">
                 {{ currentFileName }}
               </p>
-              <p id="fileInfo" class="text-sm text-gray-500 mt-1">{{ fileInfo }}</p>
+              <p id="fileInfo" class="text-xs md:text-sm text-gray-500 mt-1">{{ fileInfo }}</p>
             </div>
           </div>
 
           <!-- 编码设置区域 -->
-          <div class="mb-8">
+          <div class="mb-6 md:mb-8">
             <div class="flex items-center gap-3 mb-4">
               <i class="fas fa-file-code text-blue-500 w-5 text-center"></i>
-              <h2 class="text-lg font-semibold text-gray-700">编码设置</h2>
+              <h2 class="text-base md:text-lg font-semibold text-gray-700">编码设置</h2>
             </div>
-            <div class="bg-white rounded-lg p-4 shadow-sm mb-4 border border-gray-100">
-              <h4 class="font-medium text-gray-700 mb-3">
+            <div class="bg-white rounded-lg p-3 md:p-4 shadow-sm mb-4 border border-gray-100">
+              <h4 class="font-medium text-gray-700 mb-2 md:mb-3 text-sm md:text-base">
                 当前编码:
                 <span id="currentEncoding" class="text-blue-600">{{ currentEncoding }}</span>
               </h4>
-              <div class="space-y-3">
+              <div class="space-y-2 md:space-y-3">
                 <div class="flex items-center gap-2">
                   <input
                     type="radio"
@@ -85,7 +120,7 @@
                     @change="handleEncodingChange"
                     class="text-blue-600 focus:ring-blue-500"
                   />
-                  <label for="autoEncode" class="text-sm text-gray-700 cursor-pointer"
+                  <label for="autoEncode" class="text-xs md:text-sm text-gray-700 cursor-pointer"
                     >自动检测编码</label
                   >
                 </div>
@@ -99,7 +134,7 @@
                     @change="handleEncodingChange"
                     class="text-blue-600 focus:ring-blue-500"
                   />
-                  <label for="utf8Encode" class="text-sm text-gray-700 cursor-pointer"
+                  <label for="utf8Encode" class="text-xs md:text-sm text-gray-700 cursor-pointer"
                     >UTF-8 (推荐)</label
                   >
                 </div>
@@ -113,8 +148,8 @@
                     @change="handleEncodingChange"
                     class="text-blue-600 focus:ring-blue-500"
                   />
-                  <label for="gbkEncode" class="text-sm text-gray-700 cursor-pointer"
-                    >GBK / GB2312 (简体中文)</label
+                  <label for="gbkEncode" class="text-xs md:text-sm text-gray-700 cursor-pointer"
+                    >GBK / GB2312</label
                   >
                 </div>
                 <div class="flex items-center gap-2">
@@ -127,8 +162,8 @@
                     @change="handleEncodingChange"
                     class="text-blue-600 focus:ring-blue-500"
                   />
-                  <label for="big5Encode" class="text-sm text-gray-700 cursor-pointer"
-                    >Big5 (繁体中文)</label
+                  <label for="big5Encode" class="text-xs md:text-sm text-gray-700 cursor-pointer"
+                    >Big5 (繁体)</label
                   >
                 </div>
                 <div class="flex items-center gap-2">
@@ -141,14 +176,14 @@
                     @change="handleEncodingChange"
                     class="text-blue-600 focus:ring-blue-500"
                   />
-                  <label for="isoEncode" class="text-sm text-gray-700 cursor-pointer"
-                    >ISO-8859-1 (西欧)</label
+                  <label for="isoEncode" class="text-xs md:text-sm text-gray-700 cursor-pointer"
+                    >ISO-8859-1</label
                   >
                 </div>
               </div>
               <button
                 id="reloadBtn"
-                class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg mt-4 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm hover:shadow disabled:shadow-none"
+                class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-3 md:px-4 rounded-lg mt-3 md:mt-4 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm hover:shadow disabled:shadow-none text-sm md:text-base"
                 :disabled="!currentFile"
                 @click="reloadFile"
               >
@@ -156,7 +191,7 @@
                 使用新编码重新加载
               </button>
 
-              <div v-if="isLoading" class="mt-3">
+              <div v-if="isLoading" class="mt-2 md:mt-3">
                 <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                   <div
                     class="bg-blue-500 h-2 rounded-full transition-all duration-300"
@@ -174,7 +209,7 @@
               <p
                 v-else
                 id="encodingStatus"
-                class="mt-3 text-xs text-gray-500 italic"
+                class="mt-2 md:mt-3 text-xs text-gray-500 italic"
                 :style="{ color: encodingStatusColor }"
               >
                 {{ encodingStatus }}
@@ -186,93 +221,116 @@
           <div>
             <div class="flex items-center gap-3 mb-4">
               <i class="fas fa-info-circle text-blue-500 w-5 text-center"></i>
-              <h2 class="text-lg font-semibold text-gray-700">使用说明</h2>
+              <h2 class="text-base md:text-lg font-semibold text-gray-700">使用说明</h2>
             </div>
-            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-              <p class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <i class="fas fa-exclamation-circle text-yellow-500 text-sm"></i>
+            <div class="bg-white rounded-lg p-3 md:p-4 shadow-sm border border-gray-100">
+              <p
+                class="font-semibold text-gray-700 mb-1 md:mb-2 flex items-center gap-2 text-sm md:text-base"
+              >
+                <i class="fas fa-exclamation-circle text-yellow-500 text-xs md:text-sm"></i>
                 解决乱码问题:
               </p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">
-                1. 如果文本显示乱码，尝试在左侧选择不同的编码
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">
+                1. 如果文本显示乱码，尝试选择不同的编码
               </p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">2. 中文文件通常使用UTF-8或GBK编码</p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">3. 点击"使用新编码重新加载"按钮应用设置</p>
-              <p class="font-semibold text-gray-700 mt-3 mb-2 flex items-center gap-2">
-                <i class="fas fa-volume-up text-blue-500 text-sm"></i>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">
+                2. 中文文件通常使用UTF-8或GBK编码
+              </p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">
+                3. 点击"使用新编码重新加载"按钮
+              </p>
+              <p
+                class="font-semibold text-gray-700 mt-2 md:mt-3 mb-1 md:mb-2 flex items-center gap-2 text-sm md:text-base"
+              >
+                <i class="fas fa-volume-up text-blue-500 text-xs md:text-sm"></i>
                 朗读功能:
               </p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">4. 正确显示文本后，点击"开始朗读"按钮</p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">
+                4. 正确显示文本后，点击"开始朗读"按钮
+              </p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">
                 5. 播放时页面会自动滚动并高亮当前朗读内容
               </p>
-              <p class="font-semibold text-gray-700 mt-3 mb-2 flex items-center gap-2">
-                <i class="fas fa-keyboard text-green-500 text-sm"></i>
+              <p
+                class="font-semibold text-gray-700 mt-2 md:mt-3 mb-1 md:mb-2 flex items-center gap-2 text-sm md:text-base"
+              >
+                <i class="fas fa-keyboard text-green-500 text-xs md:text-sm"></i>
                 快捷键:
               </p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">空格键: 开始/停止朗读</p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">S键: 停止朗读</p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">Ctrl+S: 存档</p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">Ctrl+L: 读档</p>
-              <p class="text-sm text-gray-600 mb-1 pl-7">↑/↓箭头: 切换句子</p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">空格键: 开始/停止朗读</p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">S键: 停止朗读</p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">Ctrl+S: 存档</p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">Ctrl+L: 读档</p>
+              <p class="text-xs md:text-sm text-gray-600 mb-1 pl-7">↑/↓箭头: 切换句子</p>
             </div>
           </div>
         </div>
 
+        <!-- 遮罩层（移动端侧边栏打开时显示） -->
+        <div
+          v-if="leftSidebarOpen || rightSidebarOpen"
+          @click="closeAllSidebars"
+          class="fixed inset-0 bg-black/50 z-30 md:hidden"
+        ></div>
+
         <!-- 中间阅读区域 -->
-        <div class="flex-1 p-4 md:p-6 overflow-hidden flex flex-col">
+        <div class="flex-1 p-3 md:p-6 overflow-hidden flex flex-col min-w-0">
           <!-- 控制区域 -->
-          <div class="mb-4 md:mb-6 pb-4 border-b border-gray-200">
+          <div class="mb-3 md:mb-6 pb-3 md:pb-4 border-b border-gray-200">
             <!-- 播放控制按钮 -->
-            <div class="flex flex-wrap items-center gap-3 mb-4">
+            <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4">
               <button
                 id="playBtn"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
                 :disabled="!currentFile || isPlaying"
                 @click="startReading"
               >
-                <i class="fas fa-play"></i>
+                <i class="fas fa-play text-xs md:text-sm"></i>
                 <span class="hidden sm:inline">开始朗读</span>
               </button>
 
               <button
                 id="stopBtn"
-                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
                 :disabled="!isPlaying"
                 @click="stopReading"
               >
-                <i class="fas fa-stop"></i>
+                <i class="fas fa-stop text-xs md:text-sm"></i>
                 <span class="hidden sm:inline">停止</span>
               </button>
               <button
                 id="saveBtn"
-                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
                 :disabled="!currentFile"
                 @click="saveState"
               >
-                <i class="fas fa-save"></i>
+                <i class="fas fa-save text-xs md:text-sm"></i>
                 <span class="hidden sm:inline">存档</span>
               </button>
               <button
                 id="loadBtn"
-                class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+                class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
                 :disabled="!currentFile"
                 @click="loadState"
               >
-                <i class="fas fa-upload"></i>
+                <i class="fas fa-upload text-xs md:text-sm"></i>
                 <span class="hidden sm:inline">读档</span>
               </button>
             </div>
 
             <!-- 语音和语速设置 -->
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3">
               <div
-                class="bg-gray-50 px-4 py-2 rounded-full flex items-center gap-3 border border-gray-200 shadow-sm"
+                class="bg-gray-50 px-3 py-2 rounded-full flex items-center gap-2 md:gap-3 border border-gray-200 shadow-sm w-full sm:w-auto"
               >
-                <label for="voiceSelect" class="text-sm font-medium text-gray-700">语音:</label>
+                <label
+                  for="voiceSelect"
+                  class="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap"
+                  >语音:</label
+                >
                 <select
                   id="voiceSelect"
-                  class="border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 text-sm font-medium min-w-[120px] max-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="border border-gray-300 rounded-lg px-2 md:px-3 py-1.5 bg-white text-gray-700 text-xs md:text-sm font-medium min-w-[100px] max-w-[150px] sm:min-w-[120px] sm:max-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   v-model="selectedVoice"
                 >
                   <optgroup
@@ -288,12 +346,16 @@
               </div>
 
               <div
-                class="bg-gray-50 px-4 py-2 rounded-full flex items-center gap-3 border border-gray-200 shadow-sm"
+                class="bg-gray-50 px-3 py-2 rounded-full flex items-center gap-2 md:gap-3 border border-gray-200 shadow-sm w-full sm:w-auto"
               >
-                <label for="speedSelect" class="text-sm font-medium text-gray-700">语速:</label>
+                <label
+                  for="speedSelect"
+                  class="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap"
+                  >语速:</label
+                >
                 <select
                   id="speedSelect"
-                  class="border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 text-sm font-medium min-w-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="border border-gray-300 rounded-lg px-2 md:px-3 py-1.5 bg-white text-gray-700 text-xs md:text-sm font-medium min-w-[60px] sm:min-w-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   v-model="speechSpeed"
                 >
                   <option value="0.5">0.5x</option>
@@ -311,31 +373,35 @@
 
           <!-- 文本阅读区域 -->
           <div
-            class="flex-1 bg-gray-50 rounded-xl p-5 md:p-6 overflow-y-auto border border-gray-200 shadow-sm"
+            class="flex-1 bg-gray-50 rounded-xl p-3 md:p-6 overflow-y-auto border border-gray-200 shadow-sm"
           >
             <div
               v-if="!currentFileContent"
-              class="text-center py-16 flex flex-col items-center justify-center"
+              class="text-center py-8 md:py-16 flex flex-col items-center justify-center"
             >
-              <div class="bg-blue-50 rounded-full p-6 mb-6">
-                <i class="fas fa-book-open text-5xl text-blue-300"></i>
+              <div class="bg-blue-50 rounded-full p-4 md:p-6 mb-4 md:mb-6">
+                <i class="fas fa-book-open text-3xl md:text-5xl text-blue-300"></i>
               </div>
-              <h3 class="text-xl font-semibold text-gray-600 mb-3">尚未加载文件</h3>
-              <p class="text-gray-500 mb-6 max-w-md">请从左侧导入TXT文件开始阅读</p>
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md">
-                <p class="text-sm text-gray-600">
+              <h3 class="text-base md:text-xl font-semibold text-gray-600 mb-2 md:mb-3">
+                尚未加载文件
+              </h3>
+              <p class="text-gray-500 mb-4 md:mb-6 max-w-md text-sm md:text-base">
+                请从左侧导入TXT文件开始阅读
+              </p>
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 md:p-4 max-w-md">
+                <p class="text-xs md:text-sm text-gray-600">
                   <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
                   如果文本显示乱码，请尝试在左侧选择不同的编码格式重新加载
                 </p>
               </div>
             </div>
-            <div v-else class="space-y-4">
+            <div v-else class="space-y-2 md:space-y-4">
               <p
                 v-for="(sentence, index) in sentences"
                 :key="index"
-                class="cursor-pointer py-3 px-4 rounded-lg transition-all duration-300 hover:bg-blue-50 hover:border-l-4 hover:border-blue-500 hover:pl-5 text-gray-700 leading-relaxed"
+                class="cursor-pointer py-2 md:py-3 px-3 md:px-4 rounded-lg transition-all duration-300 hover:bg-blue-50 hover:border-l-4 hover:border-blue-500 hover:pl-4 md:hover:pl-5 text-gray-700 leading-relaxed text-sm md:text-base"
                 :class="{
-                  'bg-blue-100 border-l-4 border-blue-600 pl-5 shadow-sm':
+                  'bg-blue-100 border-l-4 border-blue-600 pl-4 md:pl-5 shadow-sm':
                     index === currentSentenceIndex,
                 }"
                 @click="selectSentence(index)"
@@ -347,47 +413,59 @@
 
           <!-- 朗读状态指示器 -->
           <div
-            class="mt-4 bg-blue-600 text-white py-3 px-4 rounded-lg text-center font-medium shadow-md animate-fadeIn"
+            class="mt-3 md:mt-4 bg-blue-600 text-white py-2 md:py-3 px-3 md:px-4 rounded-lg text-center font-medium shadow-md animate-fadeIn"
             v-if="isPlaying"
           >
-            <i class="fas fa-volume-up mr-2 animate-pulse"></i>
+            <i class="fas fa-volume-up mr-2 animate-pulse text-xs md:text-sm"></i>
             正在朗读:
-            <span id="currentPosText" class="font-semibold"
+            <span id="currentPosText" class="font-semibold text-xs md:text-sm"
               >第 {{ currentSentenceIndex + 1 }} 句 / 共 {{ sentences.length }} 句</span
             >
           </div>
         </div>
 
-        <!-- 右侧章节列表 -->
+        <!-- 右侧章节列表 - 移动端可折叠 -->
         <div
-          class="w-56 md:w-64 bg-gray-50 border-l border-gray-200 p-4 md:p-6 overflow-y-auto transition-all duration-300 ease-in-out"
+          :class="[
+            'fixed inset-y-0 right-0 z-40 w-72 bg-gray-50 border-l border-gray-200 p-4 md:p-6 overflow-y-auto transition-transform duration-300 ease-in-out md:static md:translate-x-0',
+            'md:w-56 lg:w-64',
+            rightSidebarOpen ? 'translate-x-0' : 'translate-x-full',
+          ]"
         >
+          <!-- 关闭按钮（仅移动端） -->
+          <button
+            @click="toggleRightSidebar"
+            class="md:hidden absolute top-4 right-4 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 transition-colors"
+          >
+            <i class="fas fa-times text-gray-600"></i>
+          </button>
+
           <div class="mb-4">
             <div class="flex items-center gap-3 mb-4">
               <i class="fas fa-list text-blue-500 w-5 text-center"></i>
-              <h2 class="text-lg font-semibold text-gray-700">章节列表</h2>
+              <h2 class="text-base md:text-lg font-semibold text-gray-700">章节列表</h2>
             </div>
             <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div
                 v-if="chapters.length === 0"
-                class="text-center py-8 flex flex-col items-center justify-center"
+                class="text-center py-6 md:py-8 flex flex-col items-center justify-center"
               >
-                <div class="bg-gray-50 rounded-full p-3 mb-3">
-                  <i class="fas fa-bookmark text-2xl text-gray-300"></i>
+                <div class="bg-gray-50 rounded-full p-2 md:p-3 mb-2 md:mb-3">
+                  <i class="fas fa-bookmark text-xl md:text-2xl text-gray-300"></i>
                 </div>
-                <p class="text-gray-500">未检测到章节</p>
+                <p class="text-gray-500 text-xs md:text-sm">未检测到章节</p>
               </div>
               <div
                 v-for="(chapter, index) in chapters"
                 :key="index"
-                class="p-3 border-b border-gray-100 cursor-pointer transition-all duration-300 hover:bg-gray-50 hover:pl-4"
+                class="p-2 md:p-3 border-b border-gray-100 cursor-pointer transition-all duration-300 hover:bg-gray-50 hover:pl-3 md:hover:pl-4"
                 :class="{
-                  'bg-blue-600 text-white hover:bg-blue-700 hover:pl-4':
+                  'bg-blue-600 text-white hover:bg-blue-700 hover:pl-3 md:hover:pl-4':
                     selectedChapterIndex === index,
                 }"
                 @click="selectChapter(index)"
               >
-                <div class="font-medium text-sm truncate">{{ chapter.title }}</div>
+                <div class="font-medium text-xs md:text-sm truncate">{{ chapter.title }}</div>
               </div>
             </div>
           </div>
@@ -431,6 +509,32 @@ const selectedVoice = ref('')
 const speechSpeed = ref('1')
 const isLoading = ref(false)
 const loadingProgress = ref(0)
+
+// 侧边栏状态
+const leftSidebarOpen = ref(false)
+const rightSidebarOpen = ref(false)
+
+// 切换左侧边栏
+function toggleLeftSidebar() {
+  leftSidebarOpen.value = !leftSidebarOpen.value
+  if (leftSidebarOpen.value) {
+    rightSidebarOpen.value = false
+  }
+}
+
+// 切换右侧边栏
+function toggleRightSidebar() {
+  rightSidebarOpen.value = !rightSidebarOpen.value
+  if (rightSidebarOpen.value) {
+    leftSidebarOpen.value = false
+  }
+}
+
+// 关闭所有侧边栏
+function closeAllSidebars() {
+  leftSidebarOpen.value = false
+  rightSidebarOpen.value = false
+}
 
 // 初始化语音列表
 function loadVoices() {
