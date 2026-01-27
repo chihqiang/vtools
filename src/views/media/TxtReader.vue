@@ -155,7 +155,24 @@
                 <i class="fas fa-sync-alt mr-2"></i>
                 使用新编码重新加载
               </button>
+
+              <div v-if="isLoading" class="mt-3">
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div
+                    class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    :style="{ width: loadingProgress + '%' }"
+                  ></div>
+                </div>
+                <p
+                  id="encodingStatus"
+                  class="mt-2 text-xs text-gray-500 italic"
+                  :style="{ color: encodingStatusColor }"
+                >
+                  {{ encodingStatus }}
+                </p>
+              </div>
               <p
+                v-else
                 id="encodingStatus"
                 class="mt-3 text-xs text-gray-500 italic"
                 :style="{ color: encodingStatusColor }"
@@ -186,7 +203,18 @@
                 朗读功能:
               </p>
               <p class="text-sm text-gray-600 mb-1 pl-7">4. 正确显示文本后，点击"开始朗读"按钮</p>
-              <p class="text-sm text-gray-600 pl-7">5. 播放时页面会自动滚动并高亮当前朗读内容</p>
+              <p class="text-sm text-gray-600 mb-1 pl-7">
+                5. 播放时页面会自动滚动并高亮当前朗读内容
+              </p>
+              <p class="font-semibold text-gray-700 mt-3 mb-2 flex items-center gap-2">
+                <i class="fas fa-keyboard text-green-500 text-sm"></i>
+                快捷键:
+              </p>
+              <p class="text-sm text-gray-600 mb-1 pl-7">空格键: 开始/停止朗读</p>
+              <p class="text-sm text-gray-600 mb-1 pl-7">S键: 停止朗读</p>
+              <p class="text-sm text-gray-600 mb-1 pl-7">Ctrl+S: 存档</p>
+              <p class="text-sm text-gray-600 mb-1 pl-7">Ctrl+L: 读档</p>
+              <p class="text-sm text-gray-600 mb-1 pl-7">↑/↓箭头: 切换句子</p>
             </div>
           </div>
         </div>
@@ -372,6 +400,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useToast } from '@/composables/useToast'
+
+const { success, error: showError, info } = useToast()
 
 // 全局变量
 const currentFileContent = ref('')
@@ -399,6 +430,8 @@ const encodingStatus = ref('')
 const encodingStatusColor = ref('#718096')
 const selectedVoice = ref('')
 const speechSpeed = ref('1')
+const isLoading = ref(false)
+const loadingProgress = ref(0)
 
 // 初始化语音列表
 function loadVoices() {
@@ -481,7 +514,7 @@ function handleDrop(e: DragEvent) {
       ) {
         readFile(file)
       } else {
-        alert('请选择TXT文件或其他文本文件')
+        showError('请选择TXT文件或其他文本文件')
       }
     }
   }
@@ -498,75 +531,142 @@ function handleFileChange(e: Event) {
 // 读取文件内容
 function readFile(file: File, encoding: string = 'auto') {
   try {
-    // 检查文件大小
-    if (file.size > 10 * 1024 * 1024) {
-      // 10MB限制
-      alert('文件过大，请选择小于10MB的文件')
+    isLoading.value = true
+    loadingProgress.value = 0
+
+    const MAX_FILE_SIZE = 10 * 1024 * 1024
+    if (file.size > MAX_FILE_SIZE) {
+      showError('文件过大，请选择小于10MB的文件')
       encodingStatus.value = '文件过大，请选择小于10MB的文件'
       encodingStatusColor.value = '#f56565'
+      isLoading.value = false
       return
     }
 
     currentFile.value = file
     currentFileName.value = file.name
 
-    const reader = new FileReader()
+    encodingStatus.value = '正在加载文件...'
+    encodingStatusColor.value = '#4299e1'
 
-    reader.onload = function (e) {
-      try {
-        let content = e.target?.result
+    if (file.size < 1 * 1024 * 1024) {
+      const reader = new FileReader()
 
-        if (!content) {
-          throw new Error('文件内容为空')
-        }
-
-        // 尝试检测编码
-        if (encoding === 'auto') {
-          const detectedEncoding = detectEncoding(content as ArrayBuffer, file)
-          currentEncoding.value = detectedEncoding
-          selectedEncoding.value = detectedEncoding.toLowerCase()
-
-          // 如果检测到的编码不是UTF-8，尝试转换
-          if (detectedEncoding !== 'UTF-8' && detectedEncoding !== '自动检测') {
-            content = convertEncoding(content as ArrayBuffer, detectedEncoding)
-          }
-        } else {
-          // 使用指定的编码
-          currentEncoding.value = encoding
-          selectedEncoding.value = encoding.toLowerCase()
-
-          if (encoding !== 'UTF-8') {
-            content = convertEncoding(content as ArrayBuffer, encoding)
-          }
-        }
-
-        currentFileContent.value = content as string
-        fileInfo.value = `文件大小: ${(file.size / 1024).toFixed(2)} KB | 字符数: ${currentFileContent.value.length} | 编码: ${currentEncoding.value}`
-
-        // 处理文本内容
-        processTextContent(currentFileContent.value)
-
-        // 更新编码状态
-        encodingStatus.value = `使用 ${currentEncoding.value} 编码加载成功`
-        encodingStatusColor.value = '#48bb78'
-      } catch (error) {
-        console.error('处理文件内容失败:', error)
-        encodingStatus.value = '处理文件内容失败: ' + (error as Error).message
-        encodingStatusColor.value = '#f56565'
+      reader.onload = function (e) {
+        loadingProgress.value = 100
+        processFileContent(e.target?.result, file, encoding)
       }
-    }
 
-    reader.onerror = function () {
-      encodingStatus.value = '文件读取失败，请尝试其他编码'
-      encodingStatusColor.value = '#f56565'
-    }
+      reader.onerror = function () {
+        encodingStatus.value = '文件读取失败，请尝试其他编码'
+        encodingStatusColor.value = '#f56565'
+        isLoading.value = false
+      }
 
-    // 读取文件为二进制数组，以便后续编码检测
-    reader.readAsArrayBuffer(file)
+      reader.readAsArrayBuffer(file)
+    } else {
+      readFileInChunks(file, encoding)
+    }
   } catch (error) {
     console.error('读取文件失败:', error)
     encodingStatus.value = '读取文件失败: ' + (error as Error).message
     encodingStatusColor.value = '#f56565'
+    isLoading.value = false
+  }
+}
+
+// 分块读取文件
+function readFileInChunks(file: File, encoding: string = 'auto') {
+  const CHUNK_SIZE = 512 * 1024
+  let offset = 0
+  const chunks: Uint8Array[] = []
+
+  function readNextChunk() {
+    if (offset >= file.size) {
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
+      const combinedArray = new Uint8Array(totalLength)
+
+      let position = 0
+      chunks.forEach((chunk) => {
+        combinedArray.set(chunk, position)
+        position += chunk.length
+      })
+
+      processFileContent(combinedArray.buffer, file, encoding)
+      return
+    }
+
+    const chunkEnd = Math.min(offset + CHUNK_SIZE, file.size)
+    const chunk = file.slice(offset, chunkEnd)
+
+    const reader = new FileReader()
+    reader.onload = function (e) {
+      const chunkArray = new Uint8Array(e.target?.result as ArrayBuffer)
+      chunks.push(chunkArray)
+
+      offset = chunkEnd
+      const progress = Math.round((offset / file.size) * 100)
+      loadingProgress.value = progress
+      encodingStatus.value = `正在加载文件... ${progress}%`
+
+      readNextChunk()
+    }
+
+    reader.onerror = function () {
+      encodingStatus.value = '文件分块读取失败'
+      encodingStatusColor.value = '#f56565'
+      isLoading.value = false
+    }
+
+    reader.readAsArrayBuffer(chunk)
+  }
+
+  readNextChunk()
+}
+
+// 处理文件内容
+function processFileContent(
+  content: ArrayBuffer | string | null | undefined,
+  file: File,
+  encoding: string = 'auto',
+) {
+  try {
+    if (!content) {
+      throw new Error('文件内容为空')
+    }
+
+    if (encoding === 'auto') {
+      const detectedEncoding = detectEncoding(content as ArrayBuffer, file)
+      currentEncoding.value = detectedEncoding
+      selectedEncoding.value = detectedEncoding.toLowerCase()
+
+      // 如果检测到的编码不是UTF-8，尝试转换
+      if (detectedEncoding !== 'UTF-8' && detectedEncoding !== '自动检测') {
+        content = convertEncoding(content as ArrayBuffer, detectedEncoding)
+      }
+    } else {
+      // 使用指定的编码
+      currentEncoding.value = encoding
+      selectedEncoding.value = encoding.toLowerCase()
+
+      if (encoding !== 'UTF-8') {
+        content = convertEncoding(content as ArrayBuffer, encoding)
+      }
+    }
+
+    currentFileContent.value = content as string
+    fileInfo.value = `文件大小: ${(file.size / 1024).toFixed(2)} KB | 字符数: ${currentFileContent.value.length} | 编码: ${currentEncoding.value}`
+
+    processTextContent(currentFileContent.value)
+
+    encodingStatus.value = `使用 ${currentEncoding.value} 编码加载成功`
+    encodingStatusColor.value = '#48bb78'
+    isLoading.value = false
+  } catch (error) {
+    console.error('处理文件内容失败:', error)
+    encodingStatus.value = '处理文件内容失败: ' + (error as Error).message
+    encodingStatusColor.value = '#f56565'
+    isLoading.value = false
   }
 }
 
@@ -835,13 +935,13 @@ function selectSentence(index: number) {
 function startReading() {
   try {
     if (!currentFileContent.value || sentences.value.length === 0) {
-      alert('请先加载文件再开始朗读')
+      showError('请先加载文件再开始朗读')
       return
     }
 
     // 检查浏览器是否支持语音合成
     if (!('speechSynthesis' in window)) {
-      alert('您的浏览器不支持语音合成功能')
+      showError('您的浏览器不支持语音合成功能')
       return
     }
 
@@ -886,7 +986,7 @@ function startReading() {
     utterance.value.onerror = function (event) {
       console.error('语音合成错误:', event)
       isPlaying.value = false
-      alert('语音合成失败: ' + event.error)
+      showError('语音合成失败: ' + event.error)
     }
 
     // 开始朗读
@@ -895,7 +995,7 @@ function startReading() {
   } catch (error) {
     console.error('开始朗读失败:', error)
     isPlaying.value = false
-    alert('开始朗读失败: ' + (error as Error).message)
+    showError('开始朗读失败: ' + (error as Error).message)
   }
 }
 
@@ -916,7 +1016,7 @@ function stopReading() {
 function saveState() {
   try {
     if (!currentFile.value) {
-      alert('请先加载文件再存档')
+      showError('请先加载文件再存档')
       return
     }
 
@@ -933,15 +1033,15 @@ function saveState() {
     const stateString = JSON.stringify(state)
     if (stateString.length > 4 * 1024 * 1024) {
       // 4MB限制
-      alert('存档失败：数据过大，请尝试减小文件大小')
+      showError('存档失败：数据过大，请尝试减小文件大小')
       return
     }
 
     localStorage.setItem('txtReaderState', stateString)
-    alert('存档成功')
+    success('存档成功')
   } catch (error) {
     console.error('存档失败:', error)
-    alert('存档失败：' + (error as Error).message)
+    showError('存档失败：' + (error as Error).message)
   }
 }
 
@@ -958,27 +1058,24 @@ function loadState() {
 
       // 显示存档信息
       const saveTime = state.saveTime ? new Date(state.saveTime).toLocaleString() : '未知时间'
-      alert(`读档成功\n存档时间: ${saveTime}\n文件名: ${state.currentFileName || '未知'}`)
+      success(`读档成功\n存档时间: ${saveTime}\n文件名: ${state.currentFileName || '未知'}`)
     } else {
-      alert('没有找到存档')
+      info('没有找到存档')
     }
   } catch (error) {
     console.error('读档失败:', error)
-    alert('读档失败：' + (error as Error).message)
+    showError('读档失败：' + (error as Error).message)
   }
 }
 
 // 生命周期钩子
 onMounted(() => {
-  // 初始化语音列表
   loadVoices()
 
-  // 监听语音列表加载
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = loadVoices
   }
 
-  // 尝试加载之前的状态
   try {
     const savedState = localStorage.getItem('txtReaderState')
     if (savedState) {
@@ -989,12 +1086,45 @@ onMounted(() => {
     }
   } catch (error) {
     console.error('加载初始状态失败:', error)
-    // 清除损坏的存档
     try {
       localStorage.removeItem('txtReaderState')
-    } catch {
-      // 忽略清除失败
+    } catch {}
+  }
+
+  window.addEventListener('keydown', handleKeyboardShortcuts)
+})
+
+function handleKeyboardShortcuts(e: KeyboardEvent) {
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+    return
+  }
+
+  if (e.code === 'Space') {
+    e.preventDefault()
+    if (isPlaying.value) {
+      stopReading()
+    } else {
+      startReading()
+    }
+  } else if (e.code === 'KeyS') {
+    e.preventDefault()
+    stopReading()
+  } else if (e.ctrlKey && e.code === 'KeyS') {
+    e.preventDefault()
+    saveState()
+  } else if (e.ctrlKey && e.code === 'KeyL') {
+    e.preventDefault()
+    loadState()
+  } else if (e.code === 'ArrowUp') {
+    e.preventDefault()
+    if (currentSentenceIndex.value > 0) {
+      selectSentence(currentSentenceIndex.value - 1)
+    }
+  } else if (e.code === 'ArrowDown') {
+    e.preventDefault()
+    if (currentSentenceIndex.value < sentences.value.length - 1) {
+      selectSentence(currentSentenceIndex.value + 1)
     }
   }
-})
+}
 </script>
