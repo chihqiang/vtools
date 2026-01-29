@@ -3,13 +3,14 @@
     <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden min-h-screen">
       <!-- 头部 -->
       <header
-        class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 md:py-6 px-4 md:px-8 text-center shadow-md relative"
+        class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 md:py-6 px-4 md:px-8 text-center shadow-md relative z-10"
       >
         <div class="flex items-center justify-between">
           <!-- 左侧菜单按钮 -->
           <button
             @click="toggleLeftSidebar"
-            class="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+            class="md:hidden p-3 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+            aria-label="打开左侧菜单"
           >
             <i class="fas fa-bars text-xl"></i>
           </button>
@@ -23,7 +24,8 @@
           <!-- 右侧菜单按钮 -->
           <button
             @click="toggleRightSidebar"
-            class="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+            class="md:hidden p-3 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+            aria-label="打开右侧菜单"
           >
             <i class="fas fa-list text-xl"></i>
           </button>
@@ -46,7 +48,8 @@
           <!-- 关闭按钮（仅移动端） -->
           <button
             @click="toggleLeftSidebar"
-            class="md:hidden absolute top-4 right-4 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 transition-colors"
+            class="md:hidden absolute top-4 right-4 p-3 bg-white rounded-lg shadow-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="关闭左侧菜单"
           >
             <i class="fas fa-times text-gray-600"></i>
           </button>
@@ -281,7 +284,7 @@
             <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4">
               <button
                 id="playBtn"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center justify-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-xs md:text-base min-w-[80px] sm:min-w-[100px]"
                 :disabled="!currentFile || isPlaying"
                 @click="startReading"
               >
@@ -291,7 +294,7 @@
 
               <button
                 id="stopBtn"
-                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
+                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center justify-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-xs md:text-base min-w-[80px] sm:min-w-[100px]"
                 :disabled="!isPlaying"
                 @click="stopReading"
               >
@@ -300,7 +303,7 @@
               </button>
               <button
                 id="saveBtn"
-                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
+                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center justify-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-xs md:text-base min-w-[80px] sm:min-w-[100px]"
                 :disabled="!currentFile"
                 @click="saveState"
               >
@@ -309,7 +312,7 @@
               </button>
               <button
                 id="loadBtn"
-                class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-sm md:text-base"
+                class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-3 md:px-4 rounded-full flex items-center justify-center gap-1 md:gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 text-xs md:text-base min-w-[80px] sm:min-w-[100px]"
                 :disabled="!currentFile"
                 @click="loadState"
               >
@@ -321,7 +324,7 @@
             <!-- 语音和语速设置 -->
             <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3">
               <div
-                class="bg-gray-50 px-3 py-2 rounded-full flex items-center gap-2 md:gap-3 border border-gray-200 shadow-sm w-full sm:w-auto"
+                class="bg-gray-50 px-3 py-2 rounded-full flex items-center gap-2 md:gap-3 border border-gray-200 shadow-sm w-full sm:w-auto mb-2 sm:mb-0"
               >
                 <label
                   for="voiceSelect"
@@ -330,7 +333,7 @@
                 >
                 <select
                   id="voiceSelect"
-                  class="border border-gray-300 rounded-lg px-2 md:px-3 py-1.5 bg-white text-gray-700 text-xs md:text-sm font-medium min-w-[100px] max-w-[150px] sm:min-w-[120px] sm:max-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="border border-gray-300 rounded-lg px-2 md:px-3 py-1.5 bg-white text-gray-700 text-xs md:text-sm font-medium min-w-[100px] max-w-[150px] sm:min-w-[120px] sm:max-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none"
                   v-model="selectedVoice"
                 >
                   <optgroup
@@ -355,7 +358,7 @@
                 >
                 <select
                   id="speedSelect"
-                  class="border border-gray-300 rounded-lg px-2 md:px-3 py-1.5 bg-white text-gray-700 text-xs md:text-sm font-medium min-w-[60px] sm:min-w-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="border border-gray-300 rounded-lg px-2 md:px-3 py-1.5 bg-white text-gray-700 text-xs md:text-sm font-medium min-w-[60px] sm:min-w-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 sm:flex-none"
                   v-model="speechSpeed"
                 >
                   <option value="0.5">0.5x</option>
@@ -374,21 +377,86 @@
           <!-- 文本阅读区域 -->
           <div
             class="flex-1 bg-gray-50 rounded-xl p-3 md:p-6 overflow-y-auto border border-gray-200 shadow-sm"
+            style="-webkit-overflow-scrolling: touch; scrollbar-width: thin"
           >
             <div
               v-if="!currentFileContent"
               class="text-center py-8 md:py-16 flex flex-col items-center justify-center"
             >
-              <div class="bg-blue-50 rounded-full p-4 md:p-6 mb-4 md:mb-6">
+              <div class="bg-blue-50 rounded-full p-4 md:p-6 mb-4 md:mb-6 animate-pulse">
                 <i class="fas fa-book-open text-3xl md:text-5xl text-blue-300"></i>
               </div>
               <h3 class="text-base md:text-xl font-semibold text-gray-600 mb-2 md:mb-3">
                 尚未加载文件
               </h3>
-              <p class="text-gray-500 mb-4 md:mb-6 max-w-md text-sm md:text-base">
+              <p class="text-gray-500 mb-6 md:mb-8 max-w-md text-sm md:text-base">
                 请从左侧导入TXT文件开始阅读
               </p>
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 md:p-4 max-w-md">
+
+              <!-- 导入文件按钮 -->
+              <button
+                @click="fileInput?.click()"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mb-6"
+              >
+                <i class="fas fa-file-import"></i>
+                <span>导入TXT文件</span>
+              </button>
+
+              <!-- 操作指引 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full px-4">
+                <!-- 移动端指引 -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 md:p-4 shadow-sm">
+                  <h4
+                    class="font-medium text-gray-700 mb-2 flex items-center gap-2 text-sm md:text-base"
+                  >
+                    <i class="fas fa-mobile-alt text-green-500"></i>
+                    手机端操作
+                  </h4>
+                  <ul class="text-xs md:text-sm text-gray-600 space-y-1">
+                    <li class="flex items-start gap-2">
+                      <i class="fas fa-check-circle text-green-500 mt-0.5 flex-shrink-0"></i>
+                      <span>点击顶部 <i class="fas fa-bars"></i> 菜单按钮打开侧边栏</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <i class="fas fa-check-circle text-green-500 mt-0.5 flex-shrink-0"></i>
+                      <span>在侧边栏中选择编码格式</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <i class="fas fa-check-circle text-green-500 mt-0.5 flex-shrink-0"></i>
+                      <span>点击播放按钮开始朗读</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- 桌面端指引 -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 md:p-4 shadow-sm">
+                  <h4
+                    class="font-medium text-gray-700 mb-2 flex items-center gap-2 text-sm md:text-base"
+                  >
+                    <i class="fas fa-desktop text-blue-500"></i>
+                    桌面端操作
+                  </h4>
+                  <ul class="text-xs md:text-sm text-gray-600 space-y-1">
+                    <li class="flex items-start gap-2">
+                      <i class="fas fa-check-circle text-blue-500 mt-0.5 flex-shrink-0"></i>
+                      <span>直接使用左侧侧边栏选择编码</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <i class="fas fa-check-circle text-blue-500 mt-0.5 flex-shrink-0"></i>
+                      <span>使用快捷键控制播放（空格键）</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <i class="fas fa-check-circle text-blue-500 mt-0.5 flex-shrink-0"></i>
+                      <span>右侧查看章节列表</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 提示信息 -->
+              <div
+                class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 md:p-4 max-w-md mt-6"
+              >
                 <p class="text-xs md:text-sm text-gray-600">
                   <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
                   如果文本显示乱码，请尝试在左侧选择不同的编码格式重新加载
@@ -399,7 +467,7 @@
               <p
                 v-for="(sentence, index) in sentences"
                 :key="index"
-                class="cursor-pointer py-2 md:py-3 px-3 md:px-4 rounded-lg transition-all duration-300 hover:bg-blue-50 hover:border-l-4 hover:border-blue-500 hover:pl-4 md:hover:pl-5 text-gray-700 leading-relaxed text-sm md:text-base"
+                class="cursor-pointer py-2 md:py-3 px-3 md:px-4 rounded-lg transition-all duration-300 hover:bg-blue-50 hover:border-l-4 hover:border-blue-500 hover:pl-4 md:hover:pl-5 text-gray-700 leading-relaxed text-xs md:text-sm sm:text-base"
                 :class="{
                   'bg-blue-100 border-l-4 border-blue-600 pl-4 md:pl-5 shadow-sm':
                     index === currentSentenceIndex,
@@ -435,7 +503,8 @@
           <!-- 关闭按钮（仅移动端） -->
           <button
             @click="toggleRightSidebar"
-            class="md:hidden absolute top-4 right-4 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 transition-colors"
+            class="md:hidden absolute top-4 right-4 p-3 bg-white rounded-lg shadow-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="关闭右侧菜单"
           >
             <i class="fas fa-times text-gray-600"></i>
           </button>
