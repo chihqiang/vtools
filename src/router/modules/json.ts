@@ -67,6 +67,19 @@ const jsonRoutes: RouteRecordRaw[] = [
       group: HomeGroup.JSON_TOOLS,
     } as HomeRouteMeta,
   },
+  {
+    path: '/json-quicktype',
+    name: 'json-quicktype',
+    component: () => import('@/views/json/QuicktypeView.vue'),
+    meta: {
+      showOnHome: true,
+      title: 'JSON 转结构体',
+      description: '将 JSON 数据转换为各种编程语言的结构体定义',
+      icon: 'M19 14l-7 7m0 0l-7-7m7 7V3',
+      color: 'orange',
+      group: HomeGroup.JSON_TOOLS,
+    } as HomeRouteMeta,
+  },
 ]
 
 export default jsonRoutes
