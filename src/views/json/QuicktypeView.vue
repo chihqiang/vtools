@@ -158,41 +158,48 @@ const configOptions = ref({
   alphabetizeProperties: true,
 })
 
+// 语言类型定义
+interface LanguageOption {
+  label: string
+  value: string
+  ext: string
+}
+
 // 可用语言列表
-const availableLanguages = [
+const availableLanguages: LanguageOption[] = [
   // 常用语言
-  { label: 'TypeScript', value: 'typescript' },
-  { label: 'JavaScript', value: 'javascript' },
-  { label: 'Python', value: 'python' },
-  { label: 'Java', value: 'java' },
-  { label: 'Go', value: 'go' },
-  { label: 'C#', value: 'csharp' },
-  { label: 'Rust', value: 'rust' },
-  { label: 'Swift', value: 'swift' },
-  { label: 'Kotlin', value: 'kotlin' },
-  { label: 'PHP', value: 'php' },
-  { label: 'Ruby', value: 'ruby' },
-  { label: 'Dart', value: 'dart' },
-  { label: 'C++', value: 'c++' },
+  { label: 'TypeScript', value: 'typescript', ext: 'ts' },
+  { label: 'JavaScript', value: 'javascript', ext: 'js' },
+  { label: 'Python', value: 'python', ext: 'py' },
+  { label: 'Java', value: 'java', ext: 'java' },
+  { label: 'Go', value: 'go', ext: 'go' },
+  { label: 'C#', value: 'csharp', ext: 'cs' },
+  { label: 'Rust', value: 'rust', ext: 'rs' },
+  { label: 'Swift', value: 'swift', ext: 'swift' },
+  { label: 'Kotlin', value: 'kotlin', ext: 'kt' },
+  { label: 'PHP', value: 'php', ext: 'php' },
+  { label: 'Ruby', value: 'ruby', ext: 'rb' },
+  { label: 'Dart', value: 'dart', ext: 'dart' },
+  { label: 'C++', value: 'c++', ext: 'cpp' },
 
   // TypeScript 变体
-  { label: 'TypeScript Zod', value: 'typescript-zod' },
-  { label: 'TypeScript Effect Schema', value: 'typescript-effect-schema' },
-  { label: 'Flow', value: 'flow' },
+  { label: 'TypeScript Zod', value: 'typescript-zod', ext: 'ts' },
+  { label: 'TypeScript Effect Schema', value: 'typescript-effect-schema', ext: 'ts' },
+  { label: 'Flow', value: 'flow', ext: 'js' },
 
   // JavaScript 变体
-  { label: 'JavaScript PropTypes', value: 'javascript-prop-types' },
+  { label: 'JavaScript PropTypes', value: 'javascript-prop-types', ext: 'js' },
 
   // 函数式语言
-  { label: 'Elixir', value: 'elixir' },
-  { label: 'Elm', value: 'elm' },
-  { label: 'Haskell', value: 'haskell' },
-  { label: 'Scala 3', value: 'scala3' },
+  { label: 'Elixir', value: 'elixir', ext: 'ex' },
+  { label: 'Elm', value: 'elm', ext: 'elm' },
+  { label: 'Haskell', value: 'haskell', ext: 'hs' },
+  { label: 'Scala 3', value: 'scala3', ext: 'scala' },
 
   // 其他
-  { label: 'Objective-C', value: 'objective-c' },
-  { label: 'Smithy4a', value: 'smithy4a' },
-  { label: 'JSON Schema', value: 'json-schema' },
+  { label: 'Objective-C', value: 'objective-c', ext: 'm' },
+  { label: 'Smithy4a', value: 'smithy4a', ext: 'smithy' },
+  { label: 'JSON Schema', value: 'json-schema', ext: 'json' },
 ]
 
 // 监听配置变化，自动重新生成
@@ -264,7 +271,8 @@ const copyResult = () => {
 const downloadResult = () => {
   if (!structResult.value) return
 
-  const extension = getFileExtension(selectedLanguage.value)
+  const language = availableLanguages.find((lang) => lang.value === selectedLanguage.value)
+  const extension = language?.ext || 'txt'
   const blob = new Blob([structResult.value], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -276,25 +284,6 @@ const downloadResult = () => {
   URL.revokeObjectURL(url)
 
   toast.success('下载成功')
-}
-
-// 获取文件扩展名
-const getFileExtension = (lang: string): string => {
-  const extensions: Record<string, string> = {
-    typescript: 'ts',
-    javascript: 'js',
-    java: 'java',
-    csharp: 'cs',
-    go: 'go',
-    python: 'py',
-    swift: 'swift',
-    kotlin: 'kt',
-    rust: 'rs',
-    php: 'php',
-    ruby: 'rb',
-    dart: 'dart',
-  }
-  return extensions[lang] || 'txt'
 }
 
 // 清空全部
