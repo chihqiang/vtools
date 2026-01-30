@@ -54,6 +54,20 @@ const imageRoutes: RouteRecordRaw[] = [
       group: HomeGroup.IMAGE_TOOLS,
     } as HomeRouteMeta,
   },
+  {
+    path: '/image-code',
+    name: 'image-code',
+    component: () => import('@/views/image/Code2ImageView.vue'),
+    meta: {
+      showOnHome: true,
+      title: '代码图片生成器',
+      description:
+        '基于 Monaco Editor 的代码图片生成器，支持多语言和主题切换，可复制和下载代码图片',
+      icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+      color: 'indigo',
+      group: HomeGroup.IMAGE_TOOLS,
+    } as HomeRouteMeta,
+  },
 ]
 
 export default imageRoutes
