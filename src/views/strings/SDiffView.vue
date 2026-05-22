@@ -58,7 +58,10 @@
     </div>
 
     <!-- 结果区 -->
-    <div v-if="diffResult" class="mt-4 border rounded-lg bg-gray-50 p-4">
+    <div v-if="isDiffing" class="mt-4 border rounded-lg bg-gray-50 p-4 text-center text-gray-500 text-sm py-8">
+      正在对比中...
+    </div>
+    <div v-else-if="diffResult" class="mt-4 border rounded-lg bg-gray-50 p-4">
       <!-- 统计 -->
       <div class="mb-4 flex flex-wrap gap-4 text-sm">
         <span class="text-red-600 font-semibold">删除 {{ diffStats.removed }}</span>
@@ -132,6 +135,7 @@
 import { ref, computed, watch } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { toastCopy } from '@/utils/clipboard'
+import { debounce } from '@/utils/debounce'
 import { diffChars } from 'diff'
 
 const toast = useToast()
@@ -142,6 +146,7 @@ const diffResult = ref<{
   text1: Array<{ text: string; type: 'normal' | 'removed' | 'added' | 'modified' }>
   text2: Array<{ text: string; type: 'normal' | 'removed' | 'added' | 'modified' }>
 } | null>(null)
+const isDiffing = ref(false)
 
 const diffStats = computed(() => {
   if (!diffResult.value) return { removed: 0, added: 0, modified: 0 }
@@ -179,18 +184,17 @@ const clearAll = () => {
   toast.info('已清空全部')
 }
 
-watch(
-  [text1, text2],
-  ([newText1, newText2]) => {
-    if (newText1 && newText2) {
-      const result = computeDiff(newText1, newText2)
-      diffResult.value = result
-    } else {
-      diffResult.value = null
-    }
-  },
-  { immediate: true },
-)
+const debouncedDiff = debounce(() => {
+  if (text1.value && text2.value) {
+    isDiffing.value = true
+    diffResult.value = computeDiff(text1.value, text2.value)
+    isDiffing.value = false
+  } else {
+    diffResult.value = null
+  }
+}, 300)
+
+watch([text1, text2], () => debouncedDiff(), { immediate: true })
 
 const computeDiff = (str1: string, str2: string) => {
   const text1Parts: Array<{ text: string; type: 'normal' | 'removed' | 'added' | 'modified' }> = []
