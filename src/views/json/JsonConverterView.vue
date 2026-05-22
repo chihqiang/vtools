@@ -17,7 +17,12 @@
               <option value="yml">输出为 YAML</option>
               <option value="xml">输出为 XML</option>
             </select>
-            <button @click="clearAll" class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300">清空</button>
+            <button
+              @click="clearAll"
+              class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+            >
+              清空
+            </button>
           </div>
         </div>
         <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
@@ -32,7 +37,9 @@
             ></textarea>
           </div>
         </div>
-        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">⚠ {{ errorMessage }}</div>
+        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">
+          ⚠ {{ errorMessage }}
+        </div>
       </div>
 
       <!-- 右侧：根据格式切换输出 -->
@@ -56,7 +63,13 @@
               <table v-if="tableData.length" class="min-w-full text-sm border-collapse">
                 <thead class="sticky top-0 z-10 bg-gray-100 border-b border-gray-300">
                   <tr>
-                    <th v-for="(h, i) in tableHeaders" :key="i" class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">{{ h }}</th>
+                    <th
+                      v-for="(h, i) in tableHeaders"
+                      :key="i"
+                      class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap"
+                    >
+                      {{ h }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -66,7 +79,9 @@
                       :key="ci"
                       class="px-4 py-2 text-gray-800 border-b border-gray-100 max-w-xs truncate"
                       :title="formatCell(row[h])"
-                    >{{ formatCell(row[h]) }}</td>
+                    >
+                      {{ formatCell(row[h]) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -75,10 +90,22 @@
                 class="flex flex-col items-center justify-center text-gray-400 gap-2"
                 :style="{ minHeight: containerHeight }"
               >
-                <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
+                <svg
+                  class="w-10 h-10 opacity-40"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 7h18M3 12h18M3 17h18"
+                  />
                 </svg>
-                <span class="text-sm">{{ isParsing ? '解析中…' : '等待输入有效的 JSON 数组' }}</span>
+                <span class="text-sm">{{
+                  isParsing ? '解析中…' : '等待输入有效的 JSON 数组'
+                }}</span>
               </div>
             </div>
           </div>
@@ -93,18 +120,38 @@
             <div class="flex flex-wrap items-center gap-3">
               <div class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
                 <label class="text-sm text-gray-600">缩进:</label>
-                <input type="number" v-model.number="yamlIndent" min="1" max="8" class="w-16 px-2 py-1 border rounded-md text-sm" />
+                <input
+                  type="number"
+                  v-model.number="yamlIndent"
+                  min="1"
+                  max="8"
+                  class="w-16 px-2 py-1 border rounded-md text-sm"
+                />
               </div>
               <div class="flex gap-2">
-                <button @click="copyYaml" class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700">复制</button>
-                <button @click="downloadYaml" class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">下载</button>
+                <button
+                  @click="copyYaml"
+                  class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+                >
+                  复制
+                </button>
+                <button
+                  @click="downloadYaml"
+                  class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                >
+                  下载
+                </button>
               </div>
             </div>
           </div>
           <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
             <div class="overflow-y-auto bg-gray-50" :style="{ height: containerHeight }">
-              <pre v-if="yamlOutput" class="p-4 font-mono text-sm whitespace-pre-wrap">{{ yamlOutput }}</pre>
-              <div v-else class="flex items-center justify-center h-full text-gray-400">等待转换为 YAML</div>
+              <pre v-if="yamlOutput" class="p-4 font-mono text-sm whitespace-pre-wrap">{{
+                yamlOutput
+              }}</pre>
+              <div v-else class="flex items-center justify-center h-full text-gray-400">
+                等待转换为 YAML
+              </div>
             </div>
           </div>
         </div>
@@ -118,22 +165,46 @@
             <div class="flex flex-wrap items-center gap-3">
               <div class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
                 <label class="text-sm text-gray-600">根节点:</label>
-                <input v-model="xmlRootName" type="text" class="w-20 px-2 py-1 border rounded-md text-sm" />
+                <input
+                  v-model="xmlRootName"
+                  type="text"
+                  class="w-20 px-2 py-1 border rounded-md text-sm"
+                />
               </div>
               <div class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
                 <label class="text-sm text-gray-600">缩进:</label>
-                <input type="number" v-model.number="xmlIndent" min="1" max="8" class="w-16 px-2 py-1 border rounded-md text-sm" />
+                <input
+                  type="number"
+                  v-model.number="xmlIndent"
+                  min="1"
+                  max="8"
+                  class="w-16 px-2 py-1 border rounded-md text-sm"
+                />
               </div>
               <div class="flex gap-2">
-                <button @click="copyXml" class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700">复制</button>
-                <button @click="downloadXml" class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">下载</button>
+                <button
+                  @click="copyXml"
+                  class="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+                >
+                  复制
+                </button>
+                <button
+                  @click="downloadXml"
+                  class="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                >
+                  下载
+                </button>
               </div>
             </div>
           </div>
           <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
             <div class="overflow-y-auto bg-gray-50" :style="{ height: containerHeight }">
-              <pre v-if="xmlOutput" class="p-4 font-mono text-sm whitespace-pre-wrap">{{ xmlOutput }}</pre>
-              <div v-else class="flex items-center justify-center h-full text-gray-400">等待转换为 XML</div>
+              <pre v-if="xmlOutput" class="p-4 font-mono text-sm whitespace-pre-wrap">{{
+                xmlOutput
+              }}</pre>
+              <div v-else class="flex items-center justify-center h-full text-gray-400">
+                等待转换为 XML
+              </div>
             </div>
           </div>
         </div>
@@ -234,7 +305,8 @@ const parseAsTable = () => {
     }
     const headers = new Set<string>()
     parsed.forEach((item: unknown) => {
-      if (item && typeof item === 'object') Object.keys(item as Record<string, unknown>).forEach((k) => headers.add(k))
+      if (item && typeof item === 'object')
+        Object.keys(item as Record<string, unknown>).forEach((k) => headers.add(k))
     })
     tableHeaders.value = Array.from(headers)
     tableData.value = parsed.map((item: Record<string, unknown>) => {
@@ -255,14 +327,20 @@ const downloadCsv = () => {
   let csv = '\uFEFF'
   csv += tableHeaders.value.map((h) => `"${h.replace(/"/g, '""')}"`).join(',') + '\n'
   tableData.value.forEach((row) => {
-    csv += tableHeaders.value
-      .map((h) => {
-        const v = formatCell(row[h], true)
-        return v.includes(',') || v.includes('"') || v.includes('\n') ? `"${v.replace(/"/g, '""')}"` : v
-      })
-      .join(',') + '\n'
+    csv +=
+      tableHeaders.value
+        .map((h) => {
+          const v = formatCell(row[h], true)
+          return v.includes(',') || v.includes('"') || v.includes('\n')
+            ? `"${v.replace(/"/g, '""')}"`
+            : v
+        })
+        .join(',') + '\n'
   })
-  downloader.text(csv, { filename: `table-${getCurrentDateTime()}.csv`, mimeType: 'text/csv;charset=utf-8;' })
+  downloader.text(csv, {
+    filename: `table-${getCurrentDateTime()}.csv`,
+    mimeType: 'text/csv;charset=utf-8;',
+  })
   toast.success('CSV 下载成功')
 }
 
@@ -292,7 +370,10 @@ const copyYaml = () => {
 
 const downloadYaml = () => {
   if (!yamlOutput.value) return
-  downloader.text(yamlOutput.value, { filename: `data-${getCurrentDateTime()}.yaml`, mimeType: 'text/plain;charset=utf-8' })
+  downloader.text(yamlOutput.value, {
+    filename: `data-${getCurrentDateTime()}.yaml`,
+    mimeType: 'text/plain;charset=utf-8',
+  })
   toast.success('下载成功')
 }
 
@@ -329,7 +410,10 @@ const copyXml = () => {
 
 const downloadXml = () => {
   if (!xmlOutput.value) return
-  downloader.text(xmlOutput.value, { filename: `data-${getCurrentDateTime()}.xml`, mimeType: 'text/plain;charset=utf-8' })
+  downloader.text(xmlOutput.value, {
+    filename: `data-${getCurrentDateTime()}.xml`,
+    mimeType: 'text/plain;charset=utf-8',
+  })
   toast.success('下载成功')
 }
 

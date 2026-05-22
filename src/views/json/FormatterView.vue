@@ -153,8 +153,7 @@ const errorMessage = ref('')
 const loading = ref(false)
 const loadingMessage = ref('')
 
-const getErrorMsg = (e: unknown) =>
-  `JSON 解析错误：${e instanceof Error ? e.message : '未知错误'}`
+const getErrorMsg = (e: unknown) => `JSON 解析错误：${e instanceof Error ? e.message : '未知错误'}`
 
 // 展开层级
 const defaultExpandDepth = 1
