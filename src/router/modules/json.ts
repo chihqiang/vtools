@@ -16,31 +16,19 @@ const jsonRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/json-table',
-    name: 'json-table',
-    component: () => import('@/views/json/TableView.vue'),
+    path: '/json-converter',
+    name: 'json-converter',
+    component: () => import('@/views/json/JsonConverterView.vue'),
     meta: {
       showOnHome: true,
-      title: 'JSON 转表格',
-      description: '将 JSON 数据转换为表格格式，并支持下载 CSV 文件',
-      icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z',
+      title: 'JSON 转换工具',
+      description: 'JSON 转表格、YAML、XML，一站式转换工具',
+      icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
       color: 'purple',
       group: HomeGroup.JSON_TOOLS,
     } as HomeRouteMeta,
   },
-  {
-    path: '/json-yml',
-    name: 'json-yml',
-    component: () => import('@/views/json/YmlView.vue'),
-    meta: {
-      showOnHome: true,
-      title: 'JSON YAML 转换',
-      description: 'JSON 和 YAML 格式之间的转换工具，支持双向转换',
-      icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
-      color: 'yellow',
-      group: HomeGroup.JSON_TOOLS,
-    } as HomeRouteMeta,
-  },
+
   {
     path: '/json-diff',
     name: 'json-diff',
