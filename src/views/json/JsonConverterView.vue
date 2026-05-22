@@ -37,9 +37,8 @@
             ></textarea>
           </div>
         </div>
-        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">
-          ⚠ {{ errorMessage }}
-        </div>
+        <div v-if="inputSizeWarning" class="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200">{{ inputSizeWarning }}</div>
+        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">⚠ {{ errorMessage }}</div>
       </div>
 
       <!-- 右侧：根据格式切换输出 -->
@@ -60,52 +59,51 @@
           </div>
           <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
             <div class="overflow-y-auto" :style="{ maxHeight: containerHeight }">
-              <table v-if="tableData.length" class="min-w-full text-sm border-collapse">
+              <table v-if="paginatedData.length" class="min-w-full text-sm border-collapse">
                 <thead class="sticky top-0 z-10 bg-gray-100 border-b border-gray-300">
                   <tr>
-                    <th
-                      v-for="(h, i) in tableHeaders"
-                      :key="i"
-                      class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap"
-                    >
-                      {{ h }}
-                    </th>
+                    <th v-for="(h, i) in tableHeaders" :key="i" class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">{{ h }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(row, ri) in tableData" :key="ri" class="hover:bg-gray-50">
+                  <tr v-for="(row, ri) in paginatedData" :key="tablePageStart + ri" class="hover:bg-gray-50">
                     <td
                       v-for="(h, ci) in tableHeaders"
                       :key="ci"
                       class="px-4 py-2 text-gray-800 border-b border-gray-100 max-w-xs truncate"
                       :title="formatCell(row[h])"
-                    >
-                      {{ formatCell(row[h]) }}
-                    </td>
+                    >{{ formatCell(row[h]) }}</td>
                   </tr>
                 </tbody>
               </table>
+
+              <!-- 分页 -->
+              <div v-if="tableData.length > tablePageSize" class="flex items-center justify-between px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600">
+                <span>共 {{ tableData.length }} 行，每页 {{ tablePageSize }} 行</span>
+                <div class="flex items-center gap-1">
+                  <button
+                    @click="tablePage--"
+                    :disabled="tablePage <= 1"
+                    class="px-2 py-1 rounded border border-gray-300 bg-white disabled:opacity-40 hover:bg-gray-100"
+                  >‹</button>
+                  <span class="px-2">{{ tablePage }} / {{ totalPages }}</span>
+                  <button
+                    @click="tablePage++"
+                    :disabled="tablePage >= totalPages"
+                    class="px-2 py-1 rounded border border-gray-300 bg-white disabled:opacity-40 hover:bg-gray-100"
+                  >›</button>
+                </div>
+              </div>
+
               <div
-                v-else
+                v-if="!tableData.length"
                 class="flex flex-col items-center justify-center text-gray-400 gap-2"
                 :style="{ minHeight: containerHeight }"
               >
-                <svg
-                  class="w-10 h-10 opacity-40"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 7h18M3 12h18M3 17h18"
-                  />
+                <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
                 </svg>
-                <span class="text-sm">{{
-                  isParsing ? '解析中…' : '等待输入有效的 JSON 数组'
-                }}</span>
+                <span class="text-sm">{{ isParsing ? '解析中…' : '等待输入有效的 JSON 数组' }}</span>
               </div>
             </div>
           </div>
@@ -218,15 +216,16 @@ import { downloader } from '@/utils/file'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as YAML from 'yaml'
-import { XMLBuilder } from 'fast-xml-parser'
 import { useToast } from '@/composables/useToast'
 import { debounce } from '@/utils/debounce'
 import { toastCopy } from '@/utils/clipboard'
 import { getCurrentDateTime } from '@/utils/times'
+import { useJsonWorker } from '@/composables/useJsonWorker'
 
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
+const { parseJSON, terminate: terminateWorker } = useJsonWorker()
 
 /* ================= 格式切换 ================= */
 const outputFormat = ref<'table' | 'yml' | 'xml'>('table')
@@ -257,6 +256,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', calcHeight)
+  terminateWorker()
 })
 
 /* ================= 共享 JSON 输入 ================= */
@@ -264,11 +264,23 @@ const inputJson = ref('')
 const errorMessage = ref('')
 const isParsing = ref(false)
 
+const inputSizeWarning = ref('')
+
+watch(inputJson, (v) => {
+  const len = v.length
+  if (len > 5 * 1024 * 1024) inputSizeWarning.value = `输入超过 5MB（${(len / 1024 / 1024).toFixed(1)}MB），解析可能较慢`
+  else if (len > 1024 * 1024) inputSizeWarning.value = `输入超过 1MB（${(len / 1024 / 1024).toFixed(1)}MB），建议精简数据`
+  else inputSizeWarning.value = ''
+})
+
 const clearAll = () => {
   inputJson.value = ''
   errorMessage.value = ''
   tableData.value = []
   tableHeaders.value = []
+  paginatedData.value = []
+  tablePage.value = 1
+  totalPages.value = 0
   yamlOutput.value = ''
   xmlOutput.value = ''
   toast.success('已清空')
@@ -277,6 +289,26 @@ const clearAll = () => {
 /* ================ 表格输出 ================ */
 const tableHeaders = ref<string[]>([])
 const tableData = ref<Record<string, unknown>[]>([])
+const tablePage = ref(1)
+const tablePageSize = 100
+
+const totalPages = ref(0)
+const tablePageStart = ref(0)
+const paginatedData = ref<Record<string, unknown>[]>([])
+
+watch(tableData, () => {
+  tablePage.value = 1
+  totalPages.value = Math.max(1, Math.ceil(tableData.value.length / tablePageSize))
+  updatePage()
+})
+
+watch(tablePage, updatePage)
+
+function updatePage() {
+  const start = (tablePage.value - 1) * tablePageSize
+  tablePageStart.value = start
+  paginatedData.value = tableData.value.slice(start, start + tablePageSize)
+}
 
 const formatCell = (value: unknown, isCsv = false): string => {
   if (value === null || value === undefined) return ''
@@ -287,7 +319,7 @@ const formatCell = (value: unknown, isCsv = false): string => {
   return String(value)
 }
 
-const parseAsTable = () => {
+const parseAsTable = async () => {
   try {
     if (!inputJson.value.trim()) {
       tableData.value = []
@@ -295,7 +327,7 @@ const parseAsTable = () => {
       errorMessage.value = ''
       return
     }
-    const parsed = JSON.parse(inputJson.value)
+    const parsed = await parseJSON(inputJson.value)
     if (!Array.isArray(parsed)) throw new Error('JSON 必须是一个数组')
     if (!parsed.length) {
       tableHeaders.value = []
@@ -304,14 +336,13 @@ const parseAsTable = () => {
       return
     }
     const headers = new Set<string>()
-    parsed.forEach((item: unknown) => {
-      if (item && typeof item === 'object')
-        Object.keys(item as Record<string, unknown>).forEach((k) => headers.add(k))
-    })
+    for (const item of parsed as Record<string, unknown>[]) {
+      if (item && typeof item === 'object') Object.keys(item).forEach((k) => headers.add(k))
+    }
     tableHeaders.value = Array.from(headers)
-    tableData.value = parsed.map((item: Record<string, unknown>) => {
+    tableData.value = (parsed as Record<string, unknown>[]).map((item) => {
       const row: Record<string, unknown> = {}
-      tableHeaders.value.forEach((h) => (row[h] = item[h] ?? ''))
+      for (const h of tableHeaders.value) row[h] = item[h] ?? ''
       return row
     })
     errorMessage.value = ''
@@ -348,14 +379,14 @@ const downloadCsv = () => {
 const yamlOutput = ref('')
 const yamlIndent = ref(2)
 
-const parseAsYaml = () => {
+const parseAsYaml = async () => {
   try {
     if (!inputJson.value.trim()) {
       yamlOutput.value = ''
       errorMessage.value = ''
       return
     }
-    const parsed = JSON.parse(inputJson.value)
+    const parsed = await parseJSON(inputJson.value)
     yamlOutput.value = YAML.stringify(parsed, { indent: yamlIndent.value })
     errorMessage.value = ''
   } catch (e) {
@@ -382,14 +413,14 @@ const xmlOutput = ref('')
 const xmlRootName = ref('root')
 const xmlIndent = ref(2)
 
-const parseAsXml = () => {
+const parseAsXml = async () => {
   try {
     if (!inputJson.value.trim()) {
       xmlOutput.value = ''
       errorMessage.value = ''
       return
     }
-    const parsed = JSON.parse(inputJson.value)
+    const parsed = await parseJSON(inputJson.value)
     const builder = new XMLBuilder({
       format: true,
       indentBy: ' '.repeat(xmlIndent.value),
@@ -418,24 +449,31 @@ const downloadXml = () => {
 }
 
 /* ================= 输入处理 ================= */
-const debouncedParse = debounce(() => {
-  isParsing.value = true
+const debouncedParse = debounce(async () => {
   errorMessage.value = ''
-  if (outputFormat.value === 'table') parseAsTable()
-  else if (outputFormat.value === 'yml') parseAsYaml()
-  else parseAsXml()
-  isParsing.value = false
+  isParsing.value = true
+  try {
+    if (outputFormat.value === 'table') await parseAsTable()
+    else if (outputFormat.value === 'yml') await parseAsYaml()
+    else await parseAsXml()
+  } finally {
+    isParsing.value = false
+  }
 }, 300)
 
 const onInput = () => debouncedParse()
 
-watch([outputFormat, yamlIndent, xmlIndent, xmlRootName], () => {
+watch([outputFormat, yamlIndent, xmlIndent, xmlRootName], async () => {
   if (inputJson.value.trim()) {
+    errorMessage.value = ''
     isParsing.value = true
-    if (outputFormat.value === 'table') parseAsTable()
-    else if (outputFormat.value === 'yml') parseAsYaml()
-    else parseAsXml()
-    isParsing.value = false
+    try {
+      if (outputFormat.value === 'table') await parseAsTable()
+      else if (outputFormat.value === 'yml') await parseAsYaml()
+      else await parseAsXml()
+    } finally {
+      isParsing.value = false
+    }
   }
 })
 </script>
