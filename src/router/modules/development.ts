@@ -29,6 +29,19 @@ const developmentRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
+    path: '/sql-quicktype',
+    name: 'sql-quicktype',
+    component: () => import('@/views/development/SqlQuicktypeView.vue'),
+    meta: {
+      showOnHome: true,
+      title: 'SQL 转结构体',
+      description: '将 SQL DDL 语句转换为 TypeScript / Go / GORM / XORM 结构体定义',
+      icon: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm2 3h12M7 12l2 2 4-4',
+      color: 'indigo',
+      group: HomeGroup.DEVELOPMENT_TOOLS,
+    } as HomeRouteMeta,
+  },
+  {
     path: '/timestamp',
     name: 'timestamp',
     component: () => import('@/views/development/TimestampView.vue'),

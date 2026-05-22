@@ -40,7 +40,6 @@
         <div class="border border-gray-300 rounded-lg flex-1 min-h-0 overflow-auto">
           <textarea
             v-model="inputJson"
-            @input="handleInput"
             placeholder="请输入或粘贴 JSON 字符串..."
             class="w-full h-full p-3 sm:p-4 font-mono text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none overflow-auto"
             spellcheck="false"
@@ -138,7 +137,7 @@
 
 <script setup lang="ts">
 import { downloader } from '@/utils/file'
-import { ref } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
@@ -154,6 +153,8 @@ const errorMessage = ref('')
 const loading = ref(false)
 const loadingMessage = ref('')
 
+const getErrorMsg = (e: unknown) => `JSON 解析错误：${e instanceof Error ? e.message : '未知错误'}`
+
 // 展开层级
 const defaultExpandDepth = 1
 const userExpandDepth = ref(defaultExpandDepth)
@@ -167,10 +168,7 @@ const updateExpandDepth = () => {
 
 // 减少展开深度
 const decreaseDepth = () => {
-  if (userExpandDepth.value > 0) {
-    userExpandDepth.value--
-    updateExpandDepth()
-  }
+  if (userExpandDepth.value > 0) userExpandDepth.value--
 }
 
 // 增加展开深度
@@ -191,11 +189,15 @@ const parseJsonDebounced = debounce(() => {
     errorMessage.value = ''
   } catch (e) {
     parsedJson.value = null
-    errorMessage.value = `JSON 解析错误：${e instanceof Error ? e.message : '未知错误'}`
+    errorMessage.value = getErrorMsg(e)
   }
 }, 300)
 
-const handleInput = () => parseJsonDebounced()
+watch(inputJson, () => parseJsonDebounced())
+
+onUnmounted(() => {
+  ;(parseJsonDebounced as unknown as { cancel: () => void }).cancel()
+})
 
 // 格式化 / 压缩 / 清空
 const formatJson = () => {
@@ -213,7 +215,7 @@ const formatJson = () => {
     errorMessage.value = ''
     toast.success('格式化成功（反斜杠已处理）')
   } catch (e) {
-    errorMessage.value = `JSON 解析错误：${e instanceof Error ? e.message : '未知错误'}`
+    errorMessage.value = getErrorMsg(e)
     toast.error('格式化失败')
   }
 }
@@ -226,7 +228,7 @@ const minifyJson = () => {
     errorMessage.value = ''
     toast.success('压缩成功')
   } catch (e) {
-    errorMessage.value = `JSON 解析错误：${e instanceof Error ? e.message : '未知错误'}`
+    errorMessage.value = getErrorMsg(e)
     toast.error('压缩失败')
   }
 }
