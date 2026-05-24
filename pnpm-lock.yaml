@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chihqiang/sql-quicktype':
-        specifier: ^0.0.2
-        version: 0.0.2(@types/node@24.10.8)
+        specifier: ^0.0.3
+        version: 0.0.3(@types/node@24.10.8)
       '@faker-js/faker':
         specifier: ^10.2.0
         version: 10.2.0
@@ -299,8 +299,8 @@ packages:
     resolution: {integrity: sha512-0ZrskXVEHSWIqZM/sQZ4EV3jZJXRkio/WCxaqKZP1g//CEWEPSfeZFcms4XeKBCHU0ZKnIkdJeU/kF+eRp5lBg==}
     engines: {node: '>=6.9.0'}
 
-  '@chihqiang/sql-quicktype@0.0.2':
-    resolution: {integrity: sha512-NreVwnZZSpBdKXs5xkmby9STUN7RX0vZVl9GBFIkfVnmTnX4DxnDbz+moobfzrFxoUtIdEAz6p0NIK8GZNbMRA==}
+  '@chihqiang/sql-quicktype@0.0.3':
+    resolution: {integrity: sha512-ELsXUv20ltmT50HLVm1Je1HN6+OT1wTGsZT+sKun1gLOhmLAqpf61wN7ROIjyB1R5UbdoQhplMp2PZaX5nv0Xg==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -2721,7 +2721,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@chihqiang/sql-quicktype@0.0.2(@types/node@24.10.8)':
+  '@chihqiang/sql-quicktype@0.0.3(@types/node@24.10.8)':
     dependencies:
       commander: 14.0.3
       mysql2: 3.22.3(@types/node@24.10.8)
