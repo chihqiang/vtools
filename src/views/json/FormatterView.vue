@@ -46,8 +46,15 @@
           ></textarea>
         </div>
 
-        <div v-if="inputSizeWarning" class="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200">{{ inputSizeWarning }}</div>
-        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">⚠ {{ errorMessage }}</div>
+        <div
+          v-if="inputSizeWarning"
+          class="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200"
+        >
+          {{ inputSizeWarning }}
+        </div>
+        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">
+          ⚠ {{ errorMessage }}
+        </div>
       </div>
 
       <!-- 右侧输出区 -->
@@ -142,7 +149,7 @@ import 'vue-json-viewer/style.css'
 import { useToast } from '@/composables/useToast'
 import { debounce } from '@/utils/debounce'
 import { toastCopy } from '@/utils/clipboard'
-import { getCurrentDateTime } from '@/utils/times'
+import { getCurrentDateTime } from '@/utils/date'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import { useJsonWorker } from '@/composables/useJsonWorker'
 
@@ -158,8 +165,10 @@ const inputSizeWarning = ref('')
 
 watch(inputJson, (v) => {
   const len = v.length
-  if (len > 5 * 1024 * 1024) inputSizeWarning.value = `输入超过 5MB（${(len / 1024 / 1024).toFixed(1)}MB），解析可能较慢`
-  else if (len > 1024 * 1024) inputSizeWarning.value = `输入超过 1MB（${(len / 1024 / 1024).toFixed(1)}MB），建议精简数据`
+  if (len > 5 * 1024 * 1024)
+    inputSizeWarning.value = `输入超过 5MB（${(len / 1024 / 1024).toFixed(1)}MB），解析可能较慢`
+  else if (len > 1024 * 1024)
+    inputSizeWarning.value = `输入超过 1MB（${(len / 1024 / 1024).toFixed(1)}MB），建议精简数据`
   else inputSizeWarning.value = ''
 })
 

@@ -341,7 +341,7 @@ import { downloader } from '@/utils/file'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { Faker, en, zh_CN } from '@faker-js/faker'
-import { getCurrentDateTime } from '@/utils/times'
+import { getCurrentDateTime } from '@/utils/date'
 
 const toast = useToast()
 

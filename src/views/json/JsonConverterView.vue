@@ -37,8 +37,15 @@
             ></textarea>
           </div>
         </div>
-        <div v-if="inputSizeWarning" class="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200">{{ inputSizeWarning }}</div>
-        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">⚠ {{ errorMessage }}</div>
+        <div
+          v-if="inputSizeWarning"
+          class="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200"
+        >
+          {{ inputSizeWarning }}
+        </div>
+        <div v-if="errorMessage" class="mt-2 text-sm text-red-500 flex items-center gap-2">
+          ⚠ {{ errorMessage }}
+        </div>
       </div>
 
       <!-- 右侧：根据格式切换输出 -->
@@ -62,36 +69,55 @@
               <table v-if="paginatedData.length" class="min-w-full text-sm border-collapse">
                 <thead class="sticky top-0 z-10 bg-gray-100 border-b border-gray-300">
                   <tr>
-                    <th v-for="(h, i) in tableHeaders" :key="i" class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">{{ h }}</th>
+                    <th
+                      v-for="(h, i) in tableHeaders"
+                      :key="i"
+                      class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap"
+                    >
+                      {{ h }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(row, ri) in paginatedData" :key="tablePageStart + ri" class="hover:bg-gray-50">
+                  <tr
+                    v-for="(row, ri) in paginatedData"
+                    :key="tablePageStart + ri"
+                    class="hover:bg-gray-50"
+                  >
                     <td
                       v-for="(h, ci) in tableHeaders"
                       :key="ci"
                       class="px-4 py-2 text-gray-800 border-b border-gray-100 max-w-xs truncate"
                       :title="formatCell(row[h])"
-                    >{{ formatCell(row[h]) }}</td>
+                    >
+                      {{ formatCell(row[h]) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
 
               <!-- 分页 -->
-              <div v-if="tableData.length > tablePageSize" class="flex items-center justify-between px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600">
+              <div
+                v-if="tableData.length > tablePageSize"
+                class="flex items-center justify-between px-4 py-2 border-t border-gray-200 bg-gray-50 text-sm text-gray-600"
+              >
                 <span>共 {{ tableData.length }} 行，每页 {{ tablePageSize }} 行</span>
                 <div class="flex items-center gap-1">
                   <button
                     @click="tablePage--"
                     :disabled="tablePage <= 1"
                     class="px-2 py-1 rounded border border-gray-300 bg-white disabled:opacity-40 hover:bg-gray-100"
-                  >‹</button>
+                  >
+                    ‹
+                  </button>
                   <span class="px-2">{{ tablePage }} / {{ totalPages }}</span>
                   <button
                     @click="tablePage++"
                     :disabled="tablePage >= totalPages"
                     class="px-2 py-1 rounded border border-gray-300 bg-white disabled:opacity-40 hover:bg-gray-100"
-                  >›</button>
+                  >
+                    ›
+                  </button>
                 </div>
               </div>
 
@@ -100,10 +126,22 @@
                 class="flex flex-col items-center justify-center text-gray-400 gap-2"
                 :style="{ minHeight: containerHeight }"
               >
-                <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
+                <svg
+                  class="w-10 h-10 opacity-40"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 7h18M3 12h18M3 17h18"
+                  />
                 </svg>
-                <span class="text-sm">{{ isParsing ? '解析中…' : '等待输入有效的 JSON 数组' }}</span>
+                <span class="text-sm">{{
+                  isParsing ? '解析中…' : '等待输入有效的 JSON 数组'
+                }}</span>
               </div>
             </div>
           </div>
@@ -219,7 +257,7 @@ import * as YAML from 'yaml'
 import { useToast } from '@/composables/useToast'
 import { debounce } from '@/utils/debounce'
 import { toastCopy } from '@/utils/clipboard'
-import { getCurrentDateTime } from '@/utils/times'
+import { getCurrentDateTime } from '@/utils/date'
 import { useJsonWorker } from '@/composables/useJsonWorker'
 
 const toast = useToast()
@@ -268,8 +306,10 @@ const inputSizeWarning = ref('')
 
 watch(inputJson, (v) => {
   const len = v.length
-  if (len > 5 * 1024 * 1024) inputSizeWarning.value = `输入超过 5MB（${(len / 1024 / 1024).toFixed(1)}MB），解析可能较慢`
-  else if (len > 1024 * 1024) inputSizeWarning.value = `输入超过 1MB（${(len / 1024 / 1024).toFixed(1)}MB），建议精简数据`
+  if (len > 5 * 1024 * 1024)
+    inputSizeWarning.value = `输入超过 5MB（${(len / 1024 / 1024).toFixed(1)}MB），解析可能较慢`
+  else if (len > 1024 * 1024)
+    inputSizeWarning.value = `输入超过 1MB（${(len / 1024 / 1024).toFixed(1)}MB），建议精简数据`
   else inputSizeWarning.value = ''
 })
 

@@ -206,7 +206,7 @@
 import { ref, computed, watch } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { toastCopy } from '@/utils/clipboard'
-import { useDebounce } from '@/utils/debounce'
+import { useDebounce } from '@/composables/useDebounce'
 
 const toast = useToast()
 

@@ -180,7 +180,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
-import { base64, url, md5Hash, sha, ripemd, hmac } from '@/utils/encryption'
+import { base64, url } from '@/utils/encoding'
+import { md5Hash, sha, ripemd, hmac } from '@/utils/hash'
 import { toastCopy } from '@/utils/clipboard'
 
 const toast = useToast()

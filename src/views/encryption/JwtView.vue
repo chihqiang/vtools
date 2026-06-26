@@ -706,9 +706,9 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
 import { useToast } from '@/composables/useToast'
-import { jwt } from '@/utils/encryption'
+import { jwt } from '@/utils/jwt'
 import { toastCopy } from '@/utils/clipboard'
-import { formatDuration, formatTimestamp } from '@/utils/times'
+import { formatDuration, formatTimestamp } from '@/utils/date'
 
 interface TokenStatus {
   isExpired: boolean

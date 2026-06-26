@@ -293,9 +293,11 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 import { toastCopy } from '@/utils/clipboard'
 
-import { solar2lunar, getGanZhiString, getAlmanac, timezeros } from '@/utils/times'
+import { solar2lunar, getGanZhiString } from '@/utils/lunar'
+import { getAlmanac } from '@/utils/almanac'
+import { timezones } from '@/utils/timezones'
 
-const timezoneOptions = ref(timezeros)
+const timezoneOptions = ref(timezones)
 
 /* ================= 当前时间 ================= */
 

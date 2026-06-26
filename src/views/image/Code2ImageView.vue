@@ -306,7 +306,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as monaco from 'monaco-editor'
 import { toPng } from 'html-to-image'
 import { useToast } from '@/composables/useToast'
-import { getCurrentDateTime } from '@/utils/times'
+import { getCurrentDateTime } from '@/utils/date'
 import { debounce } from '@/utils/debounce'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 

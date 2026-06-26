@@ -413,7 +413,7 @@ import {
   Format,
   type RsaEncryptOptions,
   type RsaDecryptOptions,
-} from '@/utils/encryption'
+} from '@/utils/rsa'
 
 // 算法选项
 const ALGORITHM_OPTIONS = [

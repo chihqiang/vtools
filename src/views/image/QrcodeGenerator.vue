@@ -582,7 +582,7 @@ import { downloader } from '@/utils/file'
 import { ref, watch } from 'vue'
 import QRCode from 'qrcode'
 import { useToast } from '@/composables/useToast'
-import { getCurrentDateTime } from '@/utils/times'
+import { getCurrentDateTime } from '@/utils/date'
 
 const toast = useToast()
 

@@ -82,7 +82,10 @@
     </div>
 
     <!-- 结果区 -->
-    <div v-if="isDiffing" class="mt-4 border rounded-lg bg-gray-50 p-4 text-center text-gray-500 text-sm py-8">
+    <div
+      v-if="isDiffing"
+      class="mt-4 border rounded-lg bg-gray-50 p-4 text-center text-gray-500 text-sm py-8"
+    >
       正在对比中...
     </div>
     <div v-else-if="diffResult" class="mt-4 border rounded-lg bg-gray-50 p-4">
