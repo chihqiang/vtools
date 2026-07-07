@@ -19,5 +19,14 @@ export default defineConfigWithVueTs(
   ...pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
 
+  // 页面级路由组件允许单词命名（如 Diff.vue、Formatter.vue 等）
+  {
+    name: 'app/views-rules',
+    files: ['src/views/**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
   skipFormatting,
 )

@@ -1,7 +1,16 @@
-import { createApp, h, ref } from 'vue'
+import { createApp, h, reactive } from 'vue'
 import ToastMessage from '@/components/ToastMessage.vue'
 
-interface ToastOptions {
+export interface ToastItem {
+  id: number
+  message: string
+  type: 'success' | 'error' | 'warning' | 'info'
+  duration: number
+  customClass?: string
+  customStyle?: Record<string, string | number>
+}
+
+export interface ToastOptions {
   message: string
   type?: 'success' | 'error' | 'warning' | 'info'
   duration?: number
@@ -9,54 +18,69 @@ interface ToastOptions {
   customStyle?: Record<string, string | number>
 }
 
-const toastContainer = ref<HTMLElement | null>(null)
-const toastQueue = ref<ToastOptions[]>([])
-const isProcessing = ref(false)
+// 全局响应式 Toast 列表，支持多个 Toast 同时堆叠显示
+const toastList = reactive<ToastItem[]>([])
+let toastId = 0
 
-// 处理队列中的Toast
-async function processQueue() {
-  if (isProcessing.value || toastQueue.value.length === 0) {
-    return
-  }
+let hostApp: ReturnType<typeof createApp> | null = null
+let hostEl: HTMLElement | null = null
 
-  isProcessing.value = true
-  const options = toastQueue.value.shift()!
+function ensureHost() {
+  if (hostApp) return
+  hostEl = document.createElement('div')
+  hostEl.id = 'toast-host'
+  document.body.appendChild(hostEl)
 
-  if (!toastContainer.value) {
-    toastContainer.value = document.createElement('div')
-    document.body.appendChild(toastContainer.value)
-  }
-
-  const toastApp = createApp({
+  hostApp = createApp({
     setup() {
-      const onClose = () => {
-        toastApp.unmount()
-        if (toastContainer.value?.children.length === 0) {
-          document.body.removeChild(toastContainer.value!)
-          toastContainer.value = null
-        }
-        // 处理下一个Toast
-        isProcessing.value = false
-        processQueue()
+      const removeToast = (id: number) => {
+        const idx = toastList.findIndex((t) => t.id === id)
+        if (idx !== -1) toastList.splice(idx, 1)
       }
-
       return () =>
-        h(ToastMessage, {
-          ...options,
-          onClose,
-        })
+        h(
+          'div',
+          {
+            class:
+              'fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 w-full max-w-sm sm:max-w-md pointer-events-none',
+          },
+          toastList.map((item) =>
+            h(ToastMessage, {
+              key: item.id,
+              message: item.message,
+              type: item.type,
+              duration: item.duration,
+              customClass: item.customClass,
+              customStyle: item.customStyle,
+              onClose: () => removeToast(item.id),
+            }),
+          ),
+        )
     },
   })
+  hostApp.mount(hostEl)
+}
 
-  toastApp.mount(toastContainer.value)
+function addToast(options: ToastOptions) {
+  ensureHost()
+  const item: ToastItem = {
+    id: ++toastId,
+    message: options.message,
+    type: options.type ?? 'info',
+    duration: options.duration ?? 3000,
+    customClass: options.customClass,
+    customStyle: options.customStyle,
+  }
+  toastList.push(item)
+  // 限制最多同时显示 5 条，避免堆积过多
+  if (toastList.length > 5) {
+    toastList.splice(0, toastList.length - 5)
+  }
 }
 
 export function useToast() {
   const show = (options: ToastOptions) => {
-    // 添加到队列
-    toastQueue.value.push(options)
-    // 开始处理队列
-    processQueue()
+    addToast(options)
   }
 
   const success = (
@@ -95,9 +119,9 @@ export function useToast() {
     show({ message, type: 'info', duration, customClass, customStyle })
   }
 
-  // 清空队列
+  // 清空所有 Toast
   const clear = () => {
-    toastQueue.value = []
+    toastList.splice(0, toastList.length)
   }
 
   return {

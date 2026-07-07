@@ -1,10 +1,10 @@
 // 定义工具分组枚举
 export enum HomeGroup {
   JSON_TOOLS = 'JSON 工具',
-  STRING_TOOLS = '字符串工具',
-  DEVELOPMENT_TOOLS = '开发工具',
+  TEXT_TOOLS = '文本工具',
   IMAGE_TOOLS = '图片工具',
-  ENCRYPTION_TOOLS = '加密解密工具',
+  DEVELOPMENT_TOOLS = '开发工具',
+  CRYPTO_TOOLS = '加密工具',
   NETWORK_TOOLS = '网络工具',
   MEDIA_TOOLS = '媒体工具',
   UNGROUPED = '未分组',

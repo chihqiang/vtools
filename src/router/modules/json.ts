@@ -5,7 +5,7 @@ const jsonRoutes: RouteRecordRaw[] = [
   {
     path: '/json-formatter',
     name: 'json-formatter',
-    component: () => import('@/views/json/FormatterView.vue'),
+    component: () => import('@/views/json/Formatter.vue'),
     meta: {
       showOnHome: true,
       title: 'JSON 格式化',
@@ -18,7 +18,7 @@ const jsonRoutes: RouteRecordRaw[] = [
   {
     path: '/json-converter',
     name: 'json-converter',
-    component: () => import('@/views/json/JsonConverterView.vue'),
+    component: () => import('@/views/json/Converter.vue'),
     meta: {
       showOnHome: true,
       title: 'JSON 转换工具',
@@ -28,11 +28,10 @@ const jsonRoutes: RouteRecordRaw[] = [
       group: HomeGroup.JSON_TOOLS,
     } as HomeRouteMeta,
   },
-
   {
     path: '/json-diff',
     name: 'json-diff',
-    component: () => import('@/views/json/JDiffView.vue'),
+    component: () => import('@/views/json/Diff.vue'),
     meta: {
       showOnHome: true,
       title: 'JSON 对比',
@@ -43,9 +42,9 @@ const jsonRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/json-faker',
-    name: 'json-faker',
-    component: () => import('@/views/json/FakerView.vue'),
+    path: '/json-mock',
+    name: 'json-mock',
+    component: () => import('@/views/json/Mock.vue'),
     meta: {
       showOnHome: true,
       title: 'Mock数据生成器',
@@ -56,9 +55,9 @@ const jsonRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/json-quicktype',
-    name: 'json-quicktype',
-    component: () => import('@/views/json/QuicktypeView.vue'),
+    path: '/json-codegen',
+    name: 'json-codegen',
+    component: () => import('@/views/json/Codegen.vue'),
     meta: {
       showOnHome: true,
       title: 'JSON 转结构体',

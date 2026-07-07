@@ -1,11 +1,11 @@
 import { type RouteRecordRaw } from 'vue-router'
 import { HomeGroup, type HomeRouteMeta } from '@/types/route'
 
-const networkRoutes: RouteRecordRaw[] = [
+const netRoutes: RouteRecordRaw[] = [
   {
-    path: '/network',
-    name: 'network',
-    component: () => import('@/views/network/NetworkView.vue'),
+    path: '/net-tools',
+    name: 'net-tools',
+    component: () => import('@/views/net/Tools.vue'),
     meta: {
       showOnHome: true,
       title: '网络工具',
@@ -16,9 +16,9 @@ const networkRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/browser-info',
-    name: 'browser-info',
-    component: () => import('@/views/network/BrowserInfoView.vue'),
+    path: '/net-browser',
+    name: 'net-browser',
+    component: () => import('@/views/net/Browser.vue'),
     meta: {
       showOnHome: true,
       title: '浏览器信息',
@@ -29,9 +29,9 @@ const networkRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/http-request',
-    name: 'http-request',
-    component: () => import('@/views/network/AxiosRequest.vue'),
+    path: '/net-http',
+    name: 'net-http',
+    component: () => import('@/views/net/Http.vue'),
     meta: {
       showOnHome: true,
       title: 'API 接口调试工具',
@@ -42,9 +42,9 @@ const networkRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/websocket-test',
-    name: 'websocket-test',
-    component: () => import('@/views/network/WebSocket.vue'),
+    path: '/net-websocket',
+    name: 'net-websocket',
+    component: () => import('@/views/net/Websocket.vue'),
     meta: {
       showOnHome: true,
       title: 'WebSocket 测试工具',
@@ -56,4 +56,4 @@ const networkRoutes: RouteRecordRaw[] = [
   },
 ]
 
-export default networkRoutes
+export default netRoutes

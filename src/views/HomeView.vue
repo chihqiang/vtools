@@ -11,10 +11,12 @@
     <div class="mb-10 max-w-2xl mx-auto">
       <div class="relative">
         <input
+          ref="searchInputRef"
           v-model="searchQuery"
           type="text"
-          placeholder="搜索工具..."
+          placeholder="搜索工具...  按 / 快速聚焦"
           class="w-full px-5 py-4 pl-14 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-3 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+          @keydown.esc="clearSearch"
         />
         <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +28,35 @@
             ></path>
           </svg>
         </div>
+        <!-- 快捷键提示徽标 -->
+        <kbd
+          v-if="!searchQuery"
+          class="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-400 bg-gray-100 border border-gray-200 rounded"
+        >
+          /
+        </kbd>
+        <!-- 清除按钮 -->
+        <button
+          v-else
+          @click="clearSearch"
+          class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="清除搜索"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
       </div>
+
+      <!-- 搜索无结果提示 -->
+      <p v-if="searchQuery && tools.length === 0" class="mt-4 text-center text-sm text-gray-400">
+        没有找到匹配「{{ searchQuery }}」的工具
+      </p>
     </div>
 
     <!-- 按分组显示工具 -->
@@ -47,35 +77,26 @@
             :key="tool.name"
             :to="tool.path"
             class="group relative overflow-hidden rounded-xl p-6 bg-white border-2 border-gray-200 text-gray-800 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
-            :class="'hover:border-' + tool.color + '-500'"
+            :class="getColorClasses(tool.color).card"
           >
             <div class="relative z-10">
               <div class="flex items-center justify-between mb-4">
                 <!-- Icon -->
-                <div
-                  :class="
-                    'w-12 h-12 rounded-lg flex items-center justify-center bg-' +
-                    tool.color +
-                    '-100'
-                  "
-                >
+                <div :class="getColorClasses(tool.color).iconBg">
                   <SvgIcon
                     :iconPath="tool.icon"
                     :size="24"
-                    :class="'w-6 h-6 text-' + tool.color + '-600'"
+                    :class="getColorClasses(tool.color).iconText"
                   />
                 </div>
-                <div
-                  :class="
-                    'w-8 h-8 rounded-full flex items-center justify-center bg-' +
-                    tool.color +
-                    '-100'
-                  "
-                >
+                <div :class="getColorClasses(tool.color).arrowBg">
                   <SvgIcon
                     iconPath="M9 5l7 7-7 7"
                     size="16"
-                    class="w-4 h-4 text-current text-' + tool.color + '-600 transform group-hover:translate-x-1 transition-transform"
+                    :class="
+                      getColorClasses(tool.color).iconText +
+                      ' transform group-hover:translate-x-1 transition-transform'
+                    "
                   />
                 </div>
               </div>
@@ -84,15 +105,15 @@
             </div>
             <!-- hover 下的底部进度条 -->
             <div
-              class="absolute bottom-0 left-0 right-0 h-1 bg-current transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
-              :class="'bg-' + tool.color + '-500'"
+              class="absolute bottom-0 left-0 right-0 h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+              :class="getColorClasses(tool.color).bar"
             ></div>
           </RouterLink>
         </div>
       </div>
 
       <!-- 更多工具卡片 -->
-      <div class="mt-12">
+      <div v-if="!searchQuery" class="mt-12">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-1 h-6 bg-gray-500 rounded"></div>
           <h2 class="text-2xl font-bold text-gray-800">更多</h2>
@@ -146,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import router from '@/router'
 import SvgIcon from '@/components/SvgIcon.vue'
 import { GroupOrder } from '@/types/route'
@@ -162,8 +183,117 @@ interface orderRouteMeta {
   group: string
 }
 
+/**
+ * 每种颜色对应完整静态类名，避免动态拼接导致 Tailwind v4 JIT 无法识别
+ */
+interface ColorClassSet {
+  card: string
+  iconBg: string
+  iconText: string
+  arrowBg: string
+  bar: string
+}
+
+const colorClasses = {
+  green: {
+    card: 'hover:border-green-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-green-100',
+    iconText: 'w-6 h-6 text-green-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-green-100',
+    bar: 'bg-green-500',
+  },
+  purple: {
+    card: 'hover:border-purple-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-purple-100',
+    iconText: 'w-6 h-6 text-purple-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-purple-100',
+    bar: 'bg-purple-500',
+  },
+  blue: {
+    card: 'hover:border-blue-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-blue-100',
+    iconText: 'w-6 h-6 text-blue-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-blue-100',
+    bar: 'bg-blue-500',
+  },
+  orange: {
+    card: 'hover:border-orange-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-orange-100',
+    iconText: 'w-6 h-6 text-orange-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-orange-100',
+    bar: 'bg-orange-500',
+  },
+  cyan: {
+    card: 'hover:border-cyan-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-cyan-100',
+    iconText: 'w-6 h-6 text-cyan-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-cyan-100',
+    bar: 'bg-cyan-500',
+  },
+  red: {
+    card: 'hover:border-red-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-red-100',
+    iconText: 'w-6 h-6 text-red-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-red-100',
+    bar: 'bg-red-500',
+  },
+  indigo: {
+    card: 'hover:border-indigo-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-indigo-100',
+    iconText: 'w-6 h-6 text-indigo-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-indigo-100',
+    bar: 'bg-indigo-500',
+  },
+  teal: {
+    card: 'hover:border-teal-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-teal-100',
+    iconText: 'w-6 h-6 text-teal-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-teal-100',
+    bar: 'bg-teal-500',
+  },
+  gray: {
+    card: 'hover:border-gray-500',
+    iconBg: 'w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100',
+    iconText: 'w-6 h-6 text-gray-600',
+    arrowBg: 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-100',
+    bar: 'bg-gray-500',
+  },
+}
+
+/**
+ * 根据颜色名获取完整静态类名，未匹配时回退到 gray
+ */
+function getColorClasses(color: string): ColorClassSet {
+  return (colorClasses as Record<string, ColorClassSet>)[color] ?? colorClasses.gray
+}
+
 // 搜索查询
 const searchQuery = ref('')
+const searchInputRef = ref<HTMLInputElement | null>(null)
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  searchInputRef.value?.focus()
+}
+
+// 全局快捷键：按 / 聚焦搜索框
+const onGlobalKeydown = (e: KeyboardEvent) => {
+  if (
+    e.key === '/' &&
+    document.activeElement?.tagName !== 'INPUT' &&
+    document.activeElement?.tagName !== 'TEXTAREA'
+  ) {
+    e.preventDefault()
+    searchInputRef.value?.focus()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onGlobalKeydown)
+})
+onUnmounted(() => {
+  window.removeEventListener('keydown', onGlobalKeydown)
+})
 
 // 获取需要在首页显示的工具并按分组排序
 const tools = computed<orderRouteMeta[]>(() => {

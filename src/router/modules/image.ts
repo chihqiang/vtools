@@ -5,7 +5,7 @@ const imageRoutes: RouteRecordRaw[] = [
   {
     path: '/image-favicon',
     name: 'image-favicon',
-    component: () => import('@/views/image/FaviconGenerator.vue'),
+    component: () => import('@/views/image/Favicon.vue'),
     meta: {
       showOnHome: true,
       title: 'Favicon 生成器',
@@ -16,9 +16,9 @@ const imageRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/qrcode-generator',
-    name: 'qrcode-generator',
-    component: () => import('@/views/image/QrcodeGenerator.vue'),
+    path: '/image-qrcode',
+    name: 'image-qrcode',
+    component: () => import('@/views/image/Qrcode.vue'),
     meta: {
       showOnHome: true,
       title: '二维码生成',
@@ -29,9 +29,9 @@ const imageRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/qrcode-scanner',
-    name: 'qrcode-scanner',
-    component: () => import('@/views/image/QrcodeScanner.vue'),
+    path: '/image-qr-scan',
+    name: 'image-qr-scan',
+    component: () => import('@/views/image/QrScan.vue'),
     meta: {
       showOnHome: true,
       title: '二维码识别',
@@ -42,9 +42,9 @@ const imageRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/image-converter',
-    name: 'image-converter',
-    component: () => import('@/views/image/ImageConverter.vue'),
+    path: '/image-convert',
+    name: 'image-convert',
+    component: () => import('@/views/image/Convert.vue'),
     meta: {
       showOnHome: true,
       title: '图片格式转换',
@@ -57,7 +57,7 @@ const imageRoutes: RouteRecordRaw[] = [
   {
     path: '/image-code',
     name: 'image-code',
-    component: () => import('@/views/image/Code2ImageView.vue'),
+    component: () => import('@/views/image/CodeImage.vue'),
     meta: {
       showOnHome: true,
       title: '代码图片生成器',

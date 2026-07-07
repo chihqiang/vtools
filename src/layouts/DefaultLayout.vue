@@ -46,8 +46,30 @@
       </div>
     </header>
 
+    <!-- 面包屑导航（仅非首页显示） -->
+    <div v-if="pageTitle" class="bg-white border-b border-gray-100">
+      <div class="w-full px-4 sm:px-6 md:px-8 lg:px-12 py-2.5 flex items-center gap-2 text-sm">
+        <RouterLink
+          to="/"
+          class="text-gray-500 hover:text-blue-600 transition-colors flex items-center gap-1"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+          工具
+        </RouterLink>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-800 font-medium">{{ pageTitle }}</span>
+      </div>
+    </div>
+
     <!-- Main -->
-    <main class="flex-1 w-full px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6">
+    <main class="flex-1 w-full px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6 flex flex-col min-h-0">
       <slot />
     </main>
 
@@ -128,4 +150,15 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 面包屑标题：取路由 meta.title，首页不显示
+const pageTitle = computed(() => {
+  if (route.name === 'home' || route.name === 'not-found') return ''
+  return (route.meta.title as string) || ''
+})
+</script>

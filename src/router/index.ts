@@ -3,11 +3,11 @@ import { type HomeRouteMeta } from '@/types/route'
 
 // 导入路由模块
 import jsonRoutes from '@/router/modules/json'
-import stringsRoutes from '@/router/modules/strings'
+import textRoutes from '@/router/modules/text'
 import imageRoutes from '@/router/modules/image'
-import developmentRoutes from '@/router/modules/development'
-import encryptionRoutes from '@/router/modules/encryption'
-import networkRoutes from '@/router/modules/network'
+import devRoutes from '@/router/modules/dev'
+import cryptoRoutes from '@/router/modules/crypto'
+import netRoutes from '@/router/modules/net'
 import mediaRoutes from '@/router/modules/media'
 
 const router = createRouter({
@@ -24,11 +24,11 @@ const router = createRouter({
     },
     // 合并所有路由模块
     ...jsonRoutes,
-    ...stringsRoutes,
+    ...textRoutes,
     ...imageRoutes,
-    ...developmentRoutes,
-    ...encryptionRoutes,
-    ...networkRoutes,
+    ...devRoutes,
+    ...cryptoRoutes,
+    ...netRoutes,
     ...mediaRoutes,
     // 404 页面
     {

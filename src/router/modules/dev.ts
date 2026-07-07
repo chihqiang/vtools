@@ -1,11 +1,11 @@
 import { type RouteRecordRaw } from 'vue-router'
 import { HomeGroup, type HomeRouteMeta } from '@/types/route'
 
-const developmentRoutes: RouteRecordRaw[] = [
+const devRoutes: RouteRecordRaw[] = [
   {
-    path: '/crontab',
-    name: 'crontab',
-    component: () => import('@/views/development/CrontabView.vue'),
+    path: '/dev-crontab',
+    name: 'dev-crontab',
+    component: () => import('@/views/dev/Crontab.vue'),
     meta: {
       showOnHome: true,
       title: 'Crontab 工具',
@@ -16,9 +16,9 @@ const developmentRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/chmod-calculator',
-    name: 'chmod-calculator',
-    component: () => import('@/views/development/ChmodCalculator.vue'),
+    path: '/dev-chmod',
+    name: 'dev-chmod',
+    component: () => import('@/views/dev/Chmod.vue'),
     meta: {
       showOnHome: true,
       title: 'Chmod 权限计算器',
@@ -29,9 +29,9 @@ const developmentRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/sql-quicktype',
-    name: 'sql-quicktype',
-    component: () => import('@/views/development/SqlQuicktypeView.vue'),
+    path: '/dev-sql-codegen',
+    name: 'dev-sql-codegen',
+    component: () => import('@/views/dev/SqlCodegen.vue'),
     meta: {
       showOnHome: true,
       title: 'SQL 转结构体',
@@ -42,9 +42,9 @@ const developmentRoutes: RouteRecordRaw[] = [
     } as HomeRouteMeta,
   },
   {
-    path: '/timestamp',
-    name: 'timestamp',
-    component: () => import('@/views/development/TimestampView.vue'),
+    path: '/dev-timestamp',
+    name: 'dev-timestamp',
+    component: () => import('@/views/dev/Timestamp.vue'),
     meta: {
       showOnHome: true,
       title: '时间戳工具',
@@ -56,4 +56,4 @@ const developmentRoutes: RouteRecordRaw[] = [
   },
 ]
 
-export default developmentRoutes
+export default devRoutes
