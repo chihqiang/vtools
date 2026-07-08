@@ -7,7 +7,7 @@
       <h2 class="text-sm font-semibold text-gray-700">代码图片生成器</h2>
       <div class="flex items-center gap-2">
         <button
-          @click="debouncedCopyAsImage"
+          @click="copyAsImage"
           :disabled="loading"
           class="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-medium shadow-sm hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center gap-1.5"
         >
@@ -22,7 +22,7 @@
           复制图片
         </button>
         <button
-          @click="debouncedDownloadAsImage"
+          @click="downloadAsImage"
           :disabled="loading"
           class="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium shadow-sm hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center gap-1.5"
         >
@@ -80,7 +80,7 @@
             <span class="w-3 h-3 rounded-full bg-green-400"></span>
           </div>
           <!-- Monaco editor -->
-          <div ref="editorContainer" class="flex-1 min-h-0 w-full"></div>
+          <div ref="editorContainer" class="w-full" :style="{ height: editorHeight + 'px' }"></div>
         </div>
       </div>
 
@@ -149,7 +149,7 @@
 
             <!-- 开关选项 -->
             <div class="space-y-2.5">
-              <label class="flex items-center justify-between cursor-pointer">
+              <div class="flex items-center justify-between cursor-pointer">
                 <span class="text-sm text-gray-600">行号</span>
                 <button
                   @click="showLineNumbers = !showLineNumbers"
@@ -159,8 +159,8 @@
                     :class="['toggle-dot', showLineNumbers ? 'translate-x-5' : 'translate-x-0.5']"
                   ></span>
                 </button>
-              </label>
-              <label class="flex items-center justify-between cursor-pointer">
+              </div>
+              <div class="flex items-center justify-between cursor-pointer">
                 <span class="text-sm text-gray-600">窗口控制按钮</span>
                 <button
                   @click="showWindowControls = !showWindowControls"
@@ -173,8 +173,8 @@
                     ]"
                   ></span>
                 </button>
-              </label>
-              <label class="flex items-center justify-between cursor-pointer">
+              </div>
+              <div class="flex items-center justify-between cursor-pointer">
                 <span class="text-sm text-gray-600">自动换行</span>
                 <button
                   @click="config.wordWrap = config.wordWrap === 'on' ? 'off' : 'on'"
@@ -187,7 +187,7 @@
                     ]"
                   ></span>
                 </button>
-              </label>
+              </div>
             </div>
 
             <div class="border-t border-gray-100"></div>
@@ -260,19 +260,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import * as monaco from 'monaco-editor'
 import { toPng } from 'html-to-image'
 import { useToast } from '@/composables/useToast'
 import { getCurrentDateTime } from '@/utils/date'
-import { debounce } from '@/utils/debounce'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+
+// ==================== Monaco Web Worker 配置 ====================
+// Vite 环境下必须配置 worker，否则语言服务无法正常工作
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
+import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
+import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
+
+self.MonacoEnvironment = {
+  getWorker(_, label) {
+    if (label === 'json') return new jsonWorker()
+    if (label === 'css' || label === 'scss' || label === 'less') return new cssWorker()
+    if (label === 'html' || label === 'handlebars' || label === 'razor') return new htmlWorker()
+    if (label === 'typescript' || label === 'javascript') return new tsWorker()
+    return new editorWorker()
+  },
+}
 
 const toast = useToast()
 const editorContainer = ref<HTMLElement | null>(null)
 const cardRef = ref<HTMLElement | null>(null)
 const loading = ref(false)
 const loadingMessage = ref('')
+const editorHeight = ref(200)
 
 let editorInstance: monaco.editor.IStandaloneCodeEditor | null = null
 
@@ -368,7 +386,6 @@ const cardStyle = computed(() => {
     overflow: 'hidden',
     width: '680px',
     maxWidth: '100%',
-    minHeight: '300px',
   }
 })
 
@@ -384,6 +401,13 @@ const defaultCode = `function fibonacci(n) {
 
 console.log(fibonacci(10));`
 
+// 根据内容自动撑高编辑器，确保截图完整
+const updateEditorHeight = () => {
+  if (!editorInstance) return
+  const contentHeight = editorInstance.getContentHeight()
+  editorHeight.value = contentHeight
+}
+
 const initEditor = () => {
   if (!editorContainer.value) return
 
@@ -394,10 +418,19 @@ const initEditor = () => {
     automaticLayout: true,
     ...config.value,
   })
+
+  // 内容变化时自动调整高度
+  editorInstance.onDidChangeModelContent(() => updateEditorHeight())
+  // 初始高度
+  updateEditorHeight()
 }
 
 const updateConfig = () => {
-  if (editorInstance) editorInstance.updateOptions(config.value)
+  if (editorInstance) {
+    editorInstance.updateOptions(config.value)
+    // 字号/行高变化后重新计算高度
+    nextTick(() => updateEditorHeight())
+  }
 }
 
 const updateLanguage = () => {
@@ -430,6 +463,7 @@ const generateImage = async (): Promise<string> => {
 }
 
 const copyAsImage = async () => {
+  if (loading.value) return
   loading.value = true
   loadingMessage.value = '生成图片中...'
   try {
@@ -460,6 +494,7 @@ const copyAsImage = async () => {
 }
 
 const downloadAsImage = async () => {
+  if (loading.value) return
   loading.value = true
   loadingMessage.value = '生成图片中...'
   try {
@@ -481,28 +516,30 @@ const downloadAsImage = async () => {
   }
 }
 
-const debouncedCopyAsImage = debounce(async () => {
-  await copyAsImage()
-}, 300)
-const debouncedDownloadAsImage = debounce(async () => {
-  await downloadAsImage()
-}, 300)
-
 // ==================== 监听 ====================
+// showLineNumbers 和 config.lineNumbers 同步，直接在 watch 中调用 updateConfig 避免循环更新
 watch(showLineNumbers, (val) => {
   config.value.lineNumbers = val ? 'on' : 'off'
+  updateConfig()
 })
 
 watch(selectedLanguage, updateLanguage)
 watch(selectedTheme, updateTheme)
-watch(config, updateConfig, { deep: true })
+watch(
+  () => ({ ...config.value, lineNumbers: undefined }),
+  () => updateConfig(),
+  { deep: true },
+)
 
 onMounted(() => {
   initEditor()
 })
 
 onBeforeUnmount(() => {
-  if (editorInstance) editorInstance.dispose()
+  if (editorInstance) {
+    editorInstance.dispose()
+    editorInstance = null
+  }
 })
 </script>
 
